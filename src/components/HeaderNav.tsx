@@ -135,9 +135,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 type="button" 
                 onClick={() => setActiveTab('builder')}
                 className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-2xl transition-transform active:scale-95"
-                title="Billr"
+                title="Billr — Murthy Chemicals"
               >
-                <BillrLogo size="md" />
+                <BillrLogo size="md" subtitle="Murthy Chemicals" showSubtitle={true} />
               </button>
             </div>
 

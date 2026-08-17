@@ -3,10 +3,10 @@
   <img src="public/icon.svg" alt="Billr Logo" width="108" height="108" />
 
   # Billr
-  ### Modern GST Commission & Tax Invoice Automation Engine
+  ### Murthy Chemical Agencies — Commission & Tax Invoice Automation Engine
 
   <p align="center">
-    <b>High-precision GST tax invoice and commercial commission billing system with smart Excel statement ingestion, dual-rate calculation engines, auto-computed IGST, and vector PDF generation.</b>
+    <b>High-precision commercial billing and tax invoice generator with smart Excel statement ingestion, dual-rate calculation engines, and vector PDF generation.</b>
   </p>
 
   <p align="center">

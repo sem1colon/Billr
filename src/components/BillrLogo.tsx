@@ -82,7 +82,7 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
           </div>
 
           {showSubtitle && subtitle && (
-            <span className={`${badgeSize} hidden sm:inline-flex font-semibold tracking-wide uppercase bg-blue-50 text-blue-700 border border-blue-200/80 rounded-md`}>
+            <span className={`${badgeSize} hidden sm:inline-flex font-bold tracking-wider uppercase bg-blue-50/80 text-blue-700 border border-blue-200/80 rounded-full backdrop-blur-md shadow-2xs`}>
               {subtitle}
             </span>
           )}
