@@ -1,9 +1,12 @@
-const CACHE_NAME = 'billr-cache-v2';
+const CACHE_NAME = 'billr-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
+  './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 // Install Event - Pre-cache core shell

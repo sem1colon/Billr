@@ -1,18 +1,31 @@
 {
   "name": "Billr — GST Invoice Studio",
   "short_name": "Billr",
-  "description": "Fast and simple GST commission invoice generator with offline Excel support and PDF export.",
+  "id": "/Billr/",
+  "description": "Fast, high-precision GST commission invoice generator with live calculations and instant vector PDF export.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#2563eb",
+  "background_color": "#090D16",
+  "theme_color": "#090D16",
   "orientation": "any",
   "categories": ["business", "finance", "productivity", "utilities"],
   "icons": [
     {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "icon.svg",
-      "sizes": "192x192 512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
