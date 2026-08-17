@@ -1,105 +1,58 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
   <defs>
     <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#1E3A8A" />
-      <stop offset="45%" stop-color="#172554" />
-      <stop offset="100%" stop-color="#090D16" />
-    </linearGradient>
-
-    <!-- Top Left Radial Glow -->
-    <radialGradient id="specularGlow" cx="120" cy="100" r="280" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.45" />
-      <stop offset="60%" stop-color="#3B82F6" stop-opacity="0.1" />
-      <stop offset="100%" stop-color="#1E3A8A" stop-opacity="0" />
-    </radialGradient>
-
-    <!-- Outer Rim Stroke Gradient -->
-    <linearGradient id="rimGrad" x1="100" y1="30" x2="400" y2="480" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#93C5FD" stop-opacity="0.6" />
-      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.2" />
-      <stop offset="100%" stop-color="#1E40AF" stop-opacity="0.4" />
-    </linearGradient>
-
-    <!-- Upper Monogram Loop Gradient -->
-    <linearGradient id="upperLoopGrad" x1="170" y1="120" x2="380" y2="270" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#60A5FA" />
-      <stop offset="50%" stop-color="#3B82F6" />
-      <stop offset="100%" stop-color="#2563EB" />
-    </linearGradient>
-
-    <!-- Lower Monogram Loop Gradient -->
-    <linearGradient id="lowerLoopGrad" x1="170" y1="240" x2="410" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3B82F6" />
-      <stop offset="60%" stop-color="#2563EB" />
+    <linearGradient id="billrBg" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
       <stop offset="100%" stop-color="#1D4ED8" />
     </linearGradient>
 
-    <!-- Vertical Spine Gradient -->
-    <linearGradient id="spineGrad" x1="130" y1="110" x2="220" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="30%" stop-color="#DBEAFE" />
-      <stop offset="100%" stop-color="#93C5FD" />
-    </linearGradient>
-
-    <!-- Accent Fold / Currency Flow Highlight -->
-    <linearGradient id="accentFlowGrad" x1="160" y1="210" x2="350" y2="290" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#93C5FD" />
-      <stop offset="100%" stop-color="#60A5FA" />
-    </linearGradient>
-
-    <!-- Subtle Drop Shadows -->
-    <filter id="monogramShadow" x="-10%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.45" />
+    <!-- Subtle Drop Shadow for the Invoice Card -->
+    <filter id="cardShadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#0F172A" flood-opacity="0.25" />
     </filter>
   </defs>
 
-  <!-- Squircle Base with Metallic Rim -->
-  <rect x="16" y="16" width="480" height="480" rx="120" fill="url(#bgGrad)" />
-  <rect x="16" y="16" width="480" height="480" rx="120" fill="url(#specularGlow)" />
-  <rect x="16.5" y="16.5" width="479" height="479" rx="119.5" stroke="url(#rimGrad)" stroke-width="3" />
+  <!-- App Icon Squircle Base -->
+  <rect width="512" height="512" rx="128" fill="url(#billrBg)" />
 
-  <!-- Modern Geometric Monogram "B" with Invoice Architectural Layers -->
-  <g filter="url(#monogramShadow)">
-    <!-- Lower Loop (Base of B) -->
+  <!-- Clean Minimalist Invoice Card with Folded Corner -->
+  <g filter="url(#cardShadow)">
+    <!-- Base Document -->
     <path
-      d="M190 236H284C339.228 236 384 274.056 384 321C384 367.944 339.228 406 284 406H144C130.745 406 120 395.255 120 382V320C120 306.745 130.745 296 144 296H190V236Z"
-      fill="url(#lowerLoopGrad)"
-    />
-
-    <!-- Upper Loop (Top of B with folded dynamic taper) -->
-    <path
-      d="M190 106H264C312.597 106 352 139.131 352 180C352 220.869 312.597 254 264 254H190V106Z"
-      fill="url(#upperLoopGrad)"
-    />
-
-    <!-- Left Precision Spine Pillar -->
-    <path
-      d="M144 106H190V406H144C130.745 406 120 395.255 120 382V130C120 116.745 130.745 106 144 106Z"
-      fill="url(#spineGrad)"
-    />
-
-    <!-- Dynamic Flow Slit / Invoice Divider Line -->
-    <path
-      d="M190 240H308C322 240 332 246 332 254C332 262 322 268 308 268H190V240Z"
+      d="M144 88C130.745 88 120 98.7452 120 112V400C120 413.255 130.745 424 144 424H368C381.255 424 392 413.255 392 400V168L312 88H144Z"
       fill="#FFFFFF"
-      fill-opacity="0.9"
     />
 
-    <!-- Inner Negative Space Upper Cutout -->
+    <!-- Folded Top-Right Document Corner -->
     <path
-      d="M190 156H256C278.091 156 296 168.088 296 183C296 197.912 278.091 210 256 210H190V156Z"
-      fill="#0E1726"
+      d="M312 88V152C312 160.837 319.163 168 328 168H392L312 88Z"
+      fill="#DBEAFE"
     />
+  </g>
 
-    <!-- Inner Negative Space Lower Cutout -->
+  <!-- Indian Rupee (₹) Symbol - Precision Geometric Billing Identity -->
+  <g stroke="#1D4ED8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top Rupee Bar -->
+    <path d="M178 184H298" stroke-width="24" />
+
+    <!-- Second Rupee Bar -->
+    <path d="M178 226H280" stroke-width="24" />
+
+    <!-- Rupee Loop & Stem -->
     <path
-      d="M190 292H276C302.51 292 324 306.775 324 325C324 343.225 302.51 358 276 358H190V292Z"
-      fill="#0A101D"
+      d="M214 184V264C214 264 282 264 282 222C282 184 214 184 214 184Z"
+      stroke-width="24"
     />
 
-    <!-- Modern Crisp Rupee Accent Line (Geometric horizontal ledger tick) -->
-    <rect x="142" y="180" width="76" height="12" rx="6" fill="#FFFFFF" fill-opacity="0.95" />
-    <rect x="142" y="322" width="76" height="12" rx="6" fill="#60A5FA" />
+    <!-- Rupee Diagonal Kick Leg -->
+    <path d="M224 264L294 340" stroke-width="26" />
+  </g>
+
+  <!-- Invoice Ledger Line Items -->
+  <g stroke-linecap="round">
+    <!-- Left Item Ledger Indicator -->
+    <line x1="178" y1="378" x2="238" y2="378" stroke="#94A3B8" stroke-width="16" />
+    <!-- Right Amount Highlight Indicator -->
+    <line x1="262" y1="378" x2="334" y2="378" stroke="#3B82F6" stroke-width="16" />
   </g>
 </svg>

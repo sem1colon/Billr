@@ -12,7 +12,7 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
   size = 'md',
   showText = true,
   className = '',
-  subtitle = 'GST Invoice Studio',
+  subtitle = 'GST Studio',
   showSubtitle = true,
 }) => {
   const iconDimensions = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-11 h-11' : 'w-9 h-9';
@@ -21,101 +21,58 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
 
   return (
     <div className={`inline-flex items-center space-x-2.5 select-none group ${className}`}>
-      {/* High-End Billr Precision Monogram Icon */}
+      {/* Clean & Professional Indian GST Invoice Icon Mark */}
       <div 
-        className={`relative ${iconDimensions} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 p-[1px] shadow-sm shadow-blue-950/20 ring-1 ring-white/15 transition-transform duration-200 group-hover:scale-105`}
+        className={`relative ${iconDimensions} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 p-1 shadow-sm border border-blue-500/40 transition-transform duration-150 group-hover:scale-105`}
       >
         <svg
           viewBox="0 0 512 512"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full rounded-xl"
+          className="w-full h-full"
         >
           <defs>
-            <linearGradient id="logoBg" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#1E3A8A" />
-              <stop offset="50%" stopColor="#172554" />
-              <stop offset="100%" stopColor="#090D16" />
-            </linearGradient>
-
-            <radialGradient id="logoGlow" cx="120" cy="100" r="280" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#60A5FA" stopOpacity="0.45" />
-              <stop offset="60%" stopColor="#3B82F6" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#1E3A8A" stopOpacity="0" />
-            </radialGradient>
-
-            <linearGradient id="logoUpper" x1="170" y1="120" x2="380" y2="270" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#60A5FA" />
-              <stop offset="50%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#2563EB" />
-            </linearGradient>
-
-            <linearGradient id="logoLower" x1="170" y1="240" x2="410" y2="400" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#3B82F6" />
-              <stop offset="60%" stopColor="#2563EB" />
-              <stop offset="100%" stopColor="#1D4ED8" />
-            </linearGradient>
-
-            <linearGradient id="logoSpine" x1="130" y1="110" x2="220" y2="400" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="35%" stopColor="#DBEAFE" />
-              <stop offset="100%" stopColor="#93C5FD" />
-            </linearGradient>
-
-            <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#000000" floodOpacity="0.4" />
+            <filter id="iconShadow" x="-10%" y="-10%" width="125%" height="130%">
+              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#0F172A" floodOpacity="0.25" />
             </filter>
           </defs>
 
-          {/* Squircle Base */}
-          <rect width="512" height="512" rx="128" fill="url(#logoBg)" />
-          <rect width="512" height="512" rx="128" fill="url(#logoGlow)" />
-
-          {/* Geometric Monogram "B" */}
-          <g filter="url(#logoShadow)">
-            {/* Lower Loop of B */}
+          {/* Invoice Document Base (White Card with Folded Corner) */}
+          <g filter="url(#iconShadow)">
             <path
-              d="M190 236H284C339.228 236 384 274.056 384 321C384 367.944 339.228 406 284 406H144C130.745 406 120 395.255 120 382V320C120 306.745 130.745 296 144 296H190V236Z"
-              fill="url(#logoLower)"
-            />
-
-            {/* Upper Loop of B */}
-            <path
-              d="M190 106H264C312.597 106 352 139.131 352 180C352 220.869 312.597 254 264 254H190V106Z"
-              fill="url(#logoUpper)"
-            />
-
-            {/* Spine Pillar */}
-            <path
-              d="M144 106H190V406H144C130.745 406 120 395.255 120 382V130C120 116.745 130.745 106 144 106Z"
-              fill="url(#logoSpine)"
-            />
-
-            {/* Center Flow Divider */}
-            <path
-              d="M190 240H308C322 240 332 246 332 254C332 262 322 268 308 268H190V240Z"
+              d="M144 88C130.745 88 120 98.7452 120 112V400C120 413.255 130.745 424 144 424H368C381.255 424 392 413.255 392 400V168L312 88H144Z"
               fill="#FFFFFF"
-              fillOpacity="0.9"
-            />
-
-            {/* Inner Cutouts */}
-            <path
-              d="M190 156H256C278.091 156 296 168.088 296 183C296 197.912 278.091 210 256 210H190V156Z"
-              fill="#0E1726"
             />
             <path
-              d="M190 292H276C302.51 292 324 306.775 324 325C324 343.225 302.51 358 276 358H190V292Z"
-              fill="#0A101D"
+              d="M312 88V152C312 160.837 319.163 168 328 168H392L312 88Z"
+              fill="#DBEAFE"
             />
+          </g>
 
-            {/* Rupee Ledger Accent Ticks */}
-            <rect x="142" y="180" width="76" height="12" rx="6" fill="#FFFFFF" fillOpacity="0.95" />
-            <rect x="142" y="322" width="76" height="12" rx="6" fill="#60A5FA" />
+          {/* Indian Rupee (₹) Symbol */}
+          <g stroke="#1D4ED8" strokeLinecap="round" strokeLinejoin="round">
+            {/* Top Rupee Bar */}
+            <path d="M178 184H298" strokeWidth="24" />
+            {/* Second Rupee Bar */}
+            <path d="M178 226H280" strokeWidth="24" />
+            {/* Rupee Loop */}
+            <path
+              d="M214 184V264C214 264 282 264 282 222C282 184 214 184 214 184Z"
+              strokeWidth="24"
+            />
+            {/* Rupee Diagonal Leg */}
+            <path d="M224 264L294 340" strokeWidth="26" />
+          </g>
+
+          {/* Invoice Ledger Line Items */}
+          <g strokeLinecap="round">
+            <line x1="178" y1="378" x2="238" y2="378" stroke="#94A3B8" strokeWidth="16" />
+            <line x1="262" y1="378" x2="334" y2="378" stroke="#3B82F6" strokeWidth="16" />
           </g>
         </svg>
       </div>
 
-      {/* Brand Wordmark & Subtle Badge */}
+      {/* Brand Wordmark & Subtle GST Badge */}
       {showText && (
         <div className="flex items-center space-x-2">
           <div className="flex items-baseline space-x-0.5 leading-none">
@@ -126,7 +83,7 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
           </div>
 
           {showSubtitle && subtitle && (
-            <span className={`${badgeSize} hidden sm:inline-flex font-semibold tracking-wide uppercase bg-slate-100 text-slate-600 border border-slate-200/80 rounded-md`}>
+            <span className={`${badgeSize} hidden sm:inline-flex font-semibold tracking-wide uppercase bg-blue-50 text-blue-700 border border-blue-200/80 rounded-md`}>
               {subtitle}
             </span>
           )}
