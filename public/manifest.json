@@ -1,8 +1,8 @@
 {
-  "name": "Billr — Murthy Chemicals",
+  "name": "Billr — Tax Invoice Generator",
   "short_name": "Billr",
   "id": "/Billr/",
-  "description": "Murthy Chemical Agencies commercial billing and tax invoice generator with live calculations and instant vector PDF export.",
+  "description": "Commercial billing and GST tax invoice generator with live calculations and instant vector PDF export.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

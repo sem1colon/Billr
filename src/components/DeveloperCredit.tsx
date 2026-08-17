@@ -1,48 +1,43 @@
-import React from 'react';
-import { ExternalLink, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ExternalLink, Globe } from 'lucide-react';
 
 interface DeveloperCreditProps {
-  variant?: 'inline' | 'floating' | 'subtle';
+  variant?: 'floating' | 'subtle' | 'inline';
   className?: string;
 }
 
 export const DeveloperCredit: React.FC<DeveloperCreditProps> = ({
-  variant = 'inline',
   className = '',
 }) => {
-  if (variant === 'floating') {
-    return (
-      <aside aria-label="Developer Credits" className={`fixed bottom-20 right-4 sm:bottom-4 sm:right-6 z-20 pointer-events-auto ${className}`}>
-        <a
-          href="https://sem1colon.github.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Engineered by sem1Colon Inc."
-          className="group flex items-center space-x-1.5 px-2.5 py-1 bg-white/80 hover:bg-white backdrop-blur-md border border-slate-200/80 hover:border-blue-300 text-slate-400 hover:text-slate-700 rounded-full text-[11px] font-mono shadow-xs transition-all duration-200 hover:shadow-sm"
-        >
-          <span className="text-blue-600 font-bold group-hover:rotate-12 transition-transform inline-block">;</span>
-          <span className="opacity-70 group-hover:opacity-100 font-medium">sem1Colon</span>
-          <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-60 transition-opacity text-blue-600" />
-        </a>
-      </aside>
-    );
-  }
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <footer className={`pt-8 pb-4 text-center select-none ${className}`}>
+    <div 
+      className={`fixed bottom-3 right-3 z-30 pointer-events-auto select-none transition-all duration-300 ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <a
         href="https://sem1colon.github.io"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors group px-3 py-1 rounded-full hover:bg-slate-100/80"
+        title="Crafted by sem1Colon Inc."
+        className="group relative flex items-center gap-1.5 px-2.5 py-1 rounded-full apple-glass-subtle bg-white/40 hover:bg-white/90 border border-white/70 shadow-xs hover:shadow-md text-slate-400 hover:text-slate-800 transition-all duration-300 opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md overflow-hidden"
       >
-        <span className="font-mono font-bold text-blue-600 group-hover:scale-110 transition-transform">;</span>
-        <span className="font-medium tracking-tight">Crafted with precision by</span>
-        <span className="font-semibold text-slate-600 group-hover:text-blue-600 group-hover:underline decoration-blue-400 underline-offset-2">
-          sem1Colon Inc.
+        {/* Subtle glowing pulse */}
+        <span className="font-mono font-black text-xs text-blue-600 group-hover:rotate-12 transition-transform duration-300">
+          ;
         </span>
-        <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-600 transition-colors" />
+
+        {/* Hidden by default, smoothly reveals on hover / tap */}
+        <div className={`flex items-center gap-1 text-[11px] font-medium tracking-tight overflow-hidden transition-all duration-300 ${
+          isHovered ? 'max-w-[140px] opacity-100 ml-0.5' : 'max-w-0 opacity-0'
+        }`}>
+          <span className="text-slate-600 font-semibold whitespace-nowrap">sem1Colon</span>
+          <Globe className="w-2.5 h-2.5 text-blue-500 flex-shrink-0" />
+          <ExternalLink className="w-2.5 h-2.5 text-slate-400 group-hover:text-blue-600 flex-shrink-0" />
+        </div>
       </a>
-    </footer>
+    </div>
   );
 };

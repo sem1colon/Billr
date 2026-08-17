@@ -134,10 +134,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div className="apple-glass-card rounded-[28px] p-6 sm:p-7 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Import Excel Working Sheet
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -149,7 +149,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             <button
               type="button"
               onClick={exportSampleExcelWorkbook}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 transition-colors"
+              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Blank Template</span>
@@ -158,7 +158,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             <button
               type="button"
               onClick={handleLoadSampleStatement}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200 transition-colors"
+              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-badge text-blue-700 hover:bg-blue-100/90 rounded-xl text-xs font-bold active:scale-95 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Load Sample Data</span>
@@ -173,8 +173,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`bg-white rounded-2xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors shadow-xs ${
-          isDragging ? 'border-blue-500 bg-blue-50/50' : 'border-slate-300 hover:border-blue-400'
+        className={`apple-glass-subtle rounded-3xl border-2 border-dashed p-8 text-center cursor-pointer transition-all shadow-xs ${
+          isDragging ? 'border-blue-500 bg-blue-50/70' : 'border-slate-300/80 hover:border-blue-400'
         }`}
       >
         <input 
@@ -186,11 +186,11 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         />
 
         <div className="max-w-md mx-auto space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-2xl apple-glass-badge text-blue-600 flex items-center justify-center mx-auto shadow-sm">
             <UploadCloud className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-bold text-slate-900">
               {fileName ? fileName : 'Click to upload or drag & drop your Excel file'}
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -207,7 +207,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* Error Notice */}
       {errorMsg && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center space-x-2 text-xs">
+        <div className="p-4 bg-red-50/90 border border-red-200 text-red-700 rounded-2xl flex items-center space-x-2 text-xs">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -215,8 +215,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* Parsed Data Table */}
       {parsedRecords.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="apple-glass-card rounded-[28px] p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/60">
             <div className="flex items-center space-x-2">
               <h3 className="text-sm font-bold text-slate-900">
                 Parsed Commission Data ({filteredRecords.length} items)
@@ -231,7 +231,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               <select
                 value={selectedCustomer}
                 onChange={(e) => setSelectedCustomer(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="px-3 py-1.5 apple-glass-input text-slate-800 text-xs font-medium rounded-xl outline-none"
               >
                 <option value="ALL">All Clients ({customers.length})</option>
                 {customers.map(c => (
@@ -246,7 +246,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 text-xs rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="pl-8 pr-3 py-1.5 apple-glass-input text-xs rounded-xl outline-none"
                 />
               </div>
             </div>
@@ -254,7 +254,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
           <div className="overflow-x-auto max-h-[400px]">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-bold sticky top-0 border-b border-slate-200">
+              <thead className="bg-slate-50/90 text-slate-600 font-bold sticky top-0 border-b border-slate-200">
                 <tr>
                   <th className="py-2.5 px-3">#</th>
                   <th className="py-2.5 px-3">Client</th>
@@ -268,7 +268,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredRecords.map((rec, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50">
+                  <tr key={idx} className="hover:bg-slate-50/60">
                     <td className="py-2.5 px-3 text-slate-400 font-medium">{idx + 1}</td>
                     <td className="py-2.5 px-3 font-semibold text-slate-800">{rec.customer}</td>
                     <td className="py-2.5 px-3 text-slate-900">{rec.product}</td>
@@ -283,7 +283,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             </table>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
             <span className="text-xs text-slate-500">
               Ready to transfer items into your GST Tax Invoice
             </span>
@@ -291,7 +291,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             <button
               type="button"
               onClick={handleApplyToInvoice}
-              className="flex items-center space-x-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+              className="flex items-center space-x-2 px-5 py-2.5 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 transition-all cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>Apply {filteredRecords.length} Items to Tax Invoice</span>

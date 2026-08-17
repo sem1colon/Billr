@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'motion/react';
 import { 
   Plus, 
   Trash2, 
@@ -14,8 +15,16 @@ import {
   Search,
   Check,
   RotateCcw,
+  ReceiptIndianRupee,
+  PenTool,
+  Building2,
+  MapPin,
+  ShieldCheck,
+  BadgeCheck,
+  Eye,
+  ChevronRight,
   Sparkles,
-  PenTool
+  ArrowRightLeft
 } from 'lucide-react';
 import { InvoiceData, InvoiceItem, ExcelParsedRecord } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
@@ -192,34 +201,188 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       
-      {/* 1. Hero Overview & Metric Card */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 bg-blue-50/80 border border-blue-200/80 px-2.5 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md">
-              <Sparkles className="w-3 h-3 text-blue-600" />
-              Tax Invoice Generator
+      {/* 1. Executive B2B GST Tax Invoice Showcase */}
+      <div className="apple-glass-card rounded-[32px] p-5 sm:p-7 transition-all overflow-hidden relative">
+        {/* Subtle luminous glass refractive orb accent */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+        {/* Top Statutory Classification & Document Identity */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-200/70">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black text-blue-700 apple-glass-badge px-3.5 py-1.5 rounded-full uppercase tracking-wider shadow-2xs">
+              <ReceiptIndianRupee className="w-3.5 h-3.5 text-blue-600" />
+              GST Tax Invoice
             </span>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 mt-2 tracking-tight">
-              {invoiceData.seller.name || invoiceData.seller.tradeName || 'Murthy Chemical Agencies'}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              GST Tax Invoice &bull; Billed to <strong className="text-slate-800">{invoiceData.buyer.name || 'Praj Industries Limited'}</strong>
-            </p>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-700 bg-white/80 border border-slate-200/90 px-3 py-1 rounded-full shadow-2xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              Original for Recipient
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-800 bg-indigo-50/90 border border-indigo-200/90 px-3 py-1 rounded-full shadow-2xs">
+              Interstate Supply &bull; 18% IGST
+            </span>
+            <span className="hidden md:inline-flex items-center text-[11px] font-medium text-slate-600 bg-slate-100/80 px-3 py-1 rounded-full">
+              SAC 998311 (Agency Services)
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 apple-glass-subtle p-3.5 rounded-2xl self-start md:self-auto shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50/90 border border-emerald-200/90 px-2.5 py-1 rounded-full shadow-2xs">
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              <span>Auto-saved</span>
+            </span>
+
+            <button
+              type="button"
+              onClick={onNavigateToPreview}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 apple-glass-btn px-3 py-1.5 rounded-xl active:scale-95 cursor-pointer shadow-2xs"
+            >
+              <Eye className="w-3.5 h-3.5 text-blue-600" />
+              <span>Live A4 Preview</span>
+            </button>
+          </div>
+        </div>
+
+        {/* B2B Commercial Billing Flow: Seller ➔ Connected Route ➔ Billed To (Praj Industries Limited) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 mt-5 items-stretch">
+          
+          {/* Supplier / Seller Panel */}
+          <div className="lg:col-span-5 apple-glass-subtle p-4 sm:p-5 rounded-2xl flex flex-col justify-between space-y-3 relative">
             <div>
-              <span className="text-[11px] text-slate-500 font-medium block">Total Invoice Value</span>
-              <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                  Supplier / Consignor
+                </span>
+                <span className="text-[10px] font-bold text-blue-700 bg-blue-50/90 border border-blue-200/70 px-2 py-0.5 rounded-md">
+                  State: 36 (Telangana)
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug">
+                {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
+              </h2>
+              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                {invoiceData.seller.address}, {invoiceData.seller.cityStateZip}
+              </p>
+            </div>
+
+            <div className="pt-2.5 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-[11px] font-mono">
+                <span className="text-slate-500 font-sans text-[10px] uppercase font-semibold">GSTIN</span>
+                <span className="font-bold text-slate-800 bg-white/90 px-2 py-0.5 rounded border border-slate-200/80 shadow-2xs">
+                  {invoiceData.seller.gstin}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={onNavigateToSettings}
+                className="text-[11px] font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+              >
+                <span>Edit Profile</span>
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Connected Trade Route Indicator */}
+          <div className="lg:col-span-2 flex lg:flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-blue-50/60 to-indigo-50/50 border border-blue-200/60 text-center gap-1.5 shadow-2xs">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <ArrowRight className="w-3.5 h-3.5 rotate-90 lg:rotate-0" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-blue-900">
+              Billed To
+            </span>
+            <span className="text-[10px] font-bold text-slate-600 font-mono">
+              TS 36 ➔ MH 27
+            </span>
+            <span className="hidden sm:inline-block text-[9px] font-semibold text-indigo-700 bg-white/90 px-2 py-0.5 rounded-full border border-indigo-100 shadow-2xs">
+              Inter-State
+            </span>
+          </div>
+
+          {/* Billed To / Recipient (Praj Industries Limited) Showcase */}
+          <div className="lg:col-span-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/90 via-indigo-50/70 to-white/95 border-2 border-blue-400/80 shadow-md flex flex-col justify-between space-y-3 relative overflow-hidden">
+            {/* Verified Enterprise Client Ribbon */}
+            <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-600 to-indigo-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs flex items-center gap-1">
+              <BadgeCheck className="w-3.5 h-3.5 text-white" />
+              Corporate Client
+            </div>
+
+            <div>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                  Billed To / Recipient
+                </span>
+                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/90 border border-indigo-200/90 px-2 py-0.5 rounded-md">
+                  State: 27 (Maharashtra)
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug pr-24">
+                {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
+              </h2>
+              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                {invoiceData.buyer.address}, {invoiceData.buyer.cityStateZip}
+              </p>
+            </div>
+
+            <div className="pt-2.5 border-t border-blue-200/70 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono">
+                  <span className="text-slate-500 font-sans text-[10px] uppercase font-semibold">GSTIN</span>
+                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-blue-200 shadow-2xs">
+                    {invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={onNavigateToSettings}
+                  className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer bg-white/90 px-2.5 py-1 rounded-xl border border-blue-200 shadow-2xs active:scale-95 transition-transform"
+                >
+                  <span>Client Profile</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              {invoiceData.buyer.placeOfSupply && (
+                <div className="flex items-start gap-1.5 text-[10px] text-slate-700 bg-white/70 p-2 rounded-xl border border-blue-200/70">
+                  <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="truncate">
+                    <span className="font-bold text-slate-900">Place of Supply: </span>
+                    <span className="text-slate-600">{invoiceData.buyer.placeOfSupply.replace(/\n/g, ', ')}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Live Financial Metrics Dock */}
+        <div className="mt-5 pt-4 border-t border-slate-200/70 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="apple-glass-subtle p-3.5 rounded-2xl">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Taxable Subtotal</span>
+            <span className="text-sm sm:text-base font-black text-slate-800 tracking-tight">
+              {formatIndianCurrency(taxableValue)}
+            </span>
+          </div>
+
+          <div className="apple-glass-subtle p-3.5 rounded-2xl">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">IGST (18%)</span>
+            <span className="text-sm sm:text-base font-black text-indigo-700 tracking-tight">
+              {formatIndianCurrency(gstAmount)}
+            </span>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-3.5 rounded-2xl shadow-md col-span-2 sm:col-span-2 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-blue-100 font-bold uppercase tracking-wider block">Total Invoice Value</span>
+              <span className="text-lg sm:text-xl font-black text-white tracking-tight">
                 {formatIndianCurrency(grandTotal)}
               </span>
             </div>
-            <div className="h-8 w-px bg-slate-200/80" />
-            <div>
-              <span className="text-[11px] text-slate-500 font-medium block">Active Items</span>
-              <span className="text-xs sm:text-sm font-bold text-blue-700">
-                {invoiceData.items.length} items ({totalQtyHandled.toLocaleString()} kg)
+            <div className="text-right">
+              <span className="text-[10px] text-blue-200 font-medium block">Handled Volume</span>
+              <span className="text-xs sm:text-sm font-bold text-white">
+                {invoiceData.items.length} items &bull; {totalQtyHandled.toLocaleString()} kg
               </span>
             </div>
           </div>
@@ -227,18 +390,18 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
       </div>
 
       {/* 2. Basic Invoice Details */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-black flex items-center justify-center">1</span>
+            <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">1</span>
             Invoice Details
           </h2>
           <button
             type="button"
             onClick={handleSetTodayDate}
-            className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1.5 apple-glass-btn px-2.5 py-1 rounded-xl active:scale-95"
+            className="text-xs text-blue-700 font-bold flex items-center gap-1.5 apple-glass-btn px-3 py-1.5 rounded-xl active:scale-95 cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5 text-blue-600" />
             <span>Set Today</span>
           </button>
         </div>
@@ -252,7 +415,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               type="date"
               value={invoiceData.invoiceDate}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceDate: e.target.value }))}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -265,13 +428,13 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               value={invoiceData.invoiceNumber}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
               placeholder="e.g. MCA/2026-27/001"
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
           <div>
             <span className="block text-xs font-semibold text-slate-700 mb-1.5">From (Seller)</span>
-            <div className="p-2.5 apple-glass-subtle rounded-xl flex items-center justify-between">
+            <div className="p-3 apple-glass-subtle rounded-2xl flex items-center justify-between">
               <div className="truncate pr-2">
                 <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.seller.name || 'Murthy Chemical Agencies'}</span>
                 <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.seller.gstin}</span>
@@ -279,7 +442,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               <button
                 type="button"
                 onClick={onNavigateToSettings}
-                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 px-2 py-0.5 apple-glass-btn rounded-lg flex-shrink-0"
+                className="text-[11px] font-bold text-blue-700 px-2.5 py-1 apple-glass-btn rounded-xl flex-shrink-0 cursor-pointer"
               >
                 Edit
               </button>
@@ -288,15 +451,15 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
 
           <div>
             <span className="block text-xs font-semibold text-slate-700 mb-1.5">To (Buyer)</span>
-            <div className="p-2.5 apple-glass-subtle rounded-xl flex items-center justify-between">
+            <div className="p-3 apple-glass-subtle rounded-2xl flex items-center justify-between border border-blue-200/60 bg-blue-50/30">
               <div className="truncate pr-2">
-                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.buyer.name || 'Praj Industries Limited'}</span>
+                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}</span>
                 <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.buyer.gstin || 'N/A'}</span>
               </div>
               <button
                 type="button"
                 onClick={onNavigateToSettings}
-                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 px-2 py-0.5 apple-glass-btn rounded-lg flex-shrink-0"
+                className="text-[11px] font-bold text-blue-700 px-2.5 py-1 apple-glass-btn rounded-xl flex-shrink-0 cursor-pointer"
               >
                 View
               </button>
@@ -306,11 +469,11 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
       </div>
 
       {/* 3. Clubbed Line Items Creator: Choose Manual Entry or Upload Excel */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/60">
           <div>
             <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-black flex items-center justify-center">2</span>
+              <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">2</span>
               Add Line Items
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -318,32 +481,50 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             </p>
           </div>
 
-          {/* Clean Segmented Mode Selector */}
-          <div className="flex items-center apple-glass-subtle p-1 rounded-2xl self-start sm:self-auto">
+          {/* Apple iOS 26 Liquid Glass Segmented Mode Selector */}
+          <div className="flex items-center relative apple-glass-segmented p-1.5 rounded-2xl self-start sm:self-auto gap-1">
             <button
               type="button"
               onClick={() => setEntryMode('manual')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                entryMode === 'manual'
-                  ? 'bg-white text-blue-700 shadow-sm font-bold scale-[1.02]'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className="relative flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
             >
-              <PenTool className="w-3.5 h-3.5" />
-              <span>Enter Manually</span>
+              {entryMode === 'manual' && (
+                <motion.div
+                  layoutId="builder-mode-liquid-pill"
+                  className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10"
+                  transition={{
+                    type: 'spring',
+                    stiffness: 450,
+                    damping: 35,
+                  }}
+                />
+              )}
+              <PenTool className={`w-3.5 h-3.5 transition-colors duration-200 ${entryMode === 'manual' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <span className={`transition-colors duration-200 ${entryMode === 'manual' ? 'text-blue-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
+                Enter Manually
+              </span>
             </button>
 
             <button
               type="button"
               onClick={() => setEntryMode('excel')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                entryMode === 'excel'
-                  ? 'bg-white text-blue-700 shadow-sm font-bold scale-[1.02]'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className="relative flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Upload Excel</span>
+              {entryMode === 'excel' && (
+                <motion.div
+                  layoutId="builder-mode-liquid-pill"
+                  className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10"
+                  transition={{
+                    type: 'spring',
+                    stiffness: 450,
+                    damping: 35,
+                  }}
+                />
+              )}
+              <FileSpreadsheet className={`w-3.5 h-3.5 transition-colors duration-200 ${entryMode === 'excel' ? 'text-blue-600' : 'text-slate-500'}`} />
+              <span className={`transition-colors duration-200 ${entryMode === 'excel' ? 'text-blue-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
+                Upload Excel
+              </span>
               <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Optional)</span>
             </button>
           </div>
@@ -372,7 +553,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenAddItemModal()}
-                className="flex items-center justify-center space-x-2 px-5 py-2.5 apple-btn-primary text-white font-bold text-xs rounded-2xl flex-shrink-0 active:scale-95"
+                className="flex items-center justify-center space-x-2 px-5 py-2.5 apple-btn-primary text-white font-bold text-xs rounded-2xl flex-shrink-0 active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>+ Add Line Item</span>
@@ -406,7 +587,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                       commissionRate: p.comm,
                       commissionAmount: 1000 * p.comm,
                     })}
-                    className="text-left p-3.5 apple-glass-card rounded-2xl hover:border-blue-300 transition-all group active:scale-[0.98]"
+                    className="text-left p-3.5 apple-glass-btn rounded-2xl transition-all group active:scale-[0.98] cursor-pointer"
                   >
                     <div className="font-bold text-xs text-slate-900 group-hover:text-blue-700 truncate">
                       + {p.name}
@@ -432,7 +613,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               className="hidden" 
             />
 
-            {/* Drop Zone */}
+            {/* Drop Zone with Glass Refraction */}
             <div
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
@@ -443,7 +624,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               }`}
             >
               <div className="max-w-md mx-auto space-y-2.5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-2xs border border-blue-100">
+                <div className="w-12 h-12 rounded-2xl apple-glass-badge text-blue-600 flex items-center justify-center mx-auto shadow-sm">
                   <UploadCloud className="w-6 h-6" />
                 </div>
                 <div>
@@ -468,7 +649,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                 <button
                   type="button"
                   onClick={exportSampleExcelWorkbook}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95"
+                  className="flex items-center space-x-1.5 px-3.5 py-1.5 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5 text-slate-400" />
                   <span>Download Blank Template</span>
@@ -477,7 +658,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                 <button
                   type="button"
                   onClick={handleLoadSampleStatement}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-50/80 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-semibold border border-blue-200/80 active:scale-95"
+                  className="flex items-center space-x-1.5 px-3.5 py-1.5 apple-glass-btn text-blue-700 hover:bg-blue-100/90 rounded-xl text-xs font-bold active:scale-95 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Load MCA Sample Working</span>
@@ -488,7 +669,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                 <button
                   type="button"
                   onClick={handleApplyExcelToInvoice}
-                  className="flex items-center space-x-2 px-4 py-2 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95"
+                  className="flex items-center space-x-2 px-4 py-2 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   <span>Transfer {filteredExcelRecords.length} Items into Invoice</span>
@@ -579,11 +760,11 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
       </div>
 
       {/* 4. Active Invoice Line Items: Responsive Mobile Cards + Desktop Table */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-4">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <div className="flex items-center space-x-2">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs font-black flex items-center justify-center">3</span>
+              <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">3</span>
               Invoice Items ({invoiceData.items.length})
             </h3>
             <span className="text-xs text-slate-500 font-medium hidden sm:inline">
@@ -596,7 +777,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               <button
                 type="button"
                 onClick={handleClearAllItems}
-                className="px-2.5 py-1 text-slate-500 hover:text-red-600 text-xs font-semibold rounded-lg hover:bg-red-50/50 transition-colors"
+                className="px-2.5 py-1 text-slate-500 hover:text-red-600 text-xs font-semibold rounded-lg hover:bg-red-50/50 transition-colors cursor-pointer"
               >
                 Clear All
               </button>
@@ -605,7 +786,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             <button
               type="button"
               onClick={() => onOpenAddItemModal()}
-              className="flex items-center space-x-1 px-3 py-1 bg-blue-50/90 text-blue-700 hover:bg-blue-100 text-xs font-bold rounded-xl border border-blue-200/80 active:scale-95 transition-all"
+              className="flex items-center space-x-1 px-3.5 py-1.5 apple-glass-btn text-blue-700 text-xs font-bold rounded-xl active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Item</span>
@@ -663,7 +844,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenAddItemModal(item)}
-                      className="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                      className="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" />
                       <span>Edit</span>
@@ -671,7 +852,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDuplicateItem(item)}
-                      className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg flex items-center gap-1"
+                      className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg flex items-center gap-1 cursor-pointer"
                     >
                       <Copy className="w-3 h-3" />
                       <span>Copy</span>
@@ -679,7 +860,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDeleteItem(item.id)}
-                      className="px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-1"
+                      className="px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Delete</span>
@@ -736,7 +917,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                           <button
                             type="button"
                             onClick={() => onOpenAddItemModal(item)}
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100/70 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100/70 rounded-lg transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -744,7 +925,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDuplicateItem(item)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100/70 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100/70 rounded-lg transition-colors cursor-pointer"
                             title="Duplicate"
                           >
                             <Copy className="w-3.5 h-3.5" />
@@ -752,7 +933,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteItem(item.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -769,7 +950,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
       </div>
 
       {/* 5. Summary & Tax Calculation Card */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7 space-y-3">
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -804,7 +985,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             <button
               type="button"
               onClick={onNavigateToPreview}
-              className="w-full flex items-center justify-center space-x-2 py-3 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 transition-all"
+              className="w-full flex items-center justify-center space-x-2 py-3 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 transition-all cursor-pointer"
             >
               <span>Proceed to Preview & Print</span>
               <ArrowRight className="w-4 h-4" />

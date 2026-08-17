@@ -5,7 +5,6 @@ import {
   RotateCcw, 
   Check, 
   X, 
-  Sparkles, 
   Trash2,
   Eye,
   EyeOff
@@ -131,16 +130,16 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="bg-white/90 backdrop-blur-2xl rounded-3xl max-w-lg w-full shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-white/80 overflow-hidden"
+        className="apple-glass-card rounded-[32px] max-w-lg w-full shadow-2xl border border-white/95 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Specular Rim Light */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+        {/* Specular Top Rim */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-black/[0.06] flex items-center justify-between bg-white/40">
+        <div className="px-6 py-4 border-b border-slate-200/50 flex items-center justify-between bg-white/30 backdrop-blur-md">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-700 border border-blue-500/20">
+            <div className="p-2 rounded-xl apple-glass-badge text-blue-700">
               <PenTool className="w-4 h-4" />
             </div>
             <div>
@@ -154,7 +153,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-black/[0.05] text-slate-400 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100/70 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -163,12 +162,12 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
         {/* Content */}
         <div className="p-6 space-y-4">
           {/* Mode Switcher */}
-          <div className="flex items-center p-1 bg-black/[0.03] rounded-2xl text-xs font-semibold border border-black/[0.04]">
+          <div className="flex items-center p-1 apple-glass-segmented rounded-2xl text-xs font-semibold gap-1">
             <button
               onClick={() => { setActiveMode('default'); handleSetToDefault(); }}
-              className={`flex-1 py-2 rounded-xl transition-all ${
+              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
                 activeMode === 'default'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold border border-black/[0.04]'
+                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -176,9 +175,9 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             </button>
             <button
               onClick={() => setActiveMode('draw')}
-              className={`flex-1 py-2 rounded-xl transition-all ${
+              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
                 activeMode === 'draw'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold border border-black/[0.04]'
+                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -186,9 +185,9 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             </button>
             <button
               onClick={() => setActiveMode('upload')}
-              className={`flex-1 py-2 rounded-xl transition-all ${
+              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
                 activeMode === 'upload'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold border border-black/[0.04]'
+                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -198,11 +197,11 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
           {/* Mode 1: Default Official Signature Preview */}
           {activeMode === 'default' && (
-            <div className="border border-black/[0.06] rounded-2xl p-4 bg-white/60 flex flex-col items-center justify-center space-y-3">
+            <div className="apple-glass-subtle rounded-2xl p-4 flex flex-col items-center justify-center space-y-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Official Pre-Configured Signature
               </span>
-              <div className="h-24 w-full bg-white border border-black/[0.06] rounded-2xl flex items-center justify-center p-2 shadow-inner">
+              <div className="h-24 w-full bg-white/90 border border-slate-200/80 rounded-2xl flex items-center justify-center p-2 shadow-inner">
                 {previewUrl ? (
                   <img 
                     src={previewUrl} 
@@ -230,17 +229,17 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                   <span className="text-[11px] text-slate-500">Ink Color:</span>
                   <button
                     onClick={() => setInkColor('#1e3a8a')}
-                    className={`w-5 h-5 rounded-full bg-blue-900 ${inkColor === '#1e3a8a' ? 'ring-2 ring-blue-400' : ''}`}
+                    className={`w-5 h-5 rounded-full bg-blue-900 cursor-pointer ${inkColor === '#1e3a8a' ? 'ring-2 ring-blue-400' : ''}`}
                     title="Royal Blue"
                   />
                   <button
                     onClick={() => setInkColor('#0f172a')}
-                    className={`w-5 h-5 rounded-full bg-slate-900 ${inkColor === '#0f172a' ? 'ring-2 ring-slate-400' : ''}`}
+                    className={`w-5 h-5 rounded-full bg-slate-900 cursor-pointer ${inkColor === '#0f172a' ? 'ring-2 ring-slate-400' : ''}`}
                     title="Black"
                   />
                   <button
                     onClick={handleClearCanvas}
-                    className="p-1 rounded-md text-xs text-red-600 hover:bg-red-50 flex items-center gap-1 font-semibold"
+                    className="p-1 rounded-md text-xs text-red-600 hover:bg-red-50 flex items-center gap-1 font-semibold cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Clear</span>
@@ -248,7 +247,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 </div>
               </div>
 
-              <div className="border-2 border-dashed border-black/[0.1] rounded-2xl bg-white overflow-hidden touch-none flex items-center justify-center">
+              <div className="border-2 border-dashed border-slate-300/80 rounded-2xl bg-white overflow-hidden touch-none flex items-center justify-center">
                 <canvas
                   ref={canvasRef}
                   width={440}
@@ -269,7 +268,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           {/* Mode 3: Upload Image */}
           {activeMode === 'upload' && (
             <div className="space-y-3">
-              <label className="border-2 border-dashed border-black/[0.1] hover:border-blue-500 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-white/50 hover:bg-blue-50/40">
+              <label className="border-2 border-dashed border-slate-300/80 hover:border-blue-500 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors apple-glass-subtle hover:bg-blue-50/40">
                 <Upload className="w-8 h-8 text-blue-600 mb-2" />
                 <span className="text-xs font-bold text-slate-800">Click to upload signature image</span>
                 <span className="text-[11px] text-slate-500 mt-0.5">Supports PNG, JPG (transparent background recommended)</span>
@@ -282,14 +281,14 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               </label>
 
               {previewUrl && (
-                <div className="p-3 bg-white border border-black/[0.08] rounded-xl flex items-center justify-between shadow-2xs">
+                <div className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between shadow-2xs">
                   <div className="flex items-center space-x-3">
                     <img src={previewUrl} alt="Uploaded signature" className="h-10 w-auto max-w-[120px] object-contain border p-1 rounded" />
                     <span className="text-xs font-semibold text-slate-700">Signature Loaded</span>
                   </div>
                   <button
                     onClick={() => setPreviewUrl('')}
-                    className="text-xs text-red-600 font-semibold hover:underline"
+                    className="text-xs text-red-600 font-semibold hover:underline cursor-pointer"
                   >
                     Remove
                   </button>
@@ -299,7 +298,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           )}
 
           {/* Visibility Toggle */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/60 border border-black/[0.06] shadow-2xs">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl apple-glass-subtle shadow-2xs">
             <div className="flex items-center space-x-2.5">
               {visible ? <Eye className="w-4 h-4 text-emerald-600" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
               <div>
@@ -309,7 +308,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             </div>
             <button
               onClick={() => setVisible(!visible)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
                 visible ? 'bg-blue-600' : 'bg-slate-300'
               }`}
             >
@@ -323,10 +322,10 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-black/[0.06] bg-white/40 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-slate-200/50 bg-white/30 backdrop-blur-md flex items-center justify-between">
           <button
             onClick={handleSetToDefault}
-            className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+            className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 apple-glass-btn px-3 py-1.5 rounded-xl cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Default</span>
@@ -335,13 +334,13 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-black/[0.05] rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 apple-glass-btn rounded-xl transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+              className="px-5 py-2 apple-btn-primary text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>Apply Signature</span>

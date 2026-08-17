@@ -1,12 +1,6 @@
 @import "tailwindcss";
 
 @layer base {
-  :root {
-    --glass-bg: rgba(255, 255, 255, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.85);
-    --glass-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
-  }
-
   html {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -16,163 +10,326 @@
   
   body {
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    background-color: #f8fafc;
+    background: #e2ecfa;
     color: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 }
 
 /* ==========================================================================
-   Apple Liquid Glass Design System Tokens & Classes
+   Authentic Apple iOS 26 / visionOS Liquid Glass Material System
+   Reference: https://liquidglassdesign.com (Optically refractive, tinted glass)
    ========================================================================== */
 
-/* 1. Primary Liquid Glass Card */
-.apple-glass-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 
-    0 16px 36px -8px rgba(15, 23, 42, 0.04),
-    0 4px 12px -2px rgba(15, 23, 42, 0.02),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.apple-glass-card:hover {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(255, 255, 255, 1);
-  box-shadow: 
-    0 24px 48px -12px rgba(15, 23, 42, 0.06),
-    0 8px 16px -4px rgba(15, 23, 42, 0.03),
-    inset 0 1px 2px 0 rgba(255, 255, 255, 1);
-}
-
-/* 2. Subtle Liquid Glass Pane (for nested sections, tables, lists) */
-.apple-glass-subtle {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(20px) saturate(170%);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 
-    0 8px 24px -6px rgba(15, 23, 42, 0.03),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* 3. Liquid Glass Floating Navigation Dock */
-.apple-glass-dock {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 
-    0 28px 64px -12px rgba(15, 23, 42, 0.12),
-    0 8px 20px -4px rgba(15, 23, 42, 0.04),
-    inset 0 1px 2px 0 rgba(255, 255, 255, 1);
-}
-
-/* 4. Liquid Glass Input Controls */
-.apple-glass-input {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 
-    inset 0 1px 2px rgba(15, 23, 42, 0.02),
-    0 1px 1px rgba(255, 255, 255, 0.9);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.apple-glass-input:focus {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: #3b82f6;
-  box-shadow: 
-    0 0 0 4px rgba(59, 130, 246, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-/* 5. Liquid Glass Buttons */
-.apple-glass-btn {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    0 4px 12px -2px rgba(15, 23, 42, 0.04),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.apple-glass-btn:hover {
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 
-    0 8px 20px -4px rgba(15, 23, 42, 0.08),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 1);
-  transform: translateY(-1px);
-}
-
-.apple-glass-btn:active {
-  transform: scale(0.98);
-}
-
-/* 6. Primary Action Liquid Glass Button */
-.apple-btn-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 24px -4px rgba(37, 99, 235, 0.35),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.apple-btn-primary:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 
-    0 12px 32px -4px rgba(37, 99, 235, 0.45),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45);
-  transform: translateY(-1px);
-}
-
-.apple-btn-primary:active {
-  transform: scale(0.98);
-}
-
-/* 7. Ambient Glowing Mesh Orbs */
+/* 1. Luminous Chromatic Background Mesh */
 .ambient-glow-mesh {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  background: 
+    radial-gradient(circle at 10% 12%, rgba(59, 130, 246, 0.48) 0%, transparent 48%),
+    radial-gradient(circle at 90% 18%, rgba(139, 92, 246, 0.42) 0%, transparent 52%),
+    radial-gradient(circle at 82% 82%, rgba(6, 182, 212, 0.46) 0%, transparent 46%),
+    radial-gradient(circle at 18% 88%, rgba(244, 63, 94, 0.28) 0%, transparent 44%),
+    radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.32) 0%, transparent 55%),
+    #e2ecfa;
+}
+
+@keyframes liquid-drift-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  33% { transform: translate(70px, -50px) scale(1.18) rotate(18deg); }
+  66% { transform: translate(-50px, 60px) scale(0.90) rotate(-12deg); }
+}
+
+@keyframes liquid-drift-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  33% { transform: translate(-70px, 50px) scale(1.22) rotate(-18deg); }
+  66% { transform: translate(50px, -50px) scale(0.88) rotate(14deg); }
+}
+
+@keyframes liquid-drift-3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-40px, -35px) scale(1.26); }
 }
 
 .ambient-orb-1 {
   position: absolute;
   top: -10%;
-  right: -5%;
-  width: 50vw;
-  height: 50vw;
-  max-width: 600px;
-  max-height: 600px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(99, 102, 241, 0.03) 50%, transparent 75%);
-  filter: blur(60px);
+  right: -8%;
+  width: 65vw;
+  height: 65vw;
+  max-width: 800px;
+  max-height: 800px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.45) 0%, rgba(124, 58, 237, 0.30) 45%, rgba(236, 72, 153, 0.15) 70%, transparent 85%);
+  filter: blur(85px);
   border-radius: 9999px;
+  animation: liquid-drift-1 16s ease-in-out infinite;
 }
 
 .ambient-orb-2 {
   position: absolute;
-  bottom: 10%;
-  left: -5%;
-  width: 45vw;
-  height: 45vw;
-  max-width: 550px;
-  max-height: 550px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 75%);
-  filter: blur(60px);
+  bottom: -5%;
+  left: -12%;
+  width: 60vw;
+  height: 60vw;
+  max-width: 750px;
+  max-height: 750px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.45) 0%, rgba(79, 70, 229, 0.28) 45%, rgba(16, 185, 129, 0.16) 70%, transparent 85%);
+  filter: blur(85px);
   border-radius: 9999px;
+  animation: liquid-drift-2 20s ease-in-out infinite;
 }
 
-/* 8. Safe Area Layout Helpers for iPhone 16 / iOS */
+.ambient-orb-3 {
+  position: absolute;
+  top: 30%;
+  left: 20%;
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(37, 99, 235, 0.22) 50%, transparent 75%);
+  filter: blur(95px);
+  border-radius: 9999px;
+  animation: liquid-drift-3 24s ease-in-out infinite;
+}
+
+/* 2. Optically Tinted Liquid Glass Cards (Refractive Material) */
+.apple-glass-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.74) 0%, rgba(238, 245, 255, 0.54) 50%, rgba(246, 250, 255, 0.68) 100%) !important;
+  backdrop-filter: blur(48px) saturate(220%) contrast(105%);
+  -webkit-backdrop-filter: blur(48px) saturate(220%) contrast(105%);
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    0 24px 64px -14px rgba(30, 58, 138, 0.11),
+    0 4px 20px -2px rgba(15, 23, 42, 0.04),
+    inset 0 1.5px 2.5px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(37, 99, 235, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-glass-card:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(240, 247, 255, 0.62) 50%, rgba(250, 252, 255, 0.78) 100%) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  box-shadow: 
+    0 32px 80px -15px rgba(30, 58, 138, 0.15),
+    0 8px 28px -4px rgba(15, 23, 42, 0.06),
+    inset 0 1.8px 3px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(37, 99, 235, 0.06);
+}
+
+/* 3. Tinted Secondary Glass Well */
+.apple-glass-subtle {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(230, 240, 255, 0.35) 100%) !important;
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 
+    0 8px 24px -6px rgba(30, 58, 138, 0.05),
+    inset 0 1.2px 1.8px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(37, 99, 235, 0.03);
+}
+
+/* 4. Tinted Liquid Glass Dock & Headers */
+.apple-glass-dock {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(238, 246, 255, 0.65) 100%) !important;
+  backdrop-filter: blur(52px) saturate(230%) contrast(106%);
+  -webkit-backdrop-filter: blur(52px) saturate(230%) contrast(106%);
+  border: 1px solid rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 
+    0 32px 80px -15px rgba(30, 58, 138, 0.16),
+    0 12px 32px -4px rgba(15, 23, 42, 0.07),
+    inset 0 1.8px 3px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(37, 99, 235, 0.05);
+}
+
+/* 5. Liquid Glass Buttons with Specular Lens Glaze */
+.apple-glass-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(235, 244, 255, 0.58) 100%) !important;
+  backdrop-filter: blur(32px) saturate(210%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 4px 18px -2px rgba(37, 99, 235, 0.08),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1.5px 2px 0 rgba(37, 99, 235, 0.04);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-glass-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 52% 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.60) 0%, rgba(255, 255, 255, 0.0) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.apple-glass-btn:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 255, 0.75) 100%) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  box-shadow: 
+    0 8px 24px -4px rgba(37, 99, 235, 0.16),
+    0 2px 8px 0 rgba(37, 99, 235, 0.10),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 1.5px 0 rgba(37, 99, 235, 0.05);
+  transform: translateY(-1.5px);
+}
+
+.apple-glass-btn:active {
+  transform: scale(0.96);
+  background: rgba(235, 244, 255, 0.75) !important;
+}
+
+/* 6. Primary Action Liquid Sapphire Glass Pill (Luminous 3D Glass) */
+.apple-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.98) 55%, rgba(29, 78, 216, 1) 100%) !important;
+  backdrop-filter: blur(32px) saturate(220%);
+  -webkit-backdrop-filter: blur(32px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 
+    0 12px 32px -4px rgba(37, 99, 235, 0.55),
+    0 4px 14px -2px rgba(37, 99, 235, 0.40),
+    inset 0 1.8px 2px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -2px 3px 0 rgba(0, 0, 0, 0.32);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 52% 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.0) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.apple-btn-primary:hover {
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.98) 0%, rgba(59, 130, 246, 1) 55%, rgba(37, 99, 235, 1) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.80) !important;
+  box-shadow: 
+    0 16px 44px -4px rgba(37, 99, 235, 0.65),
+    0 6px 20px -2px rgba(37, 99, 235, 0.45),
+    inset 0 2px 3.5px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 3px 0 rgba(0, 0, 0, 0.32);
+  transform: translateY(-1.5px);
+}
+
+.apple-btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 
+    0 6px 18px -3px rgba(37, 99, 235, 0.45),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* 7. Liquid Emerald Success Button */
+.apple-btn-emerald {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 1) 100%) !important;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 
+    0 12px 32px -4px rgba(5, 150, 105, 0.50),
+    inset 0 1.8px 2px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -2px 3px 0 rgba(0, 0, 0, 0.28);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-btn-emerald::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 52% 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.0) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.apple-btn-emerald:hover {
+  background: linear-gradient(180deg, rgba(52, 211, 153, 0.98) 0%, rgba(16, 185, 129, 1) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.80) !important;
+  box-shadow: 
+    0 18px 40px -4px rgba(5, 150, 105, 0.60),
+    inset 0 2px 3.5px 0 rgba(255, 255, 255, 1);
+  transform: translateY(-1.5px);
+}
+
+.apple-btn-emerald:active {
+  transform: scale(0.96);
+}
+
+/* 8. Tinted Glass Form Inputs */
+.apple-glass-input {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.65) 0%, rgba(238, 245, 255, 0.40) 100%) !important;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.80) !important;
+  box-shadow: 
+    inset 0 1.5px 3px rgba(30, 58, 138, 0.05),
+    0 1px 2px rgba(255, 255, 255, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-glass-input:focus {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(59, 130, 246, 0.90) !important;
+  box-shadow: 
+    0 0 0 4px rgba(59, 130, 246, 0.20),
+    0 2px 6px rgba(37, 99, 235, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 1);
+}
+
+/* 9. Liquid Glass Badges & Chips */
+.apple-glass-badge {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(235, 244, 255, 0.88) 0%, rgba(215, 232, 255, 0.60) 100%) !important;
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 3px 12px rgba(37, 99, 235, 0.12),
+    inset 0 1.2px 1.8px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(37, 99, 235, 0.08);
+}
+
+/* 10. Apple Liquid Glass Segmented Canal */
+.apple-glass-segmented {
+  position: relative;
+  background: linear-gradient(145deg, rgba(210, 226, 250, 0.55) 0%, rgba(190, 212, 245, 0.35) 100%) !important;
+  backdrop-filter: blur(36px) saturate(220%);
+  -webkit-backdrop-filter: blur(36px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    inset 0 1.8px 3.5px rgba(30, 58, 138, 0.08),
+    0 1px 2px rgba(255, 255, 255, 1);
+}
+
+/* Fluid Crystal Sliding Lens Pill */
+.apple-glass-segmented-active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 247, 255, 0.88) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 1) !important;
+  box-shadow: 
+    0 4px 18px -2px rgba(37, 99, 235, 0.18),
+    0 1px 4px 0 rgba(37, 99, 235, 0.08),
+    inset 0 1.8px 2.5px 0 rgba(255, 255, 255, 1) !important;
+}
+
+/* 11. Safe Area Layout Helpers */
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
 }
@@ -181,7 +338,7 @@
   padding-top: max(env(safe-area-inset-top, 0px), 16px);
 }
 
-/* Custom Minimalist Scrollbar */
+/* Custom Minimalist Ultra-Smooth Apple Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -192,10 +349,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.45);
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.55);
+  background: rgba(100, 116, 139, 0.70);
 }

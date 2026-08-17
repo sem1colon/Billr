@@ -61,10 +61,10 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       
-      {/* Top Banner with Upgraded Profile Icon & Info */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top Banner with Apple Liquid Glass Profile Info */}
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl apple-btn-primary text-white flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl apple-btn-primary text-white flex items-center justify-center flex-shrink-0 shadow-md">
             <UserCheck className="w-6 h-6" />
           </div>
           <div>
@@ -72,7 +72,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                 Agency & Client Profiles
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold apple-glass-badge text-blue-700">
                 GST Active
               </span>
             </div>
@@ -86,7 +86,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
           <button
             type="button"
             onClick={handleResetToMCA}
-            className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-semibold active:scale-95"
+            className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-semibold active:scale-95 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Reset Defaults</span>
@@ -96,7 +96,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <button
               type="button"
               onClick={onNavigateToBuilder}
-              className="flex items-center space-x-1 px-4 py-2 apple-btn-primary text-white rounded-2xl text-xs font-bold active:scale-95 transition-all"
+              className="flex items-center space-x-1 px-4 py-2 apple-btn-primary text-white rounded-2xl text-xs font-bold active:scale-95 transition-all cursor-pointer"
             >
               <span>Back to Invoice</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -113,7 +113,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       )}
 
       {/* Seller Profile Card */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-blue-600" />
@@ -132,7 +132,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.name}
               onChange={(e) => handleSellerChange('name', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -144,7 +144,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.partnerName}
               onChange={(e) => handleSellerChange('partnerName', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -156,7 +156,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.phone}
               onChange={(e) => handleSellerChange('phone', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -168,7 +168,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.address}
               onChange={(e) => handleSellerChange('address', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -180,7 +180,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.cityStateZip}
               onChange={(e) => handleSellerChange('cityStateZip', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -192,7 +192,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.gstin}
               onChange={(e) => handleSellerChange('gstin', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -204,7 +204,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.seller.pan}
               onChange={(e) => handleSellerChange('pan', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
         </div>
@@ -225,7 +225,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
                 type="text"
                 value={invoiceData.seller.bankName}
                 onChange={(e) => handleSellerChange('bankName', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
               />
             </div>
             <div>
@@ -234,7 +234,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
                 type="text"
                 value={invoiceData.seller.bankBranch}
                 onChange={(e) => handleSellerChange('bankBranch', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
               />
             </div>
             <div>
@@ -243,7 +243,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
                 type="text"
                 value={invoiceData.seller.accountNo}
                 onChange={(e) => handleSellerChange('accountNo', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
               />
             </div>
             <div>
@@ -252,7 +252,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
                 type="text"
                 value={invoiceData.seller.ifscCode}
                 onChange={(e) => handleSellerChange('ifscCode', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
               />
             </div>
           </div>
@@ -280,9 +280,9 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <button
               type="button"
               onClick={() => setIsSignatureModalOpen(true)}
-              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-blue-700 rounded-xl text-xs font-bold active:scale-95 self-start sm:self-auto"
+              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-blue-700 rounded-xl text-xs font-bold active:scale-95 self-start sm:self-auto cursor-pointer"
             >
-              <PenTool className="w-3.5 h-3.5" />
+              <PenTool className="w-3.5 h-3.5 text-blue-600" />
               <span>Update Signature</span>
             </button>
           </div>
@@ -290,7 +290,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       </div>
 
       {/* Buyer / Client Profile Card */}
-      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <div className="flex items-center space-x-2">
             <Lock className="w-4 h-4 text-slate-400" />
@@ -298,7 +298,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               2. Client Profile (Praj Industries Limited)
             </h2>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold apple-glass-subtle text-slate-600">
             Primary Client
           </span>
         </div>
@@ -312,7 +312,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.buyer.name}
               onChange={(e) => handleBuyerChange('name', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -324,7 +324,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.buyer.address}
               onChange={(e) => handleBuyerChange('address', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -336,7 +336,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.buyer.cityStateZip}
               onChange={(e) => handleBuyerChange('cityStateZip', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -348,7 +348,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               type="text"
               value={invoiceData.buyer.gstin}
               onChange={(e) => handleBuyerChange('gstin', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
 
@@ -360,7 +360,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               rows={3}
               value={invoiceData.buyer.placeOfSupply}
               onChange={(e) => handleBuyerChange('placeOfSupply', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs text-slate-900 apple-glass-input rounded-xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 text-xs text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
           </div>
         </div>
@@ -370,10 +370,13 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       <SignatureModal
         isOpen={isSignatureModalOpen}
         onClose={() => setIsSignatureModalOpen(false)}
-        seller={invoiceData.seller}
-        onSaveSignature={(signatureUrl) => {
+        currentSignatureUrl={invoiceData.seller.signatureUrl}
+        showSignature={invoiceData.showSignature}
+        partnerName={invoiceData.seller.partnerName}
+        onSaveSignature={(signatureUrl, showSig) => {
           setInvoiceData(prev => ({
             ...prev,
+            showSignature: showSig,
             seller: {
               ...prev.seller,
               signatureUrl,
@@ -382,24 +385,15 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
         }}
       />
 
-      {/* Discreet Developer Info */}
-      <div className="pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-        <div className="flex items-center space-x-1.5 font-mono text-[11px]">
+      {/* Discreet Engine & Privacy Status */}
+      <div className="pt-6 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center space-x-2 text-[11px]">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>Billr Engine</span>
+          <span>Local Storage Sync Active</span>
           <span>&bull;</span>
-          <span>PWA Ready</span>
+          <span>Zero Cloud Transmission</span>
         </div>
-        <a
-          href="https://sem1colon.github.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center space-x-1 hover:text-blue-600 transition-colors group"
-        >
-          <span className="font-mono font-bold text-blue-600">;</span>
-          <span>Engineered by <strong className="font-semibold group-hover:underline">sem1Colon Inc.</strong></span>
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-        </a>
+        <span className="text-[10px] text-slate-400 font-medium">Billr Engine v1.0</span>
       </div>
 
     </div>

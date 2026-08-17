@@ -18,43 +18,43 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.setTextColor(15, 23, 42);
-  doc.text('TAX INVOICE', pageWidth / 2, currentY, { align: 'center' });
+  doc.text('GST TAX INVOICE', pageWidth / 2, currentY, { align: 'center' });
 
   currentY += 4;
-  doc.setFontSize(8.5);
-  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(100, 116, 139);
-  doc.text('(ORIGINAL FOR RECIPIENT)', pageWidth / 2, currentY, { align: 'center' });
+  doc.text('(ORIGINAL FOR RECIPIENT • RULE 46 OF CGST RULES, 2017)', pageWidth / 2, currentY, { align: 'center' });
 
-  currentY += 6;
+  currentY += 5;
   doc.setDrawColor(30, 41, 59);
   doc.setLineWidth(0.6);
   doc.line(margin, currentY, pageWidth - margin, currentY);
 
   // 2. Seller Agency Banner
-  currentY += 5;
+  currentY += 4.5;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(15, 23, 42);
   doc.text(invoiceData.seller.name, pageWidth / 2, currentY, { align: 'center' });
 
-  currentY += 4.5;
-  doc.setFontSize(8.5);
+  currentY += 4;
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(51, 65, 85);
   doc.text(`${invoiceData.seller.address}, ${invoiceData.seller.cityStateZip}`, pageWidth / 2, currentY, { align: 'center' });
 
-  currentY += 4;
+  currentY += 3.8;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.text(
-    `GSTIN: ${invoiceData.seller.gstin}   |   PAN: ${invoiceData.seller.pan}   |   Phone: ${invoiceData.seller.phone}`,
+    `State: Telangana (36)   |   GSTIN: ${invoiceData.seller.gstin}   |   PAN: ${invoiceData.seller.pan}   |   Phone: ${invoiceData.seller.phone}`,
     pageWidth / 2,
     currentY,
     { align: 'center' }
   );
 
-  currentY += 4;
+  currentY += 3.8;
   doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.3);
   doc.line(margin, currentY, pageWidth - margin, currentY);
@@ -63,16 +63,17 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
   currentY += 4;
   const gridTopY = currentY;
   const colWidth = (pageWidth - margin * 2 - 4) / 2;
+  const boxHeight = 44;
 
   // Left Box: Buyer
   doc.setFillColor(248, 250, 252);
-  doc.rect(margin, gridTopY, colWidth, 38, 'F');
+  doc.rect(margin, gridTopY, colWidth, boxHeight, 'F');
   doc.setDrawColor(203, 213, 225);
-  doc.rect(margin, gridTopY, colWidth, 38, 'S');
+  doc.rect(margin, gridTopY, colWidth, boxHeight, 'S');
 
-  let buyerY = gridTopY + 4;
+  let buyerY = gridTopY + 4.5;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(100, 116, 139);
   doc.text('DETAILS OF RECEIVER / BILLED TO:', margin + 3, buyerY);
 
@@ -80,59 +81,66 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(15, 23, 42);
-  doc.text(invoiceData.buyer.name, margin + 3, buyerY);
+  doc.text(invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED', margin + 3, buyerY);
 
   buyerY += 4;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.2);
   doc.setTextColor(51, 65, 85);
-  const splitBuyerAddr = doc.splitTextToSize(`${invoiceData.buyer.address}, ${invoiceData.buyer.cityStateZip}`, colWidth - 6);
-  doc.text(splitBuyerAddr, margin + 3, buyerY);
+  const buyerFullAddr = `${invoiceData.buyer.address}, ${invoiceData.buyer.cityStateZip}`;
+  const splitBuyerAddr = doc.splitTextToSize(buyerFullAddr, colWidth - 6);
+  doc.text(splitBuyerAddr.slice(0, 2), margin + 3, buyerY);
 
-  buyerY += splitBuyerAddr.length * 3.5 + 1;
+  buyerY += Math.min(splitBuyerAddr.length, 2) * 3.2 + 1;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(`GSTIN No: ${invoiceData.buyer.gstin || 'N/A'}`, margin + 3, buyerY);
+  const gstinPanLine = `GSTIN: ${invoiceData.buyer.gstin || 'N/A'}${invoiceData.buyer.pan ? `   |   PAN: ${invoiceData.buyer.pan}` : ''}`;
+  doc.text(gstinPanLine, margin + 3, buyerY);
 
   if (invoiceData.buyer.placeOfSupply) {
-    buyerY += 4;
+    buyerY += 4.2;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
+    doc.setFontSize(6.8);
     doc.setTextColor(100, 116, 139);
-    doc.text('PLACE OF SUPPLY:', margin + 3, buyerY);
-    buyerY += 3;
+    doc.text('PLACE OF SUPPLY / DELIVERY / SERVICE:', margin + 3, buyerY);
+    buyerY += 3.2;
     doc.setFont('helvetica', 'normal');
-    doc.text("Praj Industries Ltd, At Pirangut, Mulshi, Pune - 412108.", margin + 3, buyerY);
+    doc.setFontSize(6.8);
+    doc.setTextColor(51, 65, 85);
+    const posFormatted = invoiceData.buyer.placeOfSupply.replace(/\n/g, ', ');
+    const splitPos = doc.splitTextToSize(posFormatted, colWidth - 6);
+    doc.text(splitPos.slice(0, 2), margin + 3, buyerY);
   }
 
   // Right Box: Specs
   const rightBoxX = margin + colWidth + 4;
   doc.setFillColor(248, 250, 252);
-  doc.rect(rightBoxX, gridTopY, colWidth, 38, 'F');
-  doc.rect(rightBoxX, gridTopY, colWidth, 38, 'S');
+  doc.rect(rightBoxX, gridTopY, colWidth, boxHeight, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.rect(rightBoxX, gridTopY, colWidth, boxHeight, 'S');
 
-  let specsY = gridTopY + 5;
+  let specsY = gridTopY + 4.5;
   const renderSpecRow = (label: string, value: string, isBoldVal = true) => {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(100, 116, 139);
     doc.text(label, rightBoxX + 3, specsY);
     
     doc.setFont('helvetica', isBoldVal ? 'bold' : 'normal');
     doc.setTextColor(15, 23, 42);
     doc.text(value, rightBoxX + colWidth - 3, specsY, { align: 'right' });
-    specsY += 6;
+    specsY += 5.5;
   };
 
   renderSpecRow('INVOICE No.:', invoiceData.invoiceNumber);
-  renderSpecRow('Date:', invoiceData.invoiceDate);
-  if (invoiceData.buyer.cityStateZip) {
-    renderSpecRow('Place of Supply:', invoiceData.buyer.cityStateZip);
-  }
-  renderSpecRow('Tax Category:', `Integrated GST (IGST ${invoiceData.gstRate || 18}%)`);
+  renderSpecRow('Invoice Date:', invoiceData.invoiceDate);
+  renderSpecRow('Place of Supply:', 'Maharashtra (Code: 27)');
+  renderSpecRow('Supply Category:', `Inter-State (IGST ${invoiceData.gstRate || 18}%)`);
+  renderSpecRow('SAC / Service Code:', '998311 (Agency Services)');
+  renderSpecRow('Reverse Charge (RCM):', 'No');
 
-  currentY = gridTopY + 36;
+  currentY = gridTopY + boxHeight + 4;
 
   // 4. Line Items Table (with Quantity, Unit Price, Commission Rate & Amount)
   const tableRows = invoiceData.items.map((item, index) => {
@@ -289,14 +297,8 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
 
   currentY += 12;
 
-  // 7. Declarations & Partner Signature
+  // 7. Partner Signature
   const footerY = currentY;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text('1. Certified that all particular details are true and correct.', margin, footerY);
-  doc.text('2. Subject to Hyderabad Jurisdiction.', margin, footerY + 3.5);
-  doc.text('Computer Generated Tax Invoice • Murthy Chemical Agencies', margin, footerY + 7);
 
   // Authorized Signatory Right Side
   const sigBoxX = pageWidth - margin - 55;

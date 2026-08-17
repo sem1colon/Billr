@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { HeaderNav, ActiveTab } from './components/HeaderNav';
 import { BottomDockNav } from './components/BottomDockNav';
@@ -10,32 +10,42 @@ import { InvoiceData, InvoiceItem } from './types';
 import { initialInvoiceData } from './data/sampleData';
 import { generateInvoicePDF } from './utils/pdfGenerator';
 import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
-import { DeveloperCredit } from './components/DeveloperCredit';
+import { 
+  loadSavedInvoiceData, 
+  saveInvoiceData, 
+  loadSavedActiveTab, 
+  saveActiveTab, 
+  loadSavedUiPreferences, 
+  saveUiPreferences 
+} from './utils/storageUtils';
 
 export default function App() {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData>(initialInvoiceData);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('builder');
+  const [invoiceData, setInvoiceData] = useState<InvoiceData>(() => loadSavedInvoiceData());
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => loadSavedActiveTab());
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InvoiceItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isLargeText, setIsLargeText] = useState(false);
+  const [isLargeText, setIsLargeText] = useState<boolean>(() => loadSavedUiPreferences().isLargeText);
+  const isInitialMount = useRef(true);
 
+  // Auto-persist invoiceData to localStorage
   useEffect(() => {
-    // Populate default partner signature if not present
-    if (!invoiceData.seller.signatureUrl) {
-      const defaultSig = getDefaultSignatureDataUrl();
-      if (defaultSig) {
-        setInvoiceData(prev => ({
-          ...prev,
-          showSignature: true,
-          seller: {
-            ...prev.seller,
-            signatureUrl: defaultSig,
-          },
-        }));
-      }
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  }, []);
+    saveInvoiceData(invoiceData);
+  }, [invoiceData]);
+
+  // Auto-persist activeTab to localStorage
+  useEffect(() => {
+    saveActiveTab(activeTab);
+  }, [activeTab]);
+
+  // Auto-persist UI preferences
+  useEffect(() => {
+    saveUiPreferences({ isLargeText });
+  }, [isLargeText]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -60,7 +70,7 @@ export default function App() {
       }
       return { ...prev, items: newItems };
     });
-    showToast(editingItem ? 'Item updated' : 'Item added to invoice');
+    showToast(editingItem ? 'Item updated & auto-saved' : 'Item added & auto-saved');
   };
 
   const handleDownloadPdf = () => {
@@ -69,19 +79,30 @@ export default function App() {
   };
 
   const handleLoadSample = () => {
-    setInvoiceData(initialInvoiceData);
-    showToast('Loaded reference sample invoice');
+    const defaultSig = getDefaultSignatureDataUrl();
+    const freshSample: InvoiceData = {
+      ...initialInvoiceData,
+      showSignature: true,
+      seller: {
+        ...initialInvoiceData.seller,
+        signatureUrl: initialInvoiceData.seller.signatureUrl || defaultSig,
+      },
+    };
+    setInvoiceData(freshSample);
+    saveInvoiceData(freshSample);
+    showToast('Reset to reference sample invoice');
   };
 
   const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
 
   return (
-    <div className={`relative min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
+    <div className={`relative min-h-screen max-w-[100vw] overflow-x-hidden bg-slate-50/60 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
       
-      {/* Ambient Liquid Glass Atmosphere (Floating Orbs) */}
+      {/* Ambient Liquid Glass Atmosphere (Floating Chromatic Orbs) */}
       <div className="ambient-glow-mesh">
         <div className="ambient-orb-1" />
         <div className="ambient-orb-2" />
+        <div className="ambient-orb-3" />
       </div>
 
       {/* Top Header Navigation */}
@@ -99,15 +120,15 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 sm:pb-28">
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12">
         <AnimatePresence mode="wait">
           {activeTab === 'builder' && (
             <motion.div
               key="builder"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <InvoiceBuilderView
                 invoiceData={invoiceData}
@@ -122,10 +143,10 @@ export default function App() {
           {activeTab === 'preview' && (
             <motion.div
               key="preview"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <InvoiceLivePreview
                 invoiceData={invoiceData}
@@ -139,10 +160,10 @@ export default function App() {
           {activeTab === 'settings' && (
             <motion.div
               key="settings"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <BusinessSettingsView
                 invoiceData={invoiceData}
@@ -157,8 +178,6 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Developer Attribution */}
-        <DeveloperCredit variant="inline" className="mt-8" />
       </main>
 
       {/* Floating Bottom Step Bar */}
@@ -179,7 +198,7 @@ export default function App() {
         initialItem={editingItem}
       />
 
-      {/* Floating Toast Notification (Liquid Glass Pill) */}
+      {/* Floating Toast Notification (Apple Liquid Glass Pill) */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 apple-glass-card !bg-slate-900/90 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 border border-white/20 animate-in fade-in slide-in-from-top-3 duration-200">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

@@ -9,7 +9,6 @@ import {
   Percent, 
   Hash, 
   Calendar,
-  Sparkles,
   Layers,
   ArrowRight
 } from 'lucide-react';
@@ -190,15 +189,15 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="w-full sm:max-w-xl bg-white/90 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-white/80 overflow-hidden max-h-[92vh] flex flex-col"
+          className="w-full sm:max-w-xl apple-glass-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl border border-white/95 overflow-hidden max-h-[92vh] flex flex-col z-10"
         >
-          {/* Specular Rim Light */}
-          <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+          {/* Top Specular Rim */}
+          <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
 
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] bg-white/40">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/50 bg-white/30 backdrop-blur-md">
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center font-bold border border-blue-500/20">
+              <div className="w-8 h-8 rounded-xl apple-glass-badge text-blue-700 flex items-center justify-center font-bold">
                 <Package className="w-4 h-4" />
               </div>
               <div>
@@ -213,7 +212,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-800 hover:bg-black/[0.05] rounded-full transition-all"
+              className="p-2 text-slate-400 hover:text-slate-800 apple-glass-btn rounded-full transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -233,7 +232,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. SPIRIZYME ADV ULTI (Bio Agro Energy Pvt Ltd)"
-                className="w-full px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none shadow-inner transition-all"
+                className="w-full px-3.5 py-2.5 text-sm font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
               />
 
               {/* Quick Apple Liquid Presets */}
@@ -244,7 +243,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                     type="button"
                     key={p.name}
                     onClick={() => handleApplyPreset(p)}
-                    className="text-[11px] font-semibold px-2.5 py-1 bg-black/[0.03] hover:bg-blue-500/10 hover:text-blue-700 text-slate-700 rounded-xl border border-black/[0.06] transition-all"
+                    className="text-[11px] font-semibold px-2.5 py-1 apple-glass-subtle hover:bg-blue-50 hover:text-blue-700 text-slate-700 rounded-xl transition-all cursor-pointer"
                   >
                     {p.name}
                   </button>
@@ -268,7 +267,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                     value={qty}
                     onChange={(e) => handleQtyChange(parseFloat(e.target.value) || 0)}
                     placeholder="1000"
-                    className="w-full px-3 py-2 text-sm font-bold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none shadow-inner"
+                    className="w-full px-3 py-2 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                   />
                 </div>
               </div>
@@ -281,7 +280,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 <select
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="w-full px-3 py-2 text-sm font-bold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+                  className="w-full px-3 py-2 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                 >
                   <option value="kg">kg (Kilograms)</option>
                   <option value="Lot">Lot / Lumpsum</option>
@@ -305,7 +304,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                     value={unitPrice}
                     onChange={(e) => handleUnitPriceChange(parseFloat(e.target.value) || 0)}
                     placeholder="550.00"
-                    className="w-full px-3 py-2 text-sm font-bold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none shadow-inner"
+                    className="w-full px-3 py-2 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                   />
                 </div>
               </div>
@@ -313,51 +312,70 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
             {/* Gross Product Value Reference Tag */}
             {unitPrice > 0 && (
-              <div className="px-3.5 py-2 bg-black/[0.02] border border-black/[0.06] rounded-2xl flex items-center justify-between text-xs text-slate-600">
+              <div className="px-3.5 py-2 apple-glass-subtle rounded-2xl flex items-center justify-between text-xs text-slate-600">
                 <span className="font-medium">Gross Product Value ({qty} {unit} × ₹{unitPrice}):</span>
                 <span className="font-bold text-slate-900">{formatIndianCurrency(grossProductTotal)}</span>
               </div>
             )}
 
             {/* Commission Rate & Calculation Engine */}
-            <div className="p-4 rounded-3xl bg-blue-500/[0.04] border border-blue-500/15 backdrop-blur-md space-y-3">
+            <div className="p-4 rounded-3xl apple-glass-subtle space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1.5">
                   <Calculator className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-extrabold text-blue-950">
+                  <span className="text-xs font-extrabold text-slate-900">
                     Commission Rate & Value
                   </span>
                 </div>
 
                 {/* Calculation Mode Segmented Pill */}
-                <div className="flex items-center bg-black/[0.04] p-0.5 rounded-xl border border-black/[0.06]">
+                <div className="flex items-center relative apple-glass-segmented p-0.5 rounded-xl gap-0.5">
                   <button
                     type="button"
                     onClick={() => {
                       setCommMode('PER_UNIT');
                       updateCalculations(qty, unitPrice, commissionRate, 'PER_UNIT');
                     }}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                      commMode === 'PER_UNIT'
-                        ? 'bg-white text-blue-700 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                    className="relative px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
                   >
-                    ₹ per {unit}
+                    {commMode === 'PER_UNIT' && (
+                      <motion.div
+                        layoutId="item-comm-mode-liquid-pill"
+                        className="absolute inset-0 apple-glass-segmented-active rounded-lg -z-10 shadow-xs"
+                        transition={{
+                          type: 'spring',
+                          stiffness: 450,
+                          damping: 35,
+                        }}
+                      />
+                    )}
+                    <span className={`transition-colors duration-200 ${commMode === 'PER_UNIT' ? 'text-blue-700 font-extrabold' : 'text-slate-600 hover:text-slate-900'}`}>
+                      ₹ per {unit}
+                    </span>
                   </button>
+
                   <button
                     type="button"
                     onClick={() => {
                       setCommMode('PERCENTAGE');
                       updateCalculations(qty, unitPrice, commissionPct, 'PERCENTAGE');
                     }}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                      commMode === 'PERCENTAGE'
-                        ? 'bg-white text-blue-700 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                    className="relative px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
                   >
-                    % of Price
+                    {commMode === 'PERCENTAGE' && (
+                      <motion.div
+                        layoutId="item-comm-mode-liquid-pill"
+                        className="absolute inset-0 apple-glass-segmented-active rounded-lg -z-10 shadow-xs"
+                        transition={{
+                          type: 'spring',
+                          stiffness: 450,
+                          damping: 35,
+                        }}
+                      />
+                    )}
+                    <span className={`transition-colors duration-200 ${commMode === 'PERCENTAGE' ? 'text-blue-700 font-extrabold' : 'text-slate-600 hover:text-slate-900'}`}>
+                      % of Price
+                    </span>
                   </button>
                 </div>
               </div>
@@ -376,7 +394,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                       value={commissionRate}
                       onChange={(e) => handleRateChange(parseFloat(e.target.value) || 0)}
                       placeholder="16.50"
-                      className="w-full px-3 py-2 text-sm font-bold text-blue-900 bg-white border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
+                      className="w-full px-3 py-2 text-sm font-bold text-blue-900 apple-glass-input rounded-2xl focus:outline-none"
                     />
                     {unitPrice > 0 && (
                       <span className="text-[10px] text-blue-600 font-semibold mt-0.5 block">
@@ -396,7 +414,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                       value={commissionPct}
                       onChange={(e) => handlePctChange(parseFloat(e.target.value) || 0)}
                       placeholder="3.0"
-                      className="w-full px-3 py-2 text-sm font-bold text-blue-900 bg-white border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
+                      className="w-full px-3 py-2 text-sm font-bold text-blue-900 apple-glass-input rounded-2xl focus:outline-none"
                     />
                     <span className="text-[10px] text-blue-600 font-semibold mt-0.5 block">
                       = ₹{commissionRate.toFixed(2)} / {unit}
@@ -417,7 +435,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                           setIsManualAmount(false);
                           updateCalculations(qty, unitPrice, commissionRate, commMode);
                         }}
-                        className="text-[10px] text-blue-600 hover:underline font-semibold"
+                        className="text-[10px] text-blue-600 hover:underline font-semibold cursor-pointer"
                       >
                         Auto-calc
                       </button>
@@ -432,7 +450,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                       setIsManualAmount(true);
                       setCommissionAmount(parseFloat(e.target.value) || 0);
                     }}
-                    className="w-full px-3 py-2 text-sm font-black text-slate-900 bg-white border border-blue-300 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
+                    className="w-full px-3 py-2 text-sm font-black text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                   />
                   <span className="text-[10px] text-slate-500 mt-0.5 block">
                     {qty} {unit} × ₹{commissionRate} = {formatIndianCurrency(qty * commissionRate)}
@@ -452,7 +470,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   value={hsnSacCode}
                   onChange={(e) => setHsnSacCode(e.target.value)}
                   placeholder="998311"
-                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                 />
               </div>
 
@@ -465,7 +483,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   value={invNo}
                   onChange={(e) => setInvNo(e.target.value)}
                   placeholder="800086408"
-                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                 />
               </div>
 
@@ -477,23 +495,23 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 bg-white/80 border border-black/[0.08] rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-3 py-2 text-sm font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                 />
               </div>
             </div>
 
             {/* Footer Action Buttons */}
-            <div className="pt-3 border-t border-black/[0.06] flex items-center justify-end space-x-3">
+            <div className="pt-3 border-t border-slate-200/50 flex items-center justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-black/[0.04] rounded-2xl transition-colors"
+                className="px-4 py-2.5 text-xs font-bold text-slate-700 apple-glass-btn rounded-2xl transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex items-center space-x-1.5 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-2xl shadow-[0_4px_16px_rgba(37,99,235,0.3)] active:scale-[0.98] transition-all"
+                className="flex items-center space-x-1.5 px-6 py-2.5 apple-btn-primary text-white text-xs font-extrabold rounded-2xl active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>{initialItem ? 'Save Item' : 'Add Line Item'}</span>

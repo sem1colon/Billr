@@ -16,7 +16,7 @@ registerServiceWorker();
 // Developer signature
 if (typeof window !== 'undefined') {
   console.log(
-    '%c; sem1Colon Inc.%c Crafted with precision • https://sem1colon.github.io',
+    '%csem1Colon Inc.%c Crafted with precision • https://sem1colon.github.io',
     'color: #2563eb; font-weight: bold; font-family: monospace; font-size: 12px;',
     'color: #64748b; font-size: 11px;'
   );
