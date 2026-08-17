@@ -59,8 +59,8 @@ Pre-configured for **Murthy Chemical Agencies** (Seller, Telangana GSTIN `36ABXF
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/vamsikaza007/billr.git
-   cd billr
+   git clone https://github.com/sem1colon/Billr.git
+   cd Billr
    ```
 
 2. **Install dependencies:**
@@ -114,26 +114,11 @@ Pre-configured for **Murthy Chemical Agencies** (Seller, Telangana GSTIN `36ABXF
 
 ---
 
-## 📜 Suggested License & Monetization (Paid Clone / Commercial License)
+## 📜 License
 
-If you are hosting this repository on GitHub and want users or companies to **legally pay you for cloning, deploying, or using it commercially**, you should use a **Commercial Source-Available / Dual License** model:
-
-### Recommended Option: PolyForm Commercial License 1.0.0 (or Paid Clone License)
-- **Personal / Non-commercial Use**: Users can inspect, fork, or run the project for non-commercial evaluation.
-- **Commercial Use / Production Deployment**: Any business, agency, or individual deploying this software for commercial billing or charging clients must purchase a Commercial License from the author.
+This project is licensed under the **MIT License** - see the [LICENSE](file:///Users/sem1Colon/Documents/Billr/LICENSE) file for full details.
 
 ```text
-COMMERCIAL USE LICENSE AGREEMENT
-
-Copyright (c) 2026 Vamsi Kaza. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software for personal evaluation, educational, and testing purposes only.
-
-COMMERCIAL USE RESTRICTION:
-Any commercial use, production deployment, resale, or sublicensing requires
-a paid Commercial License Agreement directly from the copyright holder.
-
-To purchase a commercial license or white-label agreement, contact:
-Email: vamsi.kaza007@gmail.com
+MIT License
+Copyright (c) 2026 Vamsi Kaza (sem1colon)
 ```
