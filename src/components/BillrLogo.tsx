@@ -21,9 +21,9 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
 
   return (
     <div className={`inline-flex items-center space-x-2.5 select-none group ${className}`}>
-      {/* Clean & Professional Indian GST Invoice Icon Mark */}
+      {/* Clean & Professional Indian Invoice Icon Mark */}
       <div 
-        className={`relative ${iconDimensions} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 p-1 shadow-sm border border-blue-500/40 transition-transform duration-150 group-hover:scale-105`}
+        className={`relative ${iconDimensions} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 p-0.5 shadow-sm border border-blue-500/40 transition-transform duration-150 group-hover:scale-105 overflow-hidden`}
       >
         <svg
           viewBox="0 0 512 512"
@@ -31,44 +31,39 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
           xmlns="http://www.w3.org/2000/svg"
           className="w-full h-full"
         >
-          <defs>
-            <filter id="iconShadow" x="-10%" y="-10%" width="125%" height="130%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#0F172A" floodOpacity="0.25" />
-            </filter>
-          </defs>
+          {/* Clean Crisp White Invoice Card */}
+          <rect x="108" y="76" width="296" height="360" rx="36" fill="#FFFFFF" />
 
-          {/* Invoice Document Base (White Card with Folded Corner) */}
-          <g filter="url(#iconShadow)">
-            <path
-              d="M144 88C130.745 88 120 98.7452 120 112V400C120 413.255 130.745 424 144 424H368C381.255 424 392 413.255 392 400V168L312 88H144Z"
-              fill="#FFFFFF"
-            />
-            <path
-              d="M312 88V152C312 160.837 319.163 168 328 168H392L312 88Z"
-              fill="#DBEAFE"
-            />
-          </g>
+          {/* Minimalist Corner Notch Accent */}
+          <path d="M336 76H368C387.882 76 404 92.1178 404 112V144L336 76Z" fill="#DBEAFE" />
 
-          {/* Indian Rupee (₹) Symbol */}
-          <g stroke="#1D4ED8" strokeLinecap="round" strokeLinejoin="round">
-            {/* Top Rupee Bar */}
-            <path d="M178 184H298" strokeWidth="24" />
-            {/* Second Rupee Bar */}
-            <path d="M178 226H280" strokeWidth="24" />
-            {/* Rupee Loop */}
-            <path
-              d="M214 184V264C214 264 282 264 282 222C282 184 214 184 214 184Z"
-              strokeWidth="24"
-            />
-            {/* Rupee Diagonal Leg */}
-            <path d="M224 264L294 340" strokeWidth="26" />
-          </g>
+          {/* Bold Indian Rupee (₹) Symbol in Royal Blue */}
+          <rect x="164" y="148" width="184" height="26" rx="13" fill="#1D4ED8" />
+          <rect x="164" y="200" width="150" height="26" rx="13" fill="#1D4ED8" />
 
-          {/* Invoice Ledger Line Items */}
-          <g strokeLinecap="round">
-            <line x1="178" y1="378" x2="238" y2="378" stroke="#94A3B8" strokeWidth="16" />
-            <line x1="262" y1="378" x2="334" y2="378" stroke="#3B82F6" strokeWidth="16" />
-          </g>
+          <path
+            d="M198 148V340"
+            stroke="#1D4ED8"
+            strokeWidth="26"
+            strokeLinecap="round"
+          />
+          <path
+            d="M198 148H264C294.928 148 320 171.281 320 200C320 228.719 294.928 252 264 252H198"
+            stroke="#1D4ED8"
+            strokeWidth="26"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <path
+            d="M232 248L318 344"
+            stroke="#1D4ED8"
+            strokeWidth="26"
+            strokeLinecap="round"
+          />
+
+          {/* Minimalist Ledger Summary Bar */}
+          <rect x="164" y="376" width="184" height="18" rx="9" fill="#93C5FD" />
         </svg>
       </div>
 
