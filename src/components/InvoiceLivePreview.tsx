@@ -56,23 +56,23 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 max-w-5xl mx-auto">
       
       {/* Top Apple Liquid Glass Action Toolbar */}
-      <div className="bg-white/75 backdrop-blur-2xl p-3 sm:p-4 rounded-3xl border border-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.03)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="apple-glass-card p-4 sm:p-5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
         {/* Left: Document Info Badge */}
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-700 flex items-center justify-center font-black text-xs border border-blue-500/20 shadow-2xs">
+          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs border border-blue-200/80 shadow-2xs">
             INV
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs sm:text-sm font-extrabold text-slate-900">Tax Invoice Preview</span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-700 border border-blue-500/20">
+              <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">Tax Invoice Preview</span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
                 18% IGST
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 mt-0.5">
               No: <strong className="text-slate-800 font-mono">{invoiceData.invoiceNumber}</strong> &bull; Date: <strong className="text-slate-800">{invoiceData.invoiceDate}</strong>
             </p>
           </div>
@@ -81,10 +81,10 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
         {/* Center & Right: Zoom & Actions */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Zoom Controls */}
-          <div className="flex items-center space-x-1 bg-black/[0.04] p-1 rounded-2xl border border-black/[0.06]">
+          <div className="flex items-center space-x-1 apple-glass-subtle p-1 rounded-2xl">
             <button
               onClick={() => setZoomLevel(prev => Math.max(prev - 10, 50))}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-xl transition-colors"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-xl transition-colors active:scale-95"
               title="Zoom Out"
               aria-label="Zoom Out"
             >
@@ -95,7 +95,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
             </span>
             <button
               onClick={() => setZoomLevel(prev => Math.min(prev + 10, 150))}
-              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-xl transition-colors"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-xl transition-colors active:scale-95"
               title="Zoom In"
               aria-label="Zoom In"
             >
@@ -105,7 +105,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
           <button
             onClick={() => setIsSignatureModalOpen(true)}
-            className="flex items-center space-x-1.5 px-3.5 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 rounded-2xl text-xs font-bold transition-colors border border-blue-500/20"
+            className="flex items-center space-x-1.5 px-3.5 py-2 bg-blue-50/80 hover:bg-blue-100/90 text-blue-700 rounded-2xl text-xs font-bold transition-all border border-blue-200/80 active:scale-95"
             title="Configure Partner Signature"
           >
             <PenTool className="w-3.5 h-3.5 text-blue-600" />
@@ -114,7 +114,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
           <button
             onClick={onEditBuilder}
-            className="flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-black/[0.04] text-slate-700 rounded-2xl text-xs font-bold transition-colors border border-black/[0.08] shadow-2xs"
+            className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-bold active:scale-95"
           >
             <Edit3 className="w-3.5 h-3.5 text-slate-600" />
             <span>Edit</span>
@@ -122,7 +122,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
           <button
             onClick={handlePrint}
-            className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-black/[0.04] text-slate-700 rounded-2xl text-xs font-bold transition-colors border border-black/[0.08] shadow-2xs"
+            className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-bold active:scale-95"
           >
             <Printer className="w-3.5 h-3.5 text-slate-600" />
             <span>Print</span>
@@ -130,7 +130,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
           <button
             onClick={handleCelebrationDownload}
-            className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-extrabold shadow-[0_4px_16px_rgba(37,99,235,0.3)] active:scale-[0.98] transition-all"
+            className="flex items-center space-x-1.5 px-4 py-2 apple-btn-primary text-white rounded-2xl text-xs font-black active:scale-95"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download PDF</span>
@@ -138,8 +138,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
         </div>
       </div>
 
-      {/* A4 Sheet Container */}
-      <div className="w-full overflow-x-auto pb-8 flex justify-center bg-slate-900/[0.04] backdrop-blur-xl p-3 sm:p-8 rounded-3xl border border-white/60">
+      {/* A4 Sheet Container with Liquid Glass Frame */}
+      <div className="w-full overflow-x-auto pb-8 flex justify-center apple-glass-subtle p-3 sm:p-8 rounded-3xl">
         <div 
           style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
           className="transition-transform duration-200"

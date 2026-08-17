@@ -62,17 +62,17 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
     <div className="space-y-6 max-w-4xl mx-auto">
       
       {/* Top Banner with Upgraded Profile Icon & Info */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl apple-btn-primary text-white flex items-center justify-center flex-shrink-0">
             <UserCheck className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg sm:text-xl font-bold text-slate-900">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                 Agency & Client Profiles
               </h1>
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
                 GST Active
               </span>
             </div>
@@ -86,7 +86,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
           <button
             type="button"
             onClick={handleResetToMCA}
-            className="flex items-center space-x-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition-colors"
+            className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-semibold active:scale-95"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Reset Defaults</span>
@@ -96,7 +96,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <button
               type="button"
               onClick={onNavigateToBuilder}
-              className="flex items-center space-x-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center space-x-1 px-4 py-2 apple-btn-primary text-white rounded-2xl text-xs font-bold active:scale-95 transition-all"
             >
               <span>Back to Invoice</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -106,15 +106,15 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       </div>
 
       {savedSuccess && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center space-x-2 text-xs font-semibold">
+        <div className="p-4 bg-emerald-50/90 border border-emerald-200/80 text-emerald-800 rounded-2xl flex items-center space-x-2 text-xs font-semibold shadow-xs">
           <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           <span>Profile configuration updated successfully.</span>
         </div>
       )}
 
       {/* Seller Profile Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-blue-600" />
             <h2 className="text-sm font-bold text-slate-900">
@@ -125,92 +125,92 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Agency Legal Name *
             </label>
             <input
               type="text"
               value={invoiceData.seller.name}
               onChange={(e) => handleSellerChange('name', e.target.value)}
-              className="w-full px-3 py-2 text-sm font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Managing Partner Name
             </label>
             <input
               type="text"
               value={invoiceData.seller.partnerName}
               onChange={(e) => handleSellerChange('partnerName', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Contact Phone Number
             </label>
             <input
               type="text"
               value={invoiceData.seller.phone}
               onChange={(e) => handleSellerChange('phone', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Registered Office Address
             </label>
             <input
               type="text"
               value={invoiceData.seller.address}
               onChange={(e) => handleSellerChange('address', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               City, State & Pincode
             </label>
             <input
               type="text"
               value={invoiceData.seller.cityStateZip}
               onChange={(e) => handleSellerChange('cityStateZip', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Seller GSTIN
             </label>
             <input
               type="text"
               value={invoiceData.seller.gstin}
               onChange={(e) => handleSellerChange('gstin', e.target.value)}
-              className="w-full px-3 py-2 text-sm font-mono font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               PAN Number
             </label>
             <input
               type="text"
               value={invoiceData.seller.pan}
               onChange={(e) => handleSellerChange('pan', e.target.value)}
-              className="w-full px-3 py-2 text-sm font-mono font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
         </div>
 
         {/* Banking & Signature */}
-        <div className="pt-4 border-t border-slate-100 space-y-4">
+        <div className="pt-5 border-t border-slate-200/60 space-y-4">
           <div className="flex items-center space-x-2">
             <CreditCard className="w-4 h-4 text-blue-600" />
             <h3 className="text-xs sm:text-sm font-bold text-slate-900">
@@ -220,47 +220,47 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Bank Name</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Bank Name</label>
               <input
                 type="text"
                 value={invoiceData.seller.bankName}
                 onChange={(e) => handleSellerChange('bankName', e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Bank Branch</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Bank Branch</label>
               <input
                 type="text"
                 value={invoiceData.seller.bankBranch}
                 onChange={(e) => handleSellerChange('bankBranch', e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Current Account Number</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Current Account Number</label>
               <input
                 type="text"
                 value={invoiceData.seller.accountNo}
                 onChange={(e) => handleSellerChange('accountNo', e.target.value)}
-                className="w-full px-3 py-2 text-sm font-mono font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">IFSC Code</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">IFSC Code</label>
               <input
                 type="text"
                 value={invoiceData.seller.ifscCode}
                 onChange={(e) => handleSellerChange('ifscCode', e.target.value)}
-                className="w-full px-3 py-2 text-sm font-mono font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
               />
             </div>
           </div>
 
           {/* Partner Signature Configuration */}
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+          <div className="p-4 apple-glass-subtle rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3">
-              <div className="h-12 w-28 bg-white border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden p-1 shadow-2xs">
+              <div className="h-12 w-28 bg-white/90 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden p-1 shadow-2xs">
                 {invoiceData.seller.signatureUrl ? (
                   <img 
                     src={invoiceData.seller.signatureUrl} 
@@ -280,7 +280,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <button
               type="button"
               onClick={() => setIsSignatureModalOpen(true)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-blue-700 rounded-lg text-xs font-bold transition-colors border border-slate-200"
+              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-blue-700 rounded-xl text-xs font-bold active:scale-95 self-start sm:self-auto"
             >
               <PenTool className="w-3.5 h-3.5" />
               <span>Update Signature</span>
@@ -290,8 +290,8 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       </div>
 
       {/* Buyer / Client Profile Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="apple-glass-card rounded-3xl p-5 sm:p-7 space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
           <div className="flex items-center space-x-2">
             <Lock className="w-4 h-4 text-slate-400" />
             <h2 className="text-sm font-bold text-slate-900">
@@ -305,62 +305,62 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Client Legal Name
             </label>
             <input
               type="text"
               value={invoiceData.buyer.name}
               onChange={(e) => handleBuyerChange('name', e.target.value)}
-              className="w-full px-3 py-2 text-sm font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Billing Office Address
             </label>
             <input
               type="text"
               value={invoiceData.buyer.address}
               onChange={(e) => handleBuyerChange('address', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               City, State & Pincode
             </label>
             <input
               type="text"
               value={invoiceData.buyer.cityStateZip}
               onChange={(e) => handleBuyerChange('cityStateZip', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Client / Buyer GSTIN
             </label>
             <input
               type="text"
               value={invoiceData.buyer.gstin}
               onChange={(e) => handleBuyerChange('gstin', e.target.value)}
-              className="w-full px-3 py-2 text-sm font-mono font-bold bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Place of Supply & Delivery Locations
             </label>
             <textarea
               rows={3}
               value={invoiceData.buyer.placeOfSupply}
               onChange={(e) => handleBuyerChange('placeOfSupply', e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3.5 py-2.5 text-xs text-slate-900 apple-glass-input rounded-xl focus:outline-none"
             />
           </div>
         </div>
@@ -386,7 +386,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       <div className="pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
         <div className="flex items-center space-x-1.5 font-mono text-[11px]">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>Billr Engine v2.4</span>
+          <span>Billr Engine</span>
           <span>&bull;</span>
           <span>PWA Ready</span>
         </div>

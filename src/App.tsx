@@ -76,8 +76,14 @@ export default function App() {
   const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
+    <div className={`relative min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
       
+      {/* Ambient Liquid Glass Atmosphere (Floating Orbs) */}
+      <div className="ambient-glow-mesh">
+        <div className="ambient-orb-1" />
+        <div className="ambient-orb-2" />
+      </div>
+
       {/* Top Header Navigation */}
       <HeaderNav
         activeTab={activeTab}
@@ -93,15 +99,15 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-24">
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 sm:pb-28">
         <AnimatePresence mode="wait">
           {activeTab === 'builder' && (
             <motion.div
               key="builder"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
               <InvoiceBuilderView
                 invoiceData={invoiceData}
@@ -116,10 +122,10 @@ export default function App() {
           {activeTab === 'preview' && (
             <motion.div
               key="preview"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
               <InvoiceLivePreview
                 invoiceData={invoiceData}
@@ -133,10 +139,10 @@ export default function App() {
           {activeTab === 'settings' && (
             <motion.div
               key="settings"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
               <BusinessSettingsView
                 invoiceData={invoiceData}
@@ -151,7 +157,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Subtle Developer Attribution */}
+        {/* Developer Attribution */}
         <DeveloperCredit variant="inline" className="mt-8" />
       </main>
 
@@ -173,10 +179,10 @@ export default function App() {
         initialItem={editingItem}
       />
 
-      {/* Floating Toast Notification */}
+      {/* Floating Toast Notification (Liquid Glass Pill) */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center space-x-2 animate-in slide-in-from-top-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+        <div className="fixed top-20 right-4 z-50 apple-glass-card !bg-slate-900/90 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 border border-white/20 animate-in fade-in slide-in-from-top-3 duration-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>{toastMessage}</span>
         </div>
       )}
