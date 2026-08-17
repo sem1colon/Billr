@@ -127,11 +127,12 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
 
   renderSpecRow('INVOICE No.:', invoiceData.invoiceNumber);
   renderSpecRow('Date:', invoiceData.invoiceDate);
-  renderSpecRow('Place of Supply:', 'Maharashtra (27)');
+  if (invoiceData.buyer.cityStateZip) {
+    renderSpecRow('Place of Supply:', invoiceData.buyer.cityStateZip);
+  }
   renderSpecRow('Tax Category:', `Integrated GST (IGST ${invoiceData.gstRate || 18}%)`);
-  renderSpecRow('State Code:', 'Seller: 36 -> Buyer: 27', false);
 
-  currentY = gridTopY + 41;
+  currentY = gridTopY + 36;
 
   // 4. Line Items Table (with Quantity, Unit Price, Commission Rate & Amount)
   const tableRows = invoiceData.items.map((item, index) => {

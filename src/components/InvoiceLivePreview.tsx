@@ -219,18 +219,14 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     </div>
                     <div className="flex justify-between border-b border-slate-200 pb-1.5">
                       <span className="text-slate-500 font-semibold">Place of Supply:</span>
-                      <span className="font-bold text-slate-800 text-[11px]">Maharashtra (27)</span>
+                      <span className="font-bold text-slate-800 text-[11px]">{invoiceData.buyer.cityStateZip || 'As per Bill'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500 font-semibold">Tax Category:</span>
                       <span className="font-bold text-slate-900 text-[11px]">
-                        Additional GST {gstRate}%
+                        IGST {gstRate}%
                       </span>
                     </div>
-                  </div>
-
-                  <div className="mt-2 pt-2 border-t border-slate-200 text-[10px] text-slate-500 italic">
-                    Seller: Telangana (36) ➔ Buyer: Maharashtra (27)
                   </div>
                 </div>
               </div>

@@ -186,7 +186,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              GSTIN (Telangana State - Code 36)
+              Seller GSTIN
             </label>
             <input
               type="text"
@@ -342,7 +342,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Client GSTIN (Maharashtra State - Code 27)
+              Client / Buyer GSTIN
             </label>
             <input
               type="text"

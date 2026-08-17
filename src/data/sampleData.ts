@@ -287,7 +287,7 @@ export const initialInvoiceData: InvoiceData = {
   buyer: defaultBuyer,
   items: sampleInvoiceItems,
   gstRate: 18,
-  gstType: 'IGST', // Inter-state from Telangana (36) to Maharashtra (27)
+  gstType: 'IGST',
   roundOff: 0,
   showSignature: true,
 };

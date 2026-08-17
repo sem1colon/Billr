@@ -268,11 +268,11 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-slate-700 mb-1.5">From (Seller Agency)</span>
+            <span className="block text-xs font-semibold text-slate-700 mb-1.5">From (Seller)</span>
             <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
               <div className="truncate">
-                <span className="text-xs font-bold text-slate-900 block truncate">Murthy Chemical Agencies</span>
-                <span className="text-[10px] text-slate-500">Telangana (36)</span>
+                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.seller.name || 'Murthy Chemical Agencies'}</span>
+                <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.seller.gstin}</span>
               </div>
               <button
                 type="button"
@@ -285,11 +285,11 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-slate-700 mb-1.5">To (Client Company)</span>
+            <span className="block text-xs font-semibold text-slate-700 mb-1.5">To (Buyer)</span>
             <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
               <div className="truncate">
-                <span className="text-xs font-bold text-slate-900 block truncate">Praj Industries Limited</span>
-                <span className="text-[10px] text-slate-500">Maharashtra (27)</span>
+                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.buyer.name || 'Praj Industries Limited'}</span>
+                <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.buyer.gstin || 'N/A'}</span>
               </div>
               <button
                 type="button"
@@ -707,7 +707,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               </p>
             </div>
             <p className="text-xs text-slate-500">
-              Integrated GST (IGST 18%) applicable for interstate services (Telangana to Maharashtra).
+              Integrated GST (IGST {invoiceData.gstRate || 18}%) applicable on taxable commission value.
             </p>
           </div>
 
