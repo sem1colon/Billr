@@ -1,5 +1,5 @@
 {
-  "name": "Billr — GST Invoice Studio",
+  "name": "Billr",
   "short_name": "Billr",
   "id": "/Billr/",
   "description": "Fast, high-precision GST commission invoice generator with live calculations and instant vector PDF export.",

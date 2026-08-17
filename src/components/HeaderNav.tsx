@@ -137,7 +137,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-xl"
                 title="Billr — GST Invoicing"
               >
-                <BillrLogo size="md" subtitle="GST Studio" />
+                <BillrLogo size="md" />
               </button>
             </div>
 
@@ -271,7 +271,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
                     {/* App Version Info */}
                     <div className="px-4 py-2 text-[10px] text-slate-400 border-t border-slate-100 mt-1 flex items-center justify-between">
-                      <span>Billr GST Studio v1.0</span>
+                      <span>Billr</span>
                       <span className="flex items-center gap-0.5 text-blue-600 font-medium">
                         <Sparkles className="w-3 h-3" /> PWA Ready
                       </span>

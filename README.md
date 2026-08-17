@@ -3,7 +3,7 @@
   <img src="public/icon.svg" alt="Billr Logo" width="108" height="108" />
 
   # Billr
-  ### Modern GST Commission & Tax Invoice Automation Studio
+  ### Modern GST Commission & Tax Invoice Automation Engine
 
   <p align="center">
     <b>High-precision GST tax invoice and commercial commission billing system with smart Excel statement ingestion, dual-rate calculation engines, auto-computed IGST, and vector PDF generation.</b>
@@ -49,7 +49,7 @@ flowchart LR
     A[📊 Raw Excel / CSV Statement] -->|SheetJS Parser| B(🧮 Calculation Engine)
     B -->|Commission Math & 18% IGST| C{Billr State Engine}
     C -->|Interactive Line Editor| D[📝 Invoice Builder View]
-    C -->|A4 Print Preview| E[👁️ Live Preview Studio]
+    C -->|A4 Print Preview| E[👁️ Live Print Preview]
     E -->|Vector Canvas Rendering| F[📄 Download Tax Invoice PDF]
     C -->|Local Persistence| G[💾 Offline PWA Storage]
 ```
@@ -68,7 +68,7 @@ flowchart LR
 - **Turnover Derivation**: Automatically calculates gross supply turnover alongside agent commission.
 - **Statutory Tax Calculations**: Auto-computes 18% Integrated GST (IGST) or CGST+SGST with Indian numbering formatting (Lakhs & Crores) and instant currency-to-words translation.
 
-### 3. 📄 Vector PDF & Print Studio
+### 3. 📄 Vector PDF & Print Engine
 - **A4 Portrait Layout**: Formatted according to statutory Indian GST Tax Invoice legal guidelines.
 - **Interactive Live Preview**: Zoomable, responsive A4 document canvas with instant recalculation.
 - **Digital Signatures**: Draw, upload, or pre-fill partner authorization signatures directly onto invoices.

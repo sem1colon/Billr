@@ -12,8 +12,8 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
   size = 'md',
   showText = true,
   className = '',
-  subtitle = 'GST Studio',
-  showSubtitle = true,
+  subtitle = '',
+  showSubtitle = false,
 }) => {
   const iconDimensions = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-11 h-11' : 'w-9 h-9';
   const textSize = size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-2xl' : 'text-xl';
