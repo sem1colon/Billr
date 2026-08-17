@@ -72,14 +72,13 @@ export const BillrLogo: React.FC<BillrLogoProps> = ({
         </svg>
       </div>
 
-      {/* Brand Wordmark & Subtle GST Badge */}
+      {/* Brand Wordmark with highlighted blue 'i' */}
       {showText && (
         <div className="flex items-center space-x-2">
-          <div className="flex items-baseline space-x-0.5 leading-none">
+          <div className="flex items-baseline leading-none">
             <span className={`font-black ${textSize} tracking-tight text-slate-900`}>
-              Billr
+              B<span className="text-blue-600 font-black">i</span>llr
             </span>
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-600 ml-0.5 transform translate-y-[-2px]"></span>
           </div>
 
           {showSubtitle && subtitle && (
