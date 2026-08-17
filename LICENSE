@@ -1,13 +1,44 @@
-COMMERCIAL USE LICENSE AGREEMENT
+COMMERCIAL & NON-COMMERCIAL USE LICENSE AGREEMENT
+(PolyForm Noncommercial 1.0.0 Framework with Commercial Licensing Terms)
 
-Copyright (c) 2026 sem1Colon Inc. All rights reserved.
+Copyright (c) 2026 sem1Colon Inc. / Vamsi Kaza (https://sem1colon.github.io)
 
+==============================================================================
+1. NON-COMMERCIAL USE GRANT
+==============================================================================
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software for personal evaluation, educational, and testing purposes only.
+of this software and associated documentation files (the "Software"), to use, 
+copy, modify, merge, publish, and distribute the Software solely for 
+Noncommercial Purposes, subject to the following conditions:
 
-COMMERCIAL USE RESTRICTION:
-Any commercial use, production deployment, client invoicing, resale, or sublicensing 
-requires a paid Commercial License Agreement directly from the copyright holder.
+- The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+- "Noncommercial Purposes" means any use that is not primarily intended for or
+  directed towards commercial advantage or monetary compensation, including 
+  personal evaluation, educational study, code inspection, and open-source research.
 
-To purchase a commercial license, contact:
-Email: vamsi.kaza007@gmail.com
+==============================================================================
+2. COMMERCIAL USE & PRODUCTION BILLING RESTRICTIONS
+==============================================================================
+Any use of the Software for Commercial Purposes—including but not limited to 
+commercial invoicing, client billing operations, corporate accounting, paid 
+services, proprietary white-label distribution, or commercial SaaS deployment—is 
+strictly prohibited without an active, written Commercial License Agreement 
+executed with the copyright holder.
+
+To purchase a commercial license, enterprise agreement, or custom white-label deployment:
+- Author: Vamsi Kaza (sem1Colon Inc.)
+- Website: https://sem1colon.github.io
+- Direct Contact: vamsi.kaza007@gmail.com
+- Repository: https://github.com/sem1colon/Billr
+
+==============================================================================
+3. DISCLAIMER OF WARRANTY & LIMITATION OF LIABILITY
+==============================================================================
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, ACCURACY OF TAX COMPUTATIONS, AND 
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
+FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.

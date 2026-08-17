@@ -2,7 +2,7 @@
   "name": "billr",
   "homepage": "https://sem1colon.github.io/Billr/",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
