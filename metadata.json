@@ -1,0 +1,7 @@
+{
+  "name": "Billr",
+  "description": "Simple and creative GST commission invoice generator with Excel import, live calculations, and PDF export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

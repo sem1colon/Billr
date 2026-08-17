@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#2563EB" />
+  
+  <!-- Invoice Document Base -->
+  <path
+    d="M112 96C112 78.3269 126.327 64 144 64H312L400 152V416C400 433.673 385.673 448 368 448H144C126.327 448 112 433.673 112 416V96Z"
+    fill="#FFFFFF"
+  />
+
+  <!-- Folded Corner -->
+  <path
+    d="M312 64V136C312 144.837 319.163 152 328 152H400L312 64Z"
+    fill="#DBEAFE"
+  />
+  <path
+    d="M312 64V136C312 144.837 319.163 152 328 152H400"
+    stroke="#93C5FD"
+    stroke-width="16"
+    stroke-linejoin="round"
+  />
+
+  <!-- Indian Rupee Symbol (₹) -->
+  <!-- Top Rupee Bar -->
+  <path
+    d="M176 176H296"
+    stroke="#1D4ED8"
+    stroke-width="28"
+    stroke-linecap="round"
+  />
+  <!-- Second Rupee Bar -->
+  <path
+    d="M176 226H276"
+    stroke="#1D4ED8"
+    stroke-width="28"
+    stroke-linecap="round"
+  />
+  <!-- Rupee Loop -->
+  <path
+    d="M212 176V264C212 264 280 264 280 220C280 176 212 176 212 176Z"
+    stroke="#1D4ED8"
+    stroke-width="28"
+    stroke-linejoin="round"
+  />
+  <!-- Rupee Diagonal Leg -->
+  <path
+    d="M224 264L296 348"
+    stroke="#1D4ED8"
+    stroke-width="30"
+    stroke-linecap="round"
+  />
+
+  <!-- Invoice Line Items -->
+  <path
+    d="M176 396H336"
+    stroke="#94A3B8"
+    stroke-width="24"
+    stroke-linecap="round"
+  />
+</svg>
