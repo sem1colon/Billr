@@ -580,10 +580,6 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
         </div>
       </div>
 
-          </div>
-        </div>
-      </div>
-
       {/* Standard Bottom Navigation Bar with Clean Solid iOS Surface */}
       <div className="apple-glass-card p-4 rounded-[28px] flex flex-col sm:flex-row items-center justify-between gap-3">
         <button
