@@ -285,7 +285,7 @@ export const initialInvoiceData: InvoiceData = {
   invoiceDate: '10-Aug-26',
   seller: defaultSeller,
   buyer: defaultBuyer,
-  items: sampleStatementItems,
+  items: [],
   gstRate: 18,
   gstType: 'IGST',
   roundOff: 0,

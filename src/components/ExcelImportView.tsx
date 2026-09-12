@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   UploadCloud,
@@ -9,7 +9,6 @@ import {
   AlertCircle,
   Search,
   Check,
-  RotateCcw,
   Plus,
   Trash2,
   Edit3,
@@ -26,7 +25,6 @@ import {
 import { ExcelParsedRecord, InvoiceItem } from '../types';
 import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWorkbook, exportSampleCsv } from '../utils/excelParser';
 import { formatIndianCurrency } from '../utils/numberToWords';
-import { saveSavedSheetRecords, loadSavedSheetRecords } from '../utils/storageUtils';
 
 interface ExcelImportViewProps {
   onApplyItemsToInvoice: (items: InvoiceItem[], customerName?: string) => void;
@@ -43,15 +41,9 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const [fileName, setFileName] = useState<string>('');
   const [activeSheetName, setActiveSheetName] = useState<string>('');
   const [availableSheets, setAvailableSheets] = useState<string[]>([]);
-  const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>(() => {
-    const cached = loadSavedSheetRecords();
-    if (cached && cached.records && cached.records.length > 0) {
-      return cached.records;
-    }
-    return [];
-  });
+  const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>([]);
 
-  const [selectedCustomer, setSelectedCustomer] = useState<string>(() => loadSavedSheetRecords()?.customer || 'ALL');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -63,11 +55,6 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
   // Extract unique customer list
   const customers = Array.from(new Set(parsedRecords.map(r => r.customer).filter(Boolean)));
-
-  // Auto-persist sheet state to localStorage
-  useEffect(() => {
-    saveSavedSheetRecords(parsedRecords, selectedCustomer);
-  }, [parsedRecords, selectedCustomer]);
 
   const handleFileProcess = (file: File) => {
     setErrorMsg('');
@@ -146,32 +133,6 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileProcess(e.dataTransfer.files[0]);
     }
-  };
-
-  const handleLoadSampleStatement = () => {
-    setFileName('MCA Commission working 08.08.2026.xlsx');
-    setActiveSheetName('MCA Commission');
-    setAvailableSheets(['MCA Commission']);
-    setErrorMsg('');
-
-    const records: ExcelParsedRecord[] = [
-      { id: `rec-sample-1`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800086408', date: '28-Jan-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 360, unitPrice: 550, commPerKg: 16.5, commAmt: 5940, selected: true },
-      { id: `rec-sample-2`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800087967', date: '6-Mar-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 3480, unitPrice: 550, commPerKg: 16.5, commAmt: 57420, selected: true },
-      { id: `rec-sample-3`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'EFFYGREN', qty: 30, unitPrice: 2800, commPerKg: 84, commAmt: 2520, selected: true },
-      { id: `rec-sample-4`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'RM-20', qty: 10, unitPrice: 26000, commPerKg: 780, commAmt: 7800, selected: true },
-      { id: `rec-sample-5`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 1590, unitPrice: 550, commPerKg: 16.5, commAmt: 26235, selected: true },
-      { id: `rec-sample-6`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'FORTIVA REVO X', qty: 375, unitPrice: 1965, commPerKg: 58.95, commAmt: 22106.25, selected: true },
-      { id: `rec-sample-7`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'ALCOHOL ACTIVE DRY YEAST (GRAIN)', qty: 320, unitPrice: 640, commPerKg: 19.2, commAmt: 6144, selected: true },
-      { id: `rec-sample-8`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089735', date: '22-Apr-26', product: 'FORTIVA REVO X', qty: 202, unitPrice: 1965, commPerKg: 58.95, commAmt: 11907.90, selected: true },
-      { id: `rec-sample-9`, customer: 'RAVINDRA AND COMPANY LTD', invNo: '800089707', date: '17-Apr-26', product: 'EFFYMOLL+', qty: 75, unitPrice: 2700, commPerKg: 780, commAmt: 58500, selected: true },
-      { id: `rec-sample-10`, customer: 'SNJ SUGARS AND PRODUCTS LTD', invNo: '800091196', date: '4-Jun-26', product: 'EFFYGREN', qty: 350, unitPrice: 3000, commPerKg: 600, commAmt: 210000, selected: true },
-      { id: `rec-sample-11`, customer: 'THE ANDHRA SUGARS LTD', invNo: '800091867', date: '23-Jun-26', product: 'EFFYMOLL+', qty: 50, unitPrice: 3300, commPerKg: 779, commAmt: 38950, selected: true },
-      { id: `rec-sample-12`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'FORTIVA REVO X', qty: 1002, unitPrice: 1608.75, commPerKg: 9.6525, commAmt: 9671.805, selected: true },
-      { id: `rec-sample-13`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 8249, unitPrice: 483.45, commPerKg: 2.9007, commAmt: 23927.8743, selected: true },
-    ];
-
-    setParsedRecords(records);
-    setSelectedCustomer('ALL');
   };
 
   // Toggle record selection
@@ -293,14 +254,6 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               <span>Sample .csv</span>
             </button>
 
-            <button
-              type="button"
-              onClick={handleLoadSampleStatement}
-              className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-badge text-blue-700 hover:bg-blue-100/90 rounded-xl text-xs font-bold active:scale-95 cursor-pointer shadow-2xs"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
-              <span>Load MCA Sample</span>
-            </button>
           </div>
         </div>
 

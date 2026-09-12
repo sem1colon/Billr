@@ -5,7 +5,6 @@ import {
   FileText, 
   Eye, 
   UserCheck, 
-  RotateCcw,
   Type,
   Download,
   Smartphone,
@@ -26,7 +25,6 @@ interface HeaderNavProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   onDownloadPdf?: () => void;
-  onLoadSample: () => void;
   itemsCount: number;
   grandTotal: number;
   isLargeText?: boolean;
@@ -37,7 +35,6 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   activeTab,
   setActiveTab,
   onDownloadPdf,
-  onLoadSample,
   itemsCount,
   isLargeText = false,
   onToggleLargeText,
@@ -107,25 +104,25 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   const navTabs = [
     { 
       id: 'sheet' as ActiveTab, 
-      label: '1. Upload Sheet', 
-      shortLabel: 'Sheet',
+      label: 'Upload', 
+      shortLabel: 'Upload',
       icon: FileSpreadsheet
     },
     { 
       id: 'builder' as ActiveTab, 
-      label: '2. Invoice Editor', 
+      label: 'Invoice', 
       shortLabel: 'Invoice',
       icon: FileText
     },
     { 
       id: 'preview' as ActiveTab, 
-      label: '3. Preview & Print', 
+      label: 'Preview', 
       shortLabel: 'Preview',
       icon: Eye 
     },
     { 
       id: 'settings' as ActiveTab, 
-      label: 'Agency Profile', 
+      label: 'Profile', 
       shortLabel: 'Profile',
       icon: Building2 
     },
@@ -254,24 +251,11 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                         >
                           <span className="flex items-center space-x-2.5">
                             <Type className="w-4 h-4 text-slate-500" />
-                            <span className="font-semibold">Large Text Mode (A+)</span>
+                            <span className="font-semibold">Large text</span>
                           </span>
                           {isLargeText && <Check className="w-3.5 h-3.5 text-blue-600 font-bold" />}
                         </button>
                       )}
-
-                      {/* Load Sample Invoice */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onLoadSample();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
-                      >
-                        <RotateCcw className="w-4 h-4 text-slate-500" />
-                        <span className="font-semibold">Load Sample Statement</span>
-                      </button>
 
                       {/* Go to Settings */}
                       <button
@@ -283,7 +267,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                         className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
                       >
                         <Building2 className="w-4 h-4 text-slate-500" />
-                        <span className="font-semibold">Agency Profile & Bank</span>
+                        <span className="font-semibold">Profile</span>
                       </button>
 
                       <div className="my-1 border-t border-slate-200/80" />
@@ -298,7 +282,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                         className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
                       >
                         <Info className="w-4 h-4 text-slate-500" />
-                        <span className="font-semibold">About Billr</span>
+                        <span className="font-semibold">About</span>
                       </button>
 
                     </motion.div>
