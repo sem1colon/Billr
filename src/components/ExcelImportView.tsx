@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  UploadCloud, 
-  FileSpreadsheet, 
-  CheckCircle2, 
-  ArrowRight, 
-  Download, 
+import {
+  UploadCloud,
+  FileSpreadsheet,
+  CheckCircle2,
+  ArrowRight,
+  Download,
   AlertCircle,
   Search,
   Check,
@@ -153,20 +153,21 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     setActiveSheetName('MCA Commission');
     setAvailableSheets(['MCA Commission']);
     setErrorMsg('');
-    
+
     const records: ExcelParsedRecord[] = [
-      { id: `rec-sample-1`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800086408', date: '28-Jan-26', product: 'SPIRIZYME ADV ULTI', qty: 360, unitPrice: 550, commPerKg: 16.5, commAmt: 5940, selected: true },
-      { id: `rec-sample-2`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800087967', date: '6-Mar-26', product: 'SPIRIZYME ADV ULTI', qty: 3480, unitPrice: 550, commPerKg: 16.5, commAmt: 57420, selected: true },
+      { id: `rec-sample-1`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800086408', date: '28-Jan-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 360, unitPrice: 550, commPerKg: 16.5, commAmt: 5940, selected: true },
+      { id: `rec-sample-2`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800087967', date: '6-Mar-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 3480, unitPrice: 550, commPerKg: 16.5, commAmt: 57420, selected: true },
       { id: `rec-sample-3`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'EFFYGREN', qty: 30, unitPrice: 2800, commPerKg: 84, commAmt: 2520, selected: true },
       { id: `rec-sample-4`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'RM-20', qty: 10, unitPrice: 26000, commPerKg: 780, commAmt: 7800, selected: true },
-      { id: `rec-sample-5`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'SPIRIZYME ADV ULTI', qty: 1590, unitPrice: 550, commPerKg: 16.5, commAmt: 26235, selected: true },
+      { id: `rec-sample-5`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 1590, unitPrice: 550, commPerKg: 16.5, commAmt: 26235, selected: true },
       { id: `rec-sample-6`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'FORTIVA REVO X', qty: 375, unitPrice: 1965, commPerKg: 58.95, commAmt: 22106.25, selected: true },
-      { id: `rec-sample-7`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'ALCOHOL ACTIVE DR', qty: 320, unitPrice: 640, commPerKg: 19.2, commAmt: 6144, selected: true },
-      { id: `rec-sample-8`, customer: 'RAVINDRA AND COMPANY LTD', invNo: '800089707', date: '17-Apr-26', product: 'EFFYMOLL+', qty: 75, unitPrice: 2700, commPerKg: 780, commAmt: 58500, selected: true },
-      { id: `rec-sample-9`, customer: 'SNJ SUGARS AND PRODUCTS LTD', invNo: '800091196', date: '4-Jun-26', product: 'EFFYGREN', qty: 350, unitPrice: 3000, commPerKg: 600, commAmt: 210000, selected: true },
-      { id: `rec-sample-10`, customer: 'THE ANDHRA SUGARS LTD', invNo: '800091867', date: '23-Jun-26', product: 'EFFYMOLL+', qty: 50, unitPrice: 3300, commPerKg: 779, commAmt: 38950, selected: true },
-      { id: `rec-sample-11`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'FORTIVA REVO X', qty: 1002, unitPrice: 1608.75, commPerKg: 9.6525, commAmt: 9671.80, selected: true },
-      { id: `rec-sample-12`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'SPIRIZYME ADV ULTI', qty: 8249, unitPrice: 483.45, commPerKg: 2.9007, commAmt: 23927.87, selected: true },
+      { id: `rec-sample-7`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'ALCOHOL ACTIVE DRY YEAST (GRAIN)', qty: 320, unitPrice: 640, commPerKg: 19.2, commAmt: 6144, selected: true },
+      { id: `rec-sample-8`, customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089735', date: '22-Apr-26', product: 'FORTIVA REVO X', qty: 202, unitPrice: 1965, commPerKg: 58.95, commAmt: 11907.90, selected: true },
+      { id: `rec-sample-9`, customer: 'RAVINDRA AND COMPANY LTD', invNo: '800089707', date: '17-Apr-26', product: 'EFFYMOLL+', qty: 75, unitPrice: 2700, commPerKg: 780, commAmt: 58500, selected: true },
+      { id: `rec-sample-10`, customer: 'SNJ SUGARS AND PRODUCTS LTD', invNo: '800091196', date: '4-Jun-26', product: 'EFFYGREN', qty: 350, unitPrice: 3000, commPerKg: 600, commAmt: 210000, selected: true },
+      { id: `rec-sample-11`, customer: 'THE ANDHRA SUGARS LTD', invNo: '800091867', date: '23-Jun-26', product: 'EFFYMOLL+', qty: 50, unitPrice: 3300, commPerKg: 779, commAmt: 38950, selected: true },
+      { id: `rec-sample-12`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'FORTIVA REVO X', qty: 1002, unitPrice: 1608.75, commPerKg: 9.6525, commAmt: 9671.805, selected: true },
+      { id: `rec-sample-13`, customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'SPIRIZYME ADV ULTRA T (30KG)', qty: 8249, unitPrice: 483.45, commPerKg: 2.9007, commAmt: 23927.8743, selected: true },
     ];
 
     setParsedRecords(records);
@@ -217,7 +218,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const filteredRecords = parsedRecords.filter(r => {
     const matchesCustomer = selectedCustomer === 'ALL' || r.customer === selectedCustomer;
     const q = searchQuery.toLowerCase().trim();
-    const matchesQuery = !q || 
+    const matchesQuery = !q ||
       r.product.toLowerCase().includes(q) ||
       r.customer.toLowerCase().includes(q) ||
       r.invNo.toLowerCase().includes(q) ||
@@ -252,7 +253,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
   return (
     <div className="space-y-5 sm:space-y-6 max-w-7xl mx-auto">
-      
+
       {/* 1. Top Hero Card: File Ingestion Hub */}
       <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -310,18 +311,17 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`rounded-2xl border-2 border-dashed p-6 sm:p-7 text-center cursor-pointer transition-all duration-200 ${
-              isDragging 
-                ? 'border-blue-500 bg-blue-50/80 shadow-md scale-[1.005]' 
+            className={`rounded-2xl border-2 border-dashed p-6 sm:p-7 text-center cursor-pointer transition-all duration-200 ${isDragging
+                ? 'border-blue-500 bg-blue-50/80 shadow-md scale-[1.005]'
                 : 'border-slate-300/90 bg-slate-50/50 hover:bg-blue-50/40 hover:border-blue-400'
-            }`}
+              }`}
           >
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={(e) => e.target.files && e.target.files[0] && handleFileProcess(e.target.files[0])} 
-              accept=".xlsx,.xls,.csv,.tsv,.txt" 
-              className="hidden" 
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={(e) => e.target.files && e.target.files[0] && handleFileProcess(e.target.files[0])}
+              accept=".xlsx,.xls,.csv,.tsv,.txt"
+              className="hidden"
             />
 
             <div className="max-w-md mx-auto space-y-2">
@@ -363,11 +363,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                 key={sheet}
                 type="button"
                 onClick={() => handleSheetChange(sheet)}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
-                  activeSheetName === sheet 
-                    ? 'bg-blue-600 text-white shadow-xs' 
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${activeSheetName === sheet
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 {sheet}
               </button>
@@ -386,7 +385,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* 2. Executive KPI Cards (Taxable, Qty, GST, Total) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        
+
         <div className="apple-glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">Selected Rows</span>
@@ -464,16 +463,15 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
-          
+
           {/* ALL Customers Pill */}
           <button
             type="button"
             onClick={() => setSelectedCustomer('ALL')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${
-              selectedCustomer === 'ALL'
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${selectedCustomer === 'ALL'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
-            }`}
+              }`}
           >
             <span>All Clients</span>
             <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-black ${selectedCustomer === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
@@ -492,11 +490,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                 key={c}
                 type="button"
                 onClick={() => setSelectedCustomer(c)}
-                className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${
-                  isCurrent
+                className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${isCurrent
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
-                }`}
+                  }`}
               >
                 <span className="truncate max-w-[160px] sm:max-w-[220px]">{c}</span>
                 <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-black ${isCurrent ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
@@ -514,7 +511,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* 4. Interactive Working Table & Card Grid */}
       <div className="apple-glass-card rounded-[28px] p-4 sm:p-6 space-y-4 shadow-xs">
-        
+
         {/* Table Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
           <div className="flex items-center space-x-2">
@@ -542,8 +539,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                 className="pl-8 pr-3 py-2 apple-glass-input text-xs rounded-xl outline-none w-full sm:w-56"
               />
               {searchQuery && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
                   className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
                 >
@@ -612,8 +609,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                 filteredRecords.map((rec) => {
                   const isChecked = rec.selected !== false;
                   return (
-                    <tr 
-                      key={rec.id} 
+                    <tr
+                      key={rec.id}
                       className={`transition-colors ${isChecked ? 'hover:bg-blue-50/40' : 'bg-slate-50/70 text-slate-400 opacity-60'}`}
                     >
                       <td className="py-3 px-3 text-center">
@@ -694,11 +691,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               return (
                 <div
                   key={rec.id}
-                  className={`p-3.5 rounded-2xl border transition-all ${
-                    isChecked 
-                      ? 'bg-white border-slate-200/90 shadow-2xs' 
+                  className={`p-3.5 rounded-2xl border transition-all ${isChecked
+                      ? 'bg-white border-slate-200/90 shadow-2xs'
                       : 'bg-slate-50 border-slate-200/50 opacity-60'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start space-x-2.5">
@@ -799,7 +795,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
       {isAddModalOpen && editingRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
           <div className="apple-glass-card rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
-            
+
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="text-sm font-bold text-slate-900">
                 {editingRecord.product ? 'Edit Transaction Row' : 'Add Transaction Row'}
