@@ -91,14 +91,34 @@ export function parseExcelFile(
       c.includes('comm') || c.includes('rate') || c.includes('price') || c.includes('amt') || c.includes('amount') || c.includes('brokerage')
     );
     const hasCustomer = row.some(c => 
-      c.includes('customer') || c.includes('client') || c.includes('buyer') || c.includes('party')
+      c.includes('customer') || c.includes('client') || c.includes('buyer') || c.includes('party') || 
+      c.includes('cust') || c.includes('account') || c.includes('dealer') || c.includes('company') || 
+      c.includes('consignee') || c.includes('distributor') || c.includes('purchaser') || c === 'name' || 
+      c.includes('party name') || c.includes('customer name') || c.includes('m/s')
     );
 
     if ((hasProductOrItem && (hasQty || hasComm)) || (hasCustomer && (row.some(c => c.includes('inv') || c.includes('bill')) || hasQty))) {
       headerRowIndex = r;
       
       row.forEach((colName, idx) => {
-        if (colName.includes('customer') || colName.includes('client') || colName.includes('buyer') || colName.includes('party') || colName.includes('account')) {
+        if (
+          colName.includes('customer') || 
+          colName.includes('client') || 
+          colName.includes('buyer') || 
+          colName.includes('party') || 
+          colName.includes('cust') || 
+          colName.includes('account') ||
+          colName.includes('dealer') ||
+          colName.includes('company') ||
+          colName.includes('consignee') ||
+          colName.includes('distributor') ||
+          colName.includes('purchaser') ||
+          colName === 'name' ||
+          colName.includes('party name') ||
+          colName.includes('customer name') ||
+          colName.includes('client name') ||
+          colName.includes('m/s')
+        ) {
           if (colIndices.customer === -1) colIndices.customer = idx;
         } else if (colName.includes('inv') || colName.includes('bill') || colName.includes('invoice') || colName.includes('doc') || colName.includes('ref')) {
           if (colIndices.invNo === -1) colIndices.invNo = idx;
@@ -125,7 +145,18 @@ export function parseExcelFile(
     headerRowIndex = 0;
     const row = rawRows[0].map(c => String(c ?? '').trim().toLowerCase());
     row.forEach((colName, idx) => {
-      if (colName.includes('cust') || colName.includes('party')) colIndices.customer = idx;
+      if (
+        colName.includes('cust') || 
+        colName.includes('party') || 
+        colName.includes('client') || 
+        colName.includes('buyer') || 
+        colName.includes('account') ||
+        colName.includes('dealer') ||
+        colName.includes('company') ||
+        colName === 'name' ||
+        colName.includes('name of') ||
+        colName.includes('m/s')
+      ) colIndices.customer = idx;
       else if (colName.includes('inv') || colName.includes('bill')) colIndices.invNo = idx;
       else if (colName.includes('date') || colName.includes('dt')) colIndices.date = idx;
       else if (colName.includes('prod') || colName.includes('desc') || colName.includes('item')) colIndices.product = idx;
@@ -139,6 +170,7 @@ export function parseExcelFile(
   const rawHeaders = rawRows[headerRowIndex]?.map(c => String(c ?? '').trim()) || [];
   const records: ExcelParsedRecord[] = [];
   const customersSet = new Set<string>();
+  let lastCustomer = '';
 
   for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
     const row = rawRows[r];
@@ -154,7 +186,7 @@ export function parseExcelFile(
       continue;
     }
 
-    const customer = colIndices.customer !== -1 ? String(row[colIndices.customer] ?? '').trim() : '';
+    let customer = colIndices.customer !== -1 ? String(row[colIndices.customer] ?? '').trim() : '';
     const invNo = colIndices.invNo !== -1 ? String(row[colIndices.invNo] ?? '').trim() : '';
     let dateVal = colIndices.date !== -1 ? String(row[colIndices.date] ?? '').trim() : '';
     
@@ -188,6 +220,13 @@ export function parseExcelFile(
       continue;
     }
 
+    // Forward fill / propagate customer name across merged or multi-line items
+    if (customer && !customer.toUpperCase().includes('TOTAL')) {
+      lastCustomer = customer;
+    } else if (!customer && lastCustomer && (product || qty > 0 || commAmt > 0 || invNo)) {
+      customer = lastCustomer;
+    }
+
     // Auto-calculate missing commission amount or rate
     if (commAmt === 0 && qty > 0 && commPerKg > 0) {
       commAmt = Number((qty * commPerKg).toFixed(2));
@@ -195,8 +234,12 @@ export function parseExcelFile(
       commPerKg = Number((commAmt / qty).toFixed(4));
     }
 
-    const resolvedCustomer = customer || 'General Customer';
-    customersSet.add(resolvedCustomer);
+    const resolvedCustomer = customer || lastCustomer || 'General Customer';
+    if (resolvedCustomer && resolvedCustomer !== 'General Customer') {
+      customersSet.add(resolvedCustomer);
+    } else if (resolvedCustomer === 'General Customer' && customersSet.size === 0) {
+      customersSet.add(resolvedCustomer);
+    }
 
     records.push({
       id: `record-${r}-${Date.now()}`,
@@ -239,7 +282,9 @@ export function convertParsedRecordsToInvoiceItems(
     .filter(r => !selectedCustomer || selectedCustomer === 'ALL' || r.customer === selectedCustomer);
 
   return filtered.map((r, idx) => {
-    const desc = (!selectedCustomer || selectedCustomer === 'ALL') && r.customer
+    // Include customer name in description if not already present
+    const hasCustomerInProduct = r.customer && r.product.toLowerCase().includes(r.customer.toLowerCase());
+    const desc = r.customer && !hasCustomerInProduct
       ? `${r.product} (${r.customer})`
       : r.product;
 

@@ -7,16 +7,18 @@ import {
   X, 
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from 'lucide-react';
 import { getDefaultSignatureDataUrl } from '../utils/signatureUtils';
+import { saveSavedSignature, getDefaultOrSavedSignature, loadSavedSignature } from '../utils/storageUtils';
 
 interface SignatureModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentSignatureUrl?: string;
   showSignature?: boolean;
-  partnerName: string;
+  partnerName?: string;
   onSaveSignature: (signatureUrl: string, showSignature: boolean) => void;
 }
 
@@ -25,7 +27,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   onClose,
   currentSignatureUrl,
   showSignature = true,
-  partnerName,
+  partnerName = 'R.S.N. Murthy',
   onSaveSignature,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -38,7 +40,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const defaultSig = currentSignatureUrl || getDefaultSignatureDataUrl();
+      const defaultSig = currentSignatureUrl || getDefaultOrSavedSignature();
       setPreviewUrl(defaultSig);
       setVisible(showSignature);
       setHasDrawn(false);
@@ -166,9 +168,13 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   };
 
   const handleSave = () => {
-    onSaveSignature(previewUrl || getDefaultSignatureDataUrl(), visible);
+    const sigToSave = previewUrl || getDefaultOrSavedSignature();
+    saveSavedSignature(sigToSave);
+    onSaveSignature(sigToSave, visible);
     onClose();
   };
+
+  const isOfficialDefault = previewUrl === getDefaultSignatureDataUrl();
 
   if (!isOpen) return null;
 
@@ -209,14 +215,14 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           <div className="grid grid-cols-3 p-1 bg-slate-100 rounded-2xl text-xs sm:text-sm font-semibold gap-1">
             <button
               type="button"
-              onClick={() => { setActiveMode('default'); handleSetToDefault(); }}
+              onClick={() => { setActiveMode('default'); setPreviewUrl(currentSignatureUrl || getDefaultOrSavedSignature()); }}
               className={`py-2.5 px-1 text-center rounded-xl transition-all cursor-pointer ${
                 activeMode === 'default'
                   ? 'bg-white text-blue-700 shadow font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Official Sign
+              Default Sign
             </button>
             <button
               type="button"
@@ -242,12 +248,17 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             </button>
           </div>
 
-          {/* Mode 1: Default Official Signature Preview */}
+          {/* Mode 1: Default / Saved Signature Preview */}
           {activeMode === 'default' && (
             <div className="apple-glass-subtle rounded-2xl p-4 flex flex-col items-center justify-center space-y-3">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Official Agency Signature (Instant)
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  {isOfficialDefault ? 'Official Agency Signature' : 'Saved Default Signature'}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Active Default ✓
+                </span>
+              </div>
               <div className="h-28 w-full bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center p-3 shadow-sm">
                 {previewUrl ? (
                   <img 
@@ -260,7 +271,11 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 )}
               </div>
               <p className="text-xs text-slate-600 text-center font-medium">
-                Verified signature of <strong>{partnerName || 'R.S.N. Murthy'}</strong> for Murthy Chemical Agencies.
+                {isOfficialDefault ? (
+                  <>Verified signature of <strong>{partnerName || 'R.S.N. Murthy'}</strong> for Murthy Chemical Agencies.</>
+                ) : (
+                  <>Your custom edited signature is saved and set as default for all invoices.</>
+                )}
               </p>
             </div>
           )}
@@ -313,7 +328,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 />
               </div>
               <p className="text-xs text-slate-500 text-center">
-                Tip: Use your finger directly in the box above to sign smoothly.
+                Tip: Draw your signature directly in the box above.
               </p>
             </div>
           )}
@@ -350,6 +365,14 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               )}
             </div>
           )}
+
+          {/* Persistent Default Notice */}
+          <div className="flex items-start space-x-2.5 p-3 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900">
+            <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <span>
+              <strong>Auto-Remembered:</strong> Your saved signature is kept by default for all invoices until you edit it again.
+            </span>
+          </div>
 
           {/* Visibility Toggle */}
           <div className="flex items-center justify-between p-4 rounded-2xl apple-glass-subtle">
@@ -402,7 +425,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               className="px-5 py-2.5 apple-btn-primary text-white text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
             >
               <Check className="w-4 h-4" />
-              <span>Save & Apply</span>
+              <span>Save & Set Default</span>
             </button>
           </div>
         </div>

@@ -40,28 +40,15 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   onNavigateToBuilder,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState<string>('MCA Commission working 08.08.2026.xlsx');
-  const [activeSheetName, setActiveSheetName] = useState<string>('MCA Commission');
-  const [availableSheets, setAvailableSheets] = useState<string[]>(['MCA Commission']);
+  const [fileName, setFileName] = useState<string>('');
+  const [activeSheetName, setActiveSheetName] = useState<string>('');
+  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
   const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>(() => {
     const cached = loadSavedSheetRecords();
     if (cached && cached.records && cached.records.length > 0) {
       return cached.records;
     }
-    return [
-      { id: 'rec-1', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800086408', date: '28-Jan-26', product: 'SPIRIZYME ADV ULTI', qty: 360, unitPrice: 550, commPerKg: 16.5, commAmt: 5940, selected: true },
-      { id: 'rec-2', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800087967', date: '6-Mar-26', product: 'SPIRIZYME ADV ULTI', qty: 3480, unitPrice: 550, commPerKg: 16.5, commAmt: 57420, selected: true },
-      { id: 'rec-3', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'EFFYGREN', qty: 30, unitPrice: 2800, commPerKg: 84, commAmt: 2520, selected: true },
-      { id: 'rec-4', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'RM-20', qty: 10, unitPrice: 26000, commPerKg: 780, commAmt: 7800, selected: true },
-      { id: 'rec-5', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'SPIRIZYME ADV ULTI', qty: 1590, unitPrice: 550, commPerKg: 16.5, commAmt: 26235, selected: true },
-      { id: 'rec-6', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'FORTIVA REVO X', qty: 375, unitPrice: 1965, commPerKg: 58.95, commAmt: 22106.25, selected: true },
-      { id: 'rec-7', customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'ALCOHOL ACTIVE DR', qty: 320, unitPrice: 640, commPerKg: 19.2, commAmt: 6144, selected: true },
-      { id: 'rec-8', customer: 'RAVINDRA AND COMPANY LTD', invNo: '800089707', date: '17-Apr-26', product: 'EFFYMOLL+', qty: 75, unitPrice: 2700, commPerKg: 780, commAmt: 58500, selected: true },
-      { id: 'rec-9', customer: 'SNJ SUGARS AND PRODUCTS LTD', invNo: '800091196', date: '4-Jun-26', product: 'EFFYGREN', qty: 350, unitPrice: 3000, commPerKg: 600, commAmt: 210000, selected: true },
-      { id: 'rec-10', customer: 'THE ANDHRA SUGARS LTD', invNo: '800091867', date: '23-Jun-26', product: 'EFFYMOLL+', qty: 50, unitPrice: 3300, commPerKg: 779, commAmt: 38950, selected: true },
-      { id: 'rec-11', customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'FORTIVA REVO X', qty: 1002, unitPrice: 1608.75, commPerKg: 9.6525, commAmt: 9671.80, selected: true },
-      { id: 'rec-12', customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'SPIRIZYME ADV ULTI', qty: 8249, unitPrice: 483.45, commPerKg: 2.9007, commAmt: 23927.87, selected: true },
-    ];
+    return [];
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState<string>(() => loadSavedSheetRecords()?.customer || 'ALL');
@@ -311,7 +298,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-badge text-blue-700 hover:bg-blue-100/90 rounded-xl text-xs font-bold active:scale-95 cursor-pointer shadow-2xs"
             >
               <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
-              <span>Reset MCA Sample</span>
+              <span>Load MCA Sample</span>
             </button>
           </div>
         </div>
@@ -613,8 +600,12 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             <tbody className="divide-y divide-slate-200/70 bg-white">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-400 font-medium">
-                    No transactions found matching your filter.
+                  <td colSpan={9} className="py-12 text-center text-slate-400 font-medium">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <FileSpreadsheet className="w-8 h-8 text-slate-300" />
+                      <p className="text-slate-500 font-semibold">No transactions loaded yet.</p>
+                      <p className="text-[11px] text-slate-400">Upload your Excel/CSV above or click &quot;Load MCA Sample&quot; to test with reference data.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -692,8 +683,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         {/* Mobile (iPhone 17e) Chunked Touch Cards View */}
         <div className="md:hidden space-y-3">
           {filteredRecords.length === 0 ? (
-            <div className="py-8 text-center text-slate-400 text-xs font-medium">
-              No transactions found matching your filter.
+            <div className="py-10 text-center text-slate-400 text-xs font-medium space-y-2">
+              <FileSpreadsheet className="w-8 h-8 mx-auto text-slate-300" />
+              <p className="font-semibold text-slate-500">No transactions loaded yet</p>
+              <p className="text-[11px] text-slate-400">Upload an Excel/CSV file above or load sample data to test.</p>
             </div>
           ) : (
             filteredRecords.map((rec) => {

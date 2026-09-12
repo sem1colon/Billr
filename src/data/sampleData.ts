@@ -2,7 +2,7 @@ import { BusinessProfile, ClientProfile, InvoiceData, InvoiceItem } from '../typ
 
 export const defaultSeller: BusinessProfile = {
   name: 'MURTHY CHEMICAL AGENCIES',
-  address: 'Flat No. 104, Rukmini Apartments, Yousufguda Check Post',
+  address: '104 Rukmini Apartment Yousufguda Check Post',
   cityStateZip: 'Hyderabad-500045.',
   partnerName: 'R.S.N.MURTHY',
   phone: '9849187125',
@@ -13,7 +13,7 @@ export const defaultSeller: BusinessProfile = {
   bankBranch: 'SANJEVAREDDYNAGAR, HYDERABAD-500038.',
   accountNo: '50200084425696',
   ifscCode: 'HDFC0000642',
-  notes: 'Payment via Direct Electronic Transfer (RTGS / NEFT / IMPS)',
+  notes: 'Note:- Please make cheques in favor of "MURTHY CHEMICAL AGENCIES"',
 };
 
 export const defaultBuyer: ClientProfile = {
@@ -274,18 +274,18 @@ export const sampleStatementItems: InvoiceItem[] = [
 export function getTodayDateIso(): string {
   const today = new Date();
   const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dd = String(today.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return `${dd}-${monthNames[today.getMonth()]}-${String(yyyy).slice(-2)}`;
 }
 
 export const initialInvoiceData: InvoiceData = {
   id: 'inv-initial-01',
-  invoiceNumber: 'MCA/2026-27/001',
-  invoiceDate: getTodayDateIso(),
+  invoiceNumber: '004/26-27',
+  invoiceDate: '10-Aug-26',
   seller: defaultSeller,
   buyer: defaultBuyer,
-  items: sampleInvoiceItems,
+  items: sampleStatementItems,
   gstRate: 18,
   gstType: 'IGST',
   roundOff: 0,

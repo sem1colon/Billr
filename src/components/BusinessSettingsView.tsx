@@ -13,7 +13,7 @@ import {
 import { InvoiceData } from '../types';
 import { defaultSeller, defaultBuyer } from '../data/sampleData';
 import { SignatureModal } from './SignatureModal';
-import { getDefaultSignatureDataUrl } from '../utils/signatureUtils';
+import { getDefaultOrSavedSignature } from '../utils/storageUtils';
 
 interface BusinessSettingsViewProps {
   invoiceData: InvoiceData;
@@ -50,7 +50,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
       ...prev,
       seller: {
         ...defaultSeller,
-        signatureUrl: prev.seller.signatureUrl || getDefaultSignatureDataUrl(),
+        signatureUrl: prev.seller.signatureUrl || getDefaultOrSavedSignature(),
       },
       buyer: defaultBuyer,
     }));

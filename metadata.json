@@ -1,6 +1,6 @@
 {
   "name": "Billr",
-  "description": "Commercial GST Commission Tax Invoice Generator from Excel & CSV with live calculations, vector PDF export, and instant mobile sharing.",
+  "description": "Upload Excel or CSV commission sheets and turn them into editable GST-ready invoices with live totals and PDF export.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
