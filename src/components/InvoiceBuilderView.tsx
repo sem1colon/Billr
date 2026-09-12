@@ -365,6 +365,14 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-500 ml-7">
+                      {item.customer && (
+                        <>
+                          <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                            Party: {item.customer}
+                          </span>
+                          <span>&bull;</span>
+                        </>
+                      )}
                       <span>HSN/SAC: <strong>{item.hsnSacCode || '998311'}</strong></span>
                       <span>&bull;</span>
                       <span>Qty: <strong>{item.qty.toLocaleString()} {item.unit || 'kg'}</strong></span>
@@ -538,10 +546,12 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
         isOpen={isSignatureModalOpen}
         onClose={() => setIsSignatureModalOpen(false)}
         currentSignatureUrl={invoiceData.seller.signatureUrl}
-        onSaveSignature={(signatureDataUrl) => {
+        showSignature={invoiceData.showSignature}
+        partnerName={invoiceData.seller.partnerName}
+        onSaveSignature={(signatureDataUrl, showSig) => {
           setInvoiceData(prev => ({
             ...prev,
-            showSignature: true,
+            showSignature: showSig !== undefined ? showSig : true,
             seller: {
               ...prev.seller,
               signatureUrl: signatureDataUrl,

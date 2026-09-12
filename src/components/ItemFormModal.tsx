@@ -439,44 +439,59 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               </div>
             </div>
 
-            {/* HSN/SAC, Customer, Inv Ref & Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Customer / Party Name, HSN/SAC, Inv Ref & Date */}
+            <div className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  HSN / SAC Code
+                  Client / Party / Customer Name
                 </label>
                 <input
                   type="text"
-                  value={hsnSacCode}
-                  onChange={(e) => setHsnSacCode(e.target.value)}
-                  placeholder="998311"
+                  value={customer}
+                  onChange={(e) => setCustomer(e.target.value)}
+                  placeholder="e.g. RAVINDRA AND COMPANY LTD"
                   className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Reference Inv No
-                </label>
-                <input
-                  type="text"
-                  value={invNo}
-                  onChange={(e) => setInvNo(e.target.value)}
-                  placeholder="800086408"
-                  className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
-                />
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    HSN / SAC Code
+                  </label>
+                  <input
+                    type="text"
+                    value={hsnSacCode}
+                    onChange={(e) => setHsnSacCode(e.target.value)}
+                    placeholder="998311"
+                    className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Supply Date
-                </label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
-                />
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Reference Inv No
+                  </label>
+                  <input
+                    type="text"
+                    value={invNo}
+                    onChange={(e) => setInvNo(e.target.value)}
+                    placeholder="800086408"
+                    className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Supply Date
+                  </label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-base font-semibold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
 

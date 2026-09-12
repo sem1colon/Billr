@@ -8,7 +8,7 @@ import { InvoiceLivePreview } from './components/InvoiceLivePreview';
 import { BusinessSettingsView } from './components/BusinessSettingsView';
 import { ItemFormModal } from './components/ItemFormModal';
 import { InvoiceData, InvoiceItem, ActiveTab, ExcelParsedRecord } from './types';
-import { initialInvoiceData, defaultBuyer } from './data/sampleData';
+import { initialInvoiceData, defaultBuyer, sampleInvoiceItems } from './data/sampleData';
 import { generateInvoicePDF } from './utils/pdfGenerator';
 import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
 import { convertParsedRecordsToInvoiceItems } from './utils/excelParser';
@@ -19,7 +19,8 @@ import {
   saveActiveTab, 
   loadSavedUiPreferences, 
   saveUiPreferences,
-  loadSavedSheetRecords
+  loadSavedSheetRecords,
+  getDefaultOrSavedSignature
 } from './utils/storageUtils';
 
 export default function App() {
@@ -102,18 +103,19 @@ export default function App() {
   };
 
   const handleLoadSample = () => {
-    const defaultSig = getDefaultSignatureDataUrl();
+    const defaultSig = getDefaultOrSavedSignature();
     const freshSample: InvoiceData = {
       ...initialInvoiceData,
+      items: sampleInvoiceItems,
       showSignature: true,
       seller: {
         ...initialInvoiceData.seller,
-        signatureUrl: initialInvoiceData.seller.signatureUrl || defaultSig,
+        signatureUrl: defaultSig,
       },
     };
     setInvoiceData(freshSample);
     saveInvoiceData(freshSample);
-    showToast('Reset to reference sample invoice');
+    showToast('Loaded reference sample invoice');
   };
 
   const handleGenerateFromSheet = () => {

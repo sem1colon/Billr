@@ -453,9 +453,14 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {index + 1}
                         </td>
                         <td className="py-2.5 px-3 border-r border-slate-200 font-medium text-slate-900">
-                          <span>{item.description}</span>
+                          <span className="font-semibold text-slate-900">{item.description}</span>
+                          {item.customer && !item.description.toLowerCase().includes(item.customer.toLowerCase()) && (
+                            <span className="block text-[11px] text-blue-700 font-bold mt-0.5">
+                              Party / Customer: {item.customer}
+                            </span>
+                          )}
                           {(item.invNo || item.date) && (
-                            <span className="block text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span className="block text-[10px] text-slate-500 font-mono mt-0.5">
                               {item.invNo ? `(Inv #${item.invNo}` : ''}{item.date ? ` dt ${item.date})` : item.invNo ? ')' : ''}
                             </span>
                           )}

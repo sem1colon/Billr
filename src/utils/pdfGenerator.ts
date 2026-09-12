@@ -145,6 +145,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   // 4. Line Items Table (with Quantity, Unit Price, Commission Rate & Amount)
   const tableRows = invoiceData.items.map((item, index) => {
     let desc = item.description;
+    if (item.customer && !desc.toLowerCase().includes(item.customer.toLowerCase())) {
+      desc += `\n(Party: ${item.customer})`;
+    }
     if (item.invNo || item.date) {
       desc += `\n(Inv #${item.invNo || ''}${item.date ? ` dt ${item.date}` : ''})`;
     }

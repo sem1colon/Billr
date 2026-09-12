@@ -3,34 +3,84 @@ import { initialInvoiceData, defaultSeller } from '../data/sampleData';
 import { getDefaultSignatureDataUrl } from './signatureUtils';
 
 const STORAGE_KEYS = {
-  INVOICE_DATA: 'billr_invoice_state_v1',
-  ACTIVE_TAB: 'billr_active_tab_v1',
+  INVOICE_DATA: 'billr_invoice_state_v2',
+  ACTIVE_TAB: 'billr_active_tab_v2',
   UI_PREFS: 'billr_ui_preferences_v1',
-  LAST_SAVED_TIMESTAMP: 'billr_last_saved_time_v1',
-  PARSED_SHEET_RECORDS: 'billr_parsed_records_v1',
-  SHEET_CUSTOMER: 'billr_sheet_customer_v1',
+  LAST_SAVED_TIMESTAMP: 'billr_last_saved_time_v2',
+  PARSED_SHEET_RECORDS: 'billr_parsed_records_v2',
+  SHEET_CUSTOMER: 'billr_sheet_customer_v2',
+  SAVED_SIGNATURE: 'billr_saved_signature_v1',
 };
 
 /**
+ * Loads the user's custom saved signature or null if not set.
+ */
+export function loadSavedSignature(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(STORAGE_KEYS.SAVED_SIGNATURE);
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Saves the user's signature to localStorage so it remains the default for future invoices.
+ */
+export function saveSavedSignature(signatureUrl: string): void {
+  if (typeof window === 'undefined' || !signatureUrl) return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.SAVED_SIGNATURE, signatureUrl);
+  } catch (err) {
+    console.error('Failed to save signature to localStorage:', err);
+  }
+}
+
+/**
+ * Clears the saved signature from localStorage (reverting to official factory signature).
+ */
+export function clearSavedSignature(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEYS.SAVED_SIGNATURE);
+  } catch (err) {
+    console.warn('Failed to clear saved signature from localStorage:', err);
+  }
+}
+
+/**
+ * Gets the effective default signature: either the last user-saved signature
+ * or the default stylized agency signature if no user edit has occurred.
+ */
+export function getDefaultOrSavedSignature(): string {
+  const saved = loadSavedSignature();
+  if (saved && saved.trim().length > 0) {
+    return saved;
+  }
+  return getDefaultSignatureDataUrl();
+}
+
+/**
  * Safely loads invoice data from localStorage.
- * Falls back to initialInvoiceData with default signature if not found or corrupted.
+ * Falls back to initialInvoiceData with default/saved signature if not found or corrupted.
  */
 export function loadSavedInvoiceData(): InvoiceData {
   if (typeof window === 'undefined') {
     return initialInvoiceData;
   }
 
+  const defaultSig = getDefaultOrSavedSignature();
+
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.INVOICE_DATA);
     if (!raw) {
-      // First time load: ensure default signature is attached
-      const defaultSig = getDefaultSignatureDataUrl();
+      // First time load: ensure default/saved signature is attached
       return {
         ...initialInvoiceData,
         showSignature: true,
         seller: {
           ...initialInvoiceData.seller,
-          signatureUrl: initialInvoiceData.seller.signatureUrl || defaultSig,
+          signatureUrl: defaultSig,
         },
       };
     }
@@ -43,12 +93,16 @@ export function loadSavedInvoiceData(): InvoiceData {
     }
 
     // Merge with defaults to ensure all required fields exist
-    const defaultSig = getDefaultSignatureDataUrl();
     const mergedSeller = {
       ...defaultSeller,
       ...(parsed.seller || {}),
       signatureUrl: parsed.seller?.signatureUrl || defaultSig,
     };
+
+    // If a signature is present in the loaded invoice, remember it as the default signature
+    if (mergedSeller.signatureUrl) {
+      saveSavedSignature(mergedSeller.signatureUrl);
+    }
 
     return {
       ...initialInvoiceData,
@@ -59,7 +113,13 @@ export function loadSavedInvoiceData(): InvoiceData {
     };
   } catch (err) {
     console.warn('Failed to load invoice state from localStorage:', err);
-    return initialInvoiceData;
+    return {
+      ...initialInvoiceData,
+      seller: {
+        ...initialInvoiceData.seller,
+        signatureUrl: defaultSig,
+      },
+    };
   }
 }
 
@@ -70,6 +130,9 @@ export function saveInvoiceData(data: InvoiceData): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
+    if (data.seller?.signatureUrl) {
+      saveSavedSignature(data.seller.signatureUrl);
+    }
     const serialized = JSON.stringify(data);
     localStorage.setItem(STORAGE_KEYS.INVOICE_DATA, serialized);
     localStorage.setItem(STORAGE_KEYS.LAST_SAVED_TIMESTAMP, new Date().toISOString());
@@ -94,18 +157,9 @@ export function clearSavedInvoiceData(): void {
 }
 
 /**
- * Loads the last active navigation tab. Defaults to 'sheet' for the upload-first workflow.
+ * Loads the active navigation tab. Always starts at 'sheet' (Step 1: Upload Sheet) on launch.
  */
 export function loadSavedActiveTab(): ActiveTab {
-  if (typeof window === 'undefined') return 'sheet';
-  try {
-    const tab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) as ActiveTab;
-    if (tab === 'sheet' || tab === 'builder' || tab === 'preview' || tab === 'settings') {
-      return tab;
-    }
-  } catch (e) {
-    // fallback
-  }
   return 'sheet';
 }
 
