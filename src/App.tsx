@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { HeaderNav } from './components/HeaderNav';
 import { BottomDockNav } from './components/BottomDockNav';
@@ -7,14 +7,20 @@ import { InvoiceBuilderView } from './components/InvoiceBuilderView';
 import { InvoiceLivePreview } from './components/InvoiceLivePreview';
 import { BusinessSettingsView } from './components/BusinessSettingsView';
 import { ItemFormModal } from './components/ItemFormModal';
-import { InvoiceData, InvoiceItem, ActiveTab } from './types';
+import { InvoiceData, InvoiceItem, ActiveTab, ExcelParsedRecord } from './types';
+import { initialInvoiceData, defaultBuyer, sampleInvoiceItems } from './data/sampleData';
 import { generateInvoicePDF } from './utils/pdfGenerator';
+import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
+import { convertParsedRecordsToInvoiceItems } from './utils/excelParser';
 import { 
   loadSavedInvoiceData, 
+  saveInvoiceData, 
   loadSavedActiveTab, 
   saveActiveTab, 
   loadSavedUiPreferences, 
-  saveUiPreferences
+  saveUiPreferences,
+  loadSavedSheetRecords,
+  getDefaultOrSavedSignature
 } from './utils/storageUtils';
 
 export default function App() {
@@ -24,6 +30,17 @@ export default function App() {
   const [editingItem, setEditingItem] = useState<InvoiceItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLargeText, setIsLargeText] = useState<boolean>(() => loadSavedUiPreferences().isLargeText);
+  const isInitialMount = useRef(true);
+
+  // Auto-persist invoiceData to localStorage
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    saveInvoiceData(invoiceData);
+  }, [invoiceData]);
+
   // Auto-persist activeTab to localStorage
   useEffect(() => {
     saveActiveTab(activeTab);
@@ -85,6 +102,31 @@ export default function App() {
     showToast('Tax Invoice PDF downloaded');
   };
 
+  const handleLoadSample = () => {
+    const defaultSig = getDefaultOrSavedSignature();
+    const freshSample: InvoiceData = {
+      ...initialInvoiceData,
+      items: sampleInvoiceItems,
+      showSignature: true,
+      seller: {
+        ...initialInvoiceData.seller,
+        signatureUrl: defaultSig,
+      },
+    };
+    setInvoiceData(freshSample);
+    saveInvoiceData(freshSample);
+    showToast('Loaded reference sample invoice');
+  };
+
+  const handleGenerateFromSheet = () => {
+    const cached = loadSavedSheetRecords();
+    if (cached && cached.records && cached.records.length > 0) {
+      const items = convertParsedRecordsToInvoiceItems(cached.records, cached.customer);
+      handleApplyItemsFromSheet(items, cached.customer !== 'ALL' ? cached.customer : undefined);
+    }
+    setActiveTab('preview');
+  };
+
   const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
 
   return (
@@ -95,6 +137,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onDownloadPdf={handleDownloadPdf}
+        onLoadSample={handleLoadSample}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
         isLargeText={isLargeText}
@@ -192,6 +235,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenAddItemModal={() => handleOpenAddItemModal()}
         onDownloadPdf={handleDownloadPdf}
+        onGenerateFromSheet={handleGenerateFromSheet}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
       />

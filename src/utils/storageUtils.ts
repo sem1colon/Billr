@@ -1,10 +1,14 @@
-import { InvoiceData, ActiveTab } from '../types';
+import { InvoiceData, ActiveTab, ExcelParsedRecord } from '../types';
 import { initialInvoiceData, defaultSeller } from '../data/sampleData';
 import { getDefaultSignatureDataUrl } from './signatureUtils';
 
 const STORAGE_KEYS = {
+  INVOICE_DATA: 'billr_invoice_state_v2',
   ACTIVE_TAB: 'billr_active_tab_v2',
   UI_PREFS: 'billr_ui_preferences_v1',
+  LAST_SAVED_TIMESTAMP: 'billr_last_saved_time_v2',
+  PARSED_SHEET_RECORDS: 'billr_parsed_records_v2',
+  SHEET_CUSTOMER: 'billr_sheet_customer_v2',
   SAVED_SIGNATURE: 'billr_saved_signature_v1',
 };
 
@@ -57,7 +61,8 @@ export function getDefaultOrSavedSignature(): string {
 }
 
 /**
- * Creates a fresh invoice without restoring previously entered line items.
+ * Safely loads invoice data from localStorage.
+ * Falls back to initialInvoiceData with default/saved signature if not found or corrupted.
  */
 export function loadSavedInvoiceData(): InvoiceData {
   if (typeof window === 'undefined') {
@@ -66,25 +71,89 @@ export function loadSavedInvoiceData(): InvoiceData {
 
   const defaultSig = getDefaultOrSavedSignature();
 
-  // Remove invoice and sheet data saved by older versions of the app.
   try {
-    localStorage.removeItem('billr_invoice_state_v2');
-    localStorage.removeItem('billr_last_saved_time_v2');
-    localStorage.removeItem('billr_parsed_records_v2');
-    localStorage.removeItem('billr_sheet_customer_v2');
-  } catch (err) {
-    // Ignore storage access failures; the in-memory invoice is still empty.
-  }
+    const raw = localStorage.getItem(STORAGE_KEYS.INVOICE_DATA);
+    if (!raw) {
+      // First time load: ensure default/saved signature is attached
+      return {
+        ...initialInvoiceData,
+        showSignature: true,
+        seller: {
+          ...initialInvoiceData.seller,
+          signatureUrl: defaultSig,
+        },
+      };
+    }
 
-  return {
-    ...initialInvoiceData,
-    items: [],
-    showSignature: true,
-    seller: {
+    const parsed: Partial<InvoiceData> = JSON.parse(raw);
+
+    // Validate essential properties
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.items)) {
+      throw new Error('Invalid invoice data structure in localStorage');
+    }
+
+    // Merge with defaults to ensure all required fields exist
+    const mergedSeller = {
       ...defaultSeller,
-      signatureUrl: defaultSig,
-    },
-  };
+      ...(parsed.seller || {}),
+      signatureUrl: parsed.seller?.signatureUrl || defaultSig,
+    };
+
+    // If a signature is present in the loaded invoice, remember it as the default signature
+    if (mergedSeller.signatureUrl) {
+      saveSavedSignature(mergedSeller.signatureUrl);
+    }
+
+    return {
+      ...initialInvoiceData,
+      ...parsed,
+      seller: mergedSeller,
+      items: parsed.items,
+      showSignature: parsed.showSignature !== undefined ? parsed.showSignature : true,
+    };
+  } catch (err) {
+    console.warn('Failed to load invoice state from localStorage:', err);
+    return {
+      ...initialInvoiceData,
+      seller: {
+        ...initialInvoiceData.seller,
+        signatureUrl: defaultSig,
+      },
+    };
+  }
+}
+
+/**
+ * Saves current invoice state to localStorage.
+ */
+export function saveInvoiceData(data: InvoiceData): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    if (data.seller?.signatureUrl) {
+      saveSavedSignature(data.seller.signatureUrl);
+    }
+    const serialized = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEYS.INVOICE_DATA, serialized);
+    localStorage.setItem(STORAGE_KEYS.LAST_SAVED_TIMESTAMP, new Date().toISOString());
+    return true;
+  } catch (err) {
+    console.error('Failed to save invoice state to localStorage:', err);
+    return false;
+  }
+}
+
+/**
+ * Clears saved invoice data and resets to factory sample data.
+ */
+export function clearSavedInvoiceData(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEYS.INVOICE_DATA);
+    localStorage.removeItem(STORAGE_KEYS.LAST_SAVED_TIMESTAMP);
+  } catch (err) {
+    console.warn('Failed to clear invoice state from localStorage:', err);
+  }
 }
 
 /**
@@ -104,6 +173,39 @@ export function saveActiveTab(tab: ActiveTab): void {
   } catch (e) {
     // ignore
   }
+}
+
+/**
+ * Saves cached parsed records from Excel/CSV
+ */
+export function saveSavedSheetRecords(records: ExcelParsedRecord[], customer: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.PARSED_SHEET_RECORDS, JSON.stringify(records));
+    localStorage.setItem(STORAGE_KEYS.SHEET_CUSTOMER, customer);
+  } catch (e) {
+    // ignore
+  }
+}
+
+/**
+ * Loads cached parsed records from Excel/CSV
+ */
+export function loadSavedSheetRecords(): { records: ExcelParsedRecord[]; customer: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PARSED_SHEET_RECORDS);
+    const customer = localStorage.getItem(STORAGE_KEYS.SHEET_CUSTOMER) || 'ALL';
+    if (raw) {
+      const records = JSON.parse(raw);
+      if (Array.isArray(records) && records.length > 0) {
+        return { records, customer };
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null;
 }
 
 export interface UiPreferences {
