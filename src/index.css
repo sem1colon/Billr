@@ -1,154 +1,188 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     scroll-behavior: smooth;
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   
   body {
+    padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    background-color: #f1f5f9;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    background-color: #f8fafc;
     color: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
   }
 
-  /* Prevent iOS Safari automatic zoom on focus while maintaining large senior readability */
+  /* Prevent automatic iOS safari zoom while providing generous tap areas */
   input, select, textarea, button {
     font-size: 16px;
+    touch-action: manipulation;
   }
 }
 
 /* ==========================================================================
-   Clean iOS Native & Senior-Accessible Design System
-   High contrast, solid readable cards, 48px+ tap targets, zero visual glare.
+   Future iOS 27 & Fluent Material Design System (Billr Next-Gen UI)
+   Refractive Frosted Glass, Dynamic Island Ergonomics & High-Contrast Typography
    ========================================================================== */
 
-/* 1. Calm, Static Background */
+/* Ambient Subtle Background Mesh */
 .ambient-glow-mesh {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: #f1f5f9;
+  background: 
+    radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 85%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+    #f8fafc;
 }
 
-/* 2. Solid High-Contrast Card System */
+/* Billr brand mark: an invoice sheet with a confident, ready-to-send tick. */
+.billr-mark {
+  background: linear-gradient(145deg, #0f1f4d 0%, #1d4ed8 64%, #2563eb 100%);
+  isolation: isolate;
+}
+
+.billr-mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 42%);
+  pointer-events: none;
+}
+
+/* Next-Gen iOS Frosted Glass Cards */
 .apple-glass-card {
   position: relative;
-  background: #ffffff !important;
-  border: 1.5px solid #e2e8f0 !important;
-  border-radius: 24px;
-  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  background: rgba(255, 255, 255, 0.94) !important;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.85) !important;
+  border-radius: 28px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
-/* 3. Subtle Wells & Sub-panels */
+/* Sub-panels & Nested Containers */
 .apple-glass-subtle {
   position: relative;
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.85) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 20px;
 }
 
-/* 4. Bottom Tab Bar & Dock */
+/* Bottom Floating Capsule Dock */
 .apple-glass-dock {
   position: relative;
-  background: rgba(255, 255, 255, 0.96) !important;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-top: 1.5px solid #e2e8f0 !important;
-  box-shadow: 0 -8px 24px -4px rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.92) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  backdrop-filter: blur(30px) saturate(190%);
+  border-top: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 -10px 32px -4px rgba(15, 23, 42, 0.09);
 }
 
-/* 5. Tactile Neutral Action Buttons */
+/* Tactile Neutral Buttons */
 .apple-glass-btn {
   position: relative;
-  background: #ffffff !important;
-  border: 1.5px solid #cbd5e1 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #cbd5e1 !important;
   color: #1e293b;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 44px;
 }
 
 .apple-glass-btn:hover {
-  background: #f8fafc !important;
+  background: #ffffff !important;
   border-color: #94a3b8 !important;
   color: #0f172a;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
 }
 
 .apple-glass-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
   background: #f1f5f9 !important;
 }
 
-/* 6. High-Contrast Primary Button (Electric Royal Blue) */
+/* Electric Royal Blue Primary Action CTA */
 .apple-btn-primary {
   position: relative;
-  background: #2563eb !important;
-  border: 1.5px solid #1d4ed8 !important;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border: 1px solid #1e40af !important;
   color: #ffffff !important;
   font-weight: 700;
-  box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.35);
-  transition: all 0.15s ease;
+  box-shadow: 0 6px 20px -2px rgba(37, 99, 235, 0.38);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 48px;
 }
 
 .apple-btn-primary:hover {
-  background: #1d4ed8 !important;
-  box-shadow: 0 6px 18px -2px rgba(37, 99, 235, 0.45);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  box-shadow: 0 8px 24px -2px rgba(37, 99, 235, 0.48);
 }
 
 .apple-btn-primary:active {
-  transform: scale(0.97);
-  background: #1e40af !important;
+  transform: scale(0.96);
 }
 
-/* 7. Success Emerald Action Button */
+/* Emerald Action CTA */
 .apple-btn-emerald {
   position: relative;
-  background: #059669 !important;
-  border: 1.5px solid #047857 !important;
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  border: 1px solid #065f46 !important;
   color: #ffffff !important;
   font-weight: 700;
-  box-shadow: 0 4px 14px -2px rgba(5, 150, 105, 0.35);
-  transition: all 0.15s ease;
+  box-shadow: 0 6px 20px -2px rgba(5, 150, 105, 0.38);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 48px;
 }
 
 .apple-btn-emerald:hover {
-  background: #047857 !important;
+  background: linear-gradient(135deg, #047857, #065f46) !important;
 }
 
 .apple-btn-emerald:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
-/* 8. Crisp Senior-Friendly Form Inputs */
+/* Modern Input Controls with Fluent Focus Rings */
 .apple-glass-input {
   background: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
   color: #0f172a !important;
-  border-radius: 14px;
+  border-radius: 16px;
   font-size: 16px !important;
   font-weight: 500;
-  padding: 12px 14px !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  padding: 12px 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 .apple-glass-input:focus {
   background: #ffffff !important;
   border-color: #2563eb !important;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18) !important;
   outline: none !important;
 }
 
@@ -156,7 +190,7 @@
   color: #94a3b8;
 }
 
-/* 9. High-Contrast Badges & Chips */
+/* Badges & Chips */
 .apple-glass-badge {
   background: #eff6ff !important;
   border: 1px solid #bfdbfe !important;
@@ -164,11 +198,11 @@
   font-weight: 700;
 }
 
-/* 10. Segmented Control */
+/* Fluid Segmented Control Pill */
 .apple-glass-segmented {
   background: #e2e8f0 !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 4px;
 }
 
@@ -176,11 +210,11 @@
   background: #ffffff !important;
   color: #0f172a !important;
   font-weight: 700;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.10) !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12) !important;
 }
 
-/* 11. Safe Area Layout Helpers for iPhone / PWA */
+/* Safe Area Helpers */
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
 }
@@ -189,10 +223,18 @@
   padding-top: max(env(safe-area-inset-top, 0px), 16px);
 }
 
-/* Clean Custom Scrollbar */
+.pl-safe {
+  padding-left: max(env(safe-area-inset-left, 0px), 12px);
+}
+
+.pr-safe {
+  padding-right: max(env(safe-area-inset-right, 0px), 12px);
+}
+
+/* Windows / Chrome Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {

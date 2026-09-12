@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   Plus, 
@@ -8,27 +8,24 @@ import {
   FileSpreadsheet, 
   Calendar, 
   CheckCircle2, 
-  UploadCloud,
-  ArrowRight,
-  Download,
-  AlertCircle,
-  Search,
-  Check,
+  ArrowRight, 
+  Download, 
+  AlertCircle, 
+  ReceiptIndianRupee, 
+  PenTool, 
+  Building2, 
+  MapPin, 
+  ShieldCheck, 
+  BadgeCheck, 
+  Eye, 
+  ChevronRight, 
+  Sparkles, 
   RotateCcw,
-  ReceiptIndianRupee,
-  PenTool,
-  Building2,
-  MapPin,
-  ShieldCheck,
-  BadgeCheck,
-  Eye,
-  ChevronRight,
-  Sparkles,
-  ArrowRightLeft
+  UserCheck
 } from 'lucide-react';
-import { InvoiceData, InvoiceItem, ExcelParsedRecord } from '../types';
+import { InvoiceData, InvoiceItem, GstType } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
-import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWorkbook } from '../utils/excelParser';
+import { SignatureModal } from './SignatureModal';
 
 interface InvoiceBuilderViewProps {
   invoiceData: InvoiceData;
@@ -36,6 +33,7 @@ interface InvoiceBuilderViewProps {
   onOpenAddItemModal: (item?: InvoiceItem) => void;
   onNavigateToPreview: () => void;
   onNavigateToSettings: () => void;
+  onNavigateToSheet?: () => void;
 }
 
 export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
@@ -44,27 +42,14 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
   onOpenAddItemModal,
   onNavigateToPreview,
   onNavigateToSettings,
+  onNavigateToSheet,
 }) => {
-  // Mode selection: 'manual' or 'excel'
-  const [entryMode, setEntryMode] = useState<'manual' | 'excel'>('manual');
-  
-  // Excel Sheet Parsing states
-  const [isDragging, setIsDragging] = useState(false);
-  const [excelFileName, setExcelFileName] = useState<string>('');
-  const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>([]);
-  const [customers, setCustomers] = useState<string[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [excelError, setExcelError] = useState<string>('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
   const taxableValue = invoiceData.items.reduce((sum, item) => sum + (item.commissionAmount || 0), 0);
   const gstRate = invoiceData.gstRate || 18;
   const gstAmount = (taxableValue * gstRate) / 100;
-  const grandTotal = taxableValue + gstAmount;
+  const grandTotal = taxableValue + gstAmount + (invoiceData.roundOff || 0);
   const totalQtyHandled = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
 
   const amountInWords = numberToIndianRupees(grandTotal);
@@ -100,324 +85,56 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
     setInvoiceData(prev => ({ ...prev, invoiceDate: today }));
   };
 
-  // Excel parsing
-  const handleFileProcess = (file: File) => {
-    setExcelError('');
-    setIsProcessing(true);
-    setExcelFileName(file.name);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const buffer = e.target?.result as ArrayBuffer;
-        const result = parseExcelFile(buffer);
-
-        if (result.records.length === 0) {
-          setExcelError('No valid commission rows found in spreadsheet.');
-          setIsProcessing(false);
-          return;
-        }
-
-        setParsedRecords(result.records);
-        setCustomers(result.customers);
-        setSelectedCustomer('ALL');
-      } catch (err: any) {
-        console.error('Error parsing excel:', err);
-        setExcelError(err.message || 'Failed to parse Excel file.');
-      } finally {
-        setIsProcessing(false);
-      }
-    };
-
-    reader.onerror = () => {
-      setExcelError('Error reading file.');
-      setIsProcessing(false);
-    };
-
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileProcess(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleLoadSampleStatement = () => {
-    setExcelFileName('MCA Commission working 08.08.2026.xlsx');
-    setExcelError('');
-    
-    const records: ExcelParsedRecord[] = [
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800086408', date: '28-Jan-26', product: 'SPIRIZYME ADV ULTI', qty: 360, unitPrice: 550, commPerKg: 16.5, commAmt: 5940 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800087967', date: '6-Mar-26', product: 'SPIRIZYME ADV ULTI', qty: 3480, unitPrice: 550, commPerKg: 16.5, commAmt: 57420 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'EFFYGREN', qty: 30, unitPrice: 2800, commPerKg: 84, commAmt: 2520 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'RM-20', qty: 10, unitPrice: 26000, commPerKg: 780, commAmt: 7800 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'SPIRIZYME ADV ULTI', qty: 1590, unitPrice: 550, commPerKg: 16.5, commAmt: 26235 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'FORTIVA REVO X', qty: 375, unitPrice: 1965, commPerKg: 58.95, commAmt: 22106.25 },
-      { customer: 'BIO AGRO ENERGY PVT LTD', invNo: '800089619', date: '14-Apr-26', product: 'ALCOHOL ACTIVE DR', qty: 320, unitPrice: 640, commPerKg: 19.2, commAmt: 6144 },
-      { customer: 'RAVINDRA AND COMPANY LTD', invNo: '800089707', date: '17-Apr-26', product: 'EFFYMOLL+', qty: 75, unitPrice: 2700, commPerKg: 780, commAmt: 58500 },
-      { customer: 'SNJ SUGARS AND PRODUCTS LTD', invNo: '800091196', date: '4-Jun-26', product: 'EFFYGREN', qty: 350, unitPrice: 3000, commPerKg: 600, commAmt: 210000 },
-      { customer: 'THE ANDHRA SUGARS LTD', invNo: '800091867', date: '23-Jun-26', product: 'EFFYMOLL+', qty: 50, unitPrice: 3300, commPerKg: 779, commAmt: 38950 },
-      { customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'FORTIVA REVO X', qty: 1002, unitPrice: 1608.75, commPerKg: 9.6525, commAmt: 9671.80 },
-      { customer: 'VISHWA SAMUDRA BIO ENERGY PVT LTD', invNo: '800082526', date: '30-Oct-25', product: 'SPIRIZYME ADV ULTI', qty: 8249, unitPrice: 483.45, commPerKg: 2.9007, commAmt: 23927.87 },
-    ];
-
-    setParsedRecords(records);
-    setCustomers([
-      'BIO AGRO ENERGY PVT LTD',
-      'RAVINDRA AND COMPANY LTD',
-      'SNJ SUGARS AND PRODUCTS LTD',
-      'THE ANDHRA SUGARS LTD',
-      'VISHWA SAMUDRA BIO ENERGY PVT LTD',
-    ]);
-    setSelectedCustomer('ALL');
-  };
-
-  const filteredExcelRecords = parsedRecords.filter(r => {
-    const matchesCustomer = selectedCustomer === 'ALL' || r.customer === selectedCustomer;
-    const matchesQuery = !searchQuery || 
-      r.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.invNo.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCustomer && matchesQuery;
-  });
-
-  const filteredExcelTotalTaxable = filteredExcelRecords.reduce((sum, r) => sum + (r.commAmt || 0), 0);
-  const filteredExcelTotalQty = filteredExcelRecords.reduce((sum, r) => sum + (r.qty || 0), 0);
-
-  const handleApplyExcelToInvoice = () => {
-    if (filteredExcelRecords.length === 0) return;
-    const newItems = convertParsedRecordsToInvoiceItems(parsedRecords, selectedCustomer);
-    setInvoiceData(prev => ({
-      ...prev,
-      items: newItems,
-    }));
-    setUploadFeedback(`Applied ${newItems.length} line items to your Tax Invoice.`);
-    setTimeout(() => setUploadFeedback(null), 3500);
-  };
-
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       
-      {/* 1. Executive B2B GST Tax Invoice Showcase */}
-      <div className="apple-glass-card rounded-[32px] p-5 sm:p-7 transition-all overflow-hidden relative">
-        {/* Subtle luminous glass refractive orb accent */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-        {/* Top Statutory Classification & Document Identity */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-200">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-black text-blue-800 bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-full uppercase tracking-wider">
-              <ReceiptIndianRupee className="w-4 h-4 text-blue-600" />
-              GST Tax Invoice
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-2xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              Original for Recipient
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full">
-              Interstate Supply &bull; 18% IGST
-            </span>
+      {/* 1. Header Banner & Quick Navigation */}
+      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-700 tracking-wide">
+                STEP 2 &bull; INVOICE CUSTOMIZER
+              </span>
+              <span className="text-xs text-slate-400 font-medium">Rule 46 CGST Compliant</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1.5">
+              Invoice Details & Line Items
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Review and adjust invoice parameters, tax classification, and line items.
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Auto-saved</span>
-            </span>
+          <div className="flex items-center space-x-2">
+            {onNavigateToSheet && (
+              <button
+                type="button"
+                onClick={onNavigateToSheet}
+                className="flex items-center space-x-1.5 px-3.5 py-2 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-blue-600" />
+                <span>Back to Sheet</span>
+              </button>
+            )}
 
             <button
               type="button"
               onClick={onNavigateToPreview}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800 apple-glass-btn px-4 py-2 rounded-xl active:scale-95 cursor-pointer"
+              className="flex items-center space-x-1.5 px-4 py-2 apple-btn-primary text-white rounded-xl text-xs sm:text-sm font-bold active:scale-95 cursor-pointer shadow-md"
             >
-              <Eye className="w-4 h-4 text-blue-600" />
-              <span>Live A4 Preview</span>
+              <Eye className="w-4 h-4" />
+              <span>Live Preview</span>
             </button>
           </div>
         </div>
 
-        {/* B2B Commercial Billing Flow: Seller ➔ Connected Route ➔ Billed To (Praj Industries Limited) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 mt-5 items-stretch">
+        {/* Invoice Meta Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-5">
           
-          {/* Supplier / Seller Panel */}
-          <div className="lg:col-span-5 apple-glass-subtle p-4 sm:p-5 rounded-2xl flex flex-col justify-between space-y-3 relative">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                  Supplier / Consignor
-                </span>
-                <span className="text-[10px] font-bold text-blue-700 bg-blue-50/90 border border-blue-200/70 px-2 py-0.5 rounded-md">
-                  State: 36 (Telangana)
-                </span>
-              </div>
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug">
-                {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
-              </h2>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
-                {invoiceData.seller.address}, {invoiceData.seller.cityStateZip}
-              </p>
-            </div>
-
-            <div className="pt-2.5 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[11px] font-mono">
-                <span className="text-slate-500 font-sans text-[10px] uppercase font-semibold">GSTIN</span>
-                <span className="font-bold text-slate-800 bg-white/90 px-2 py-0.5 rounded border border-slate-200/80 shadow-2xs">
-                  {invoiceData.seller.gstin}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={onNavigateToSettings}
-                className="text-[11px] font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Edit Profile</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* Connected Trade Route Indicator */}
-          <div className="lg:col-span-2 flex lg:flex-col items-center justify-center p-3 rounded-2xl bg-gradient-to-b from-blue-50/60 to-indigo-50/50 border border-blue-200/60 text-center gap-1.5 shadow-2xs">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <ArrowRight className="w-3.5 h-3.5 rotate-90 lg:rotate-0" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-blue-900">
-              Billed To
-            </span>
-            <span className="text-[10px] font-bold text-slate-600 font-mono">
-              TS 36 ➔ MH 27
-            </span>
-            <span className="hidden sm:inline-block text-[9px] font-semibold text-indigo-700 bg-white/90 px-2 py-0.5 rounded-full border border-indigo-100 shadow-2xs">
-              Inter-State
-            </span>
-          </div>
-
-          {/* Billed To / Recipient (Praj Industries Limited) Showcase */}
-          <div className="lg:col-span-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/90 via-indigo-50/70 to-white/95 border-2 border-blue-400/80 shadow-md flex flex-col justify-between space-y-3 relative overflow-hidden">
-            {/* Verified Enterprise Client Ribbon */}
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-600 to-indigo-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs flex items-center gap-1">
-              <BadgeCheck className="w-3.5 h-3.5 text-white" />
-              Corporate Client
-            </div>
-
-            <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
-                  Billed To / Recipient
-                </span>
-                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/90 border border-indigo-200/90 px-2 py-0.5 rounded-md">
-                  State: 27 (Maharashtra)
-                </span>
-              </div>
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug pr-24">
-                {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
-              </h2>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
-                {invoiceData.buyer.address}, {invoiceData.buyer.cityStateZip}
-              </p>
-            </div>
-
-            <div className="pt-2.5 border-t border-blue-200/70 space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-mono">
-                  <span className="text-slate-500 font-sans text-[10px] uppercase font-semibold">GSTIN</span>
-                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-blue-200 shadow-2xs">
-                    {invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={onNavigateToSettings}
-                  className="text-[11px] font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer bg-white/90 px-2.5 py-1 rounded-xl border border-blue-200 shadow-2xs active:scale-95 transition-transform"
-                >
-                  <span>Client Profile</span>
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {invoiceData.buyer.placeOfSupply && (
-                <div className="flex items-start gap-1.5 text-[10px] text-slate-700 bg-white/70 p-2 rounded-xl border border-blue-200/70">
-                  <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="truncate">
-                    <span className="font-bold text-slate-900">Place of Supply: </span>
-                    <span className="text-slate-600">{invoiceData.buyer.placeOfSupply.replace(/\n/g, ', ')}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Live Financial Metrics Dock */}
-        <div className="mt-5 pt-4 border-t border-slate-200/70 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="apple-glass-subtle p-3.5 rounded-2xl">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Taxable Subtotal</span>
-            <span className="text-sm sm:text-base font-black text-slate-800 tracking-tight">
-              {formatIndianCurrency(taxableValue)}
-            </span>
-          </div>
-
-          <div className="apple-glass-subtle p-3.5 rounded-2xl">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">IGST (18%)</span>
-            <span className="text-sm sm:text-base font-black text-indigo-700 tracking-tight">
-              {formatIndianCurrency(gstAmount)}
-            </span>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-3.5 rounded-2xl shadow-md col-span-2 sm:col-span-2 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-blue-100 font-bold uppercase tracking-wider block">Total Invoice Value</span>
-              <span className="text-lg sm:text-xl font-black text-white tracking-tight">
-                {formatIndianCurrency(grandTotal)}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] text-blue-200 font-medium block">Handled Volume</span>
-              <span className="text-xs sm:text-sm font-bold text-white">
-                {invoiceData.items.length} items &bull; {totalQtyHandled.toLocaleString()} kg
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Basic Invoice Details */}
-      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">1</span>
-            Invoice Details
-          </h2>
-          <button
-            type="button"
-            onClick={handleSetTodayDate}
-            className="text-xs text-blue-700 font-bold flex items-center gap-1.5 apple-glass-btn px-3 py-1.5 rounded-xl active:scale-95 cursor-pointer"
-          >
-            <Calendar className="w-3.5 h-3.5 text-blue-600" />
-            <span>Set Today</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Invoice Date
-            </label>
-            <input
-              type="date"
-              value={invoiceData.invoiceDate}
-              onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceDate: e.target.value }))}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          {/* Invoice Number */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
               Invoice Number
             </label>
             <input
@@ -425,348 +142,170 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               value={invoiceData.invoiceNumber}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
               placeholder="e.g. MCA/2026-27/001"
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+              className="w-full px-3.5 py-2.5 apple-glass-input text-xs sm:text-sm font-bold text-slate-900 rounded-xl outline-none"
             />
           </div>
 
-          <div>
-            <span className="block text-xs font-semibold text-slate-700 mb-1.5">From (Seller)</span>
-            <div className="p-3 apple-glass-subtle rounded-2xl flex items-center justify-between">
-              <div className="truncate pr-2">
-                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.seller.name || 'Murthy Chemical Agencies'}</span>
-                <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.seller.gstin}</span>
-              </div>
+          {/* Invoice Date */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                Invoice Date
+              </label>
               <button
                 type="button"
-                onClick={onNavigateToSettings}
-                className="text-[11px] font-bold text-blue-700 px-2.5 py-1 apple-glass-btn rounded-xl flex-shrink-0 cursor-pointer"
+                onClick={handleSetTodayDate}
+                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
               >
-                Edit
+                Set Today
               </button>
             </div>
-          </div>
-
-          <div>
-            <span className="block text-xs font-semibold text-slate-700 mb-1.5">To (Buyer)</span>
-            <div className="p-3 apple-glass-subtle rounded-2xl flex items-center justify-between border border-blue-200/60 bg-blue-50/30">
-              <div className="truncate pr-2">
-                <span className="text-xs font-bold text-slate-900 block truncate">{invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}</span>
-                <span className="text-[10px] text-slate-500 font-mono">GSTIN: {invoiceData.buyer.gstin || 'N/A'}</span>
-              </div>
-              <button
-                type="button"
-                onClick={onNavigateToSettings}
-                className="text-[11px] font-bold text-blue-700 px-2.5 py-1 apple-glass-btn rounded-xl flex-shrink-0 cursor-pointer"
-              >
-                View
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Clubbed Line Items Creator: Choose Manual Entry or Upload Excel */}
-      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/60">
-          <div>
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">2</span>
-              Add Line Items
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Type items manually or upload a monthly Excel statement.
-            </p>
-          </div>
-
-          {/* Apple iOS 26 Liquid Glass Segmented Mode Selector */}
-          <div className="flex items-center relative apple-glass-segmented p-1.5 rounded-2xl self-start sm:self-auto gap-1">
-            <button
-              type="button"
-              onClick={() => setEntryMode('manual')}
-              className="relative flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
-            >
-              {entryMode === 'manual' && (
-                <motion.div
-                  layoutId="builder-mode-liquid-pill"
-                  className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10"
-                  transition={{
-                    type: 'spring',
-                    stiffness: 450,
-                    damping: 35,
-                  }}
-                />
-              )}
-              <PenTool className={`w-3.5 h-3.5 transition-colors duration-200 ${entryMode === 'manual' ? 'text-blue-600' : 'text-slate-500'}`} />
-              <span className={`transition-colors duration-200 ${entryMode === 'manual' ? 'text-blue-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
-                Enter Manually
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setEntryMode('excel')}
-              className="relative flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
-            >
-              {entryMode === 'excel' && (
-                <motion.div
-                  layoutId="builder-mode-liquid-pill"
-                  className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10"
-                  transition={{
-                    type: 'spring',
-                    stiffness: 450,
-                    damping: 35,
-                  }}
-                />
-              )}
-              <FileSpreadsheet className={`w-3.5 h-3.5 transition-colors duration-200 ${entryMode === 'excel' ? 'text-blue-600' : 'text-slate-500'}`} />
-              <span className={`transition-colors duration-200 ${entryMode === 'excel' ? 'text-blue-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
-                Upload Excel
-              </span>
-              <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Optional)</span>
-            </button>
-          </div>
-        </div>
-
-        {uploadFeedback && (
-          <div className="p-3.5 bg-emerald-50/90 border border-emerald-200/80 text-emerald-800 rounded-2xl flex items-center space-x-2 text-xs font-semibold shadow-xs">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span>{uploadFeedback}</span>
-          </div>
-        )}
-
-        {/* Mode A: Manual Entry */}
-        {entryMode === 'manual' && (
-          <div className="space-y-4 pt-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 apple-glass-subtle p-4 sm:p-5 rounded-2xl">
-              <div>
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Manual Line Item Form
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Specify description, quantity (kg), customer invoice reference, and commission rate.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onOpenAddItemModal()}
-                className="flex items-center justify-center space-x-2 px-5 py-2.5 apple-btn-primary text-white font-bold text-xs rounded-2xl flex-shrink-0 active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>+ Add Line Item</span>
-              </button>
-            </div>
-
-            {/* Quick Chemical Presets */}
-            <div className="pt-1">
-              <span className="text-xs font-semibold text-slate-600 block mb-2.5">
-                Quick Preset Items (Click to add standard item):
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                {[
-                  { name: 'SPIRIZYME ADV ULTI', price: 550, comm: 16.50, desc: 'Enzymes (₹16.50/kg)' },
-                  { name: 'FORTIVA REVO X', price: 1965, comm: 58.95, desc: 'Specialty Chemical (₹58.95/kg)' },
-                  { name: 'EFFYGREN', price: 2800, comm: 84.00, desc: 'Enzyme Formulation (₹84.00/kg)' },
-                  { name: 'EFFYMOLL+', price: 2700, comm: 780.00, desc: 'Processing Chemical (₹780.00/kg)' },
-                ].map(p => (
-                  <button
-                    key={p.name}
-                    type="button"
-                    onClick={() => onOpenAddItemModal({
-                      id: `item-${Date.now()}`,
-                      description: p.name,
-                      hsnSacCode: '998311',
-                      qty: 1000,
-                      unit: 'kg',
-                      unitPrice: p.price,
-                      productAmount: 1000 * p.price,
-                      commissionType: 'PER_UNIT',
-                      commissionRate: p.comm,
-                      commissionAmount: 1000 * p.comm,
-                    })}
-                    className="text-left p-3.5 apple-glass-btn rounded-2xl transition-all group active:scale-[0.98] cursor-pointer"
-                  >
-                    <div className="font-bold text-xs text-slate-900 group-hover:text-blue-700 truncate">
-                      + {p.name}
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      {p.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Mode B: Excel Upload */}
-        {entryMode === 'excel' && (
-          <div className="space-y-4 pt-1">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={(e) => e.target.files && e.target.files[0] && handleFileProcess(e.target.files[0])} 
-              accept=".xlsx,.xls,.csv" 
-              className="hidden" 
+            <input
+              type="date"
+              value={invoiceData.invoiceDate}
+              onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceDate: e.target.value }))}
+              className="w-full px-3.5 py-2.5 apple-glass-input text-xs sm:text-sm font-bold text-slate-900 rounded-xl outline-none"
             />
-
-            {/* Drop Zone with Glass Refraction */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-3xl p-6 sm:p-8 text-center cursor-pointer transition-all ${
-                isDragging ? 'border-blue-500 bg-blue-50/70' : 'border-slate-300/80 hover:border-blue-400 apple-glass-subtle'
-              }`}
-            >
-              <div className="max-w-md mx-auto space-y-2.5">
-                <div className="w-12 h-12 rounded-2xl apple-glass-badge text-blue-600 flex items-center justify-center mx-auto shadow-sm">
-                  <UploadCloud className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-bold text-slate-900">
-                    {excelFileName ? excelFileName : 'Click to select or drag & drop monthly commission sheet'}
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Supports <strong>.xlsx</strong>, <strong>.xls</strong>, and <strong>.csv</strong> spreadsheets
-                  </p>
-                </div>
-                {isProcessing && (
-                  <p className="text-xs text-blue-600 font-semibold animate-pulse">
-                    Extracting volume and rates...
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={exportSampleExcelWorkbook}
-                  className="flex items-center space-x-1.5 px-3.5 py-1.5 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Download Blank Template</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleLoadSampleStatement}
-                  className="flex items-center space-x-1.5 px-3.5 py-1.5 apple-glass-btn text-blue-700 hover:bg-blue-100/90 rounded-xl text-xs font-bold active:scale-95 cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Load MCA Sample Working</span>
-                </button>
-              </div>
-
-              {parsedRecords.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleApplyExcelToInvoice}
-                  className="flex items-center space-x-2 px-4 py-2 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 cursor-pointer"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>Transfer {filteredExcelRecords.length} Items into Invoice</span>
-                </button>
-              )}
-            </div>
-
-            {excelError && (
-              <div className="p-3.5 bg-red-50/90 border border-red-200/80 text-red-700 rounded-2xl flex items-center space-x-2 text-xs shadow-xs">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{excelError}</span>
-              </div>
-            )}
-
-            {/* Parsed Spreadsheet Table */}
-            {parsedRecords.length > 0 && (
-              <div className="apple-glass-card rounded-2xl overflow-hidden mt-3">
-                <div className="bg-slate-50/80 px-4 py-3 border-b border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-bold text-slate-900">
-                      Parsed Rows ({filteredExcelRecords.length})
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-medium">
-                      Subtotal: {formatIndianCurrency(filteredExcelTotalTaxable)} ({filteredExcelTotalQty.toLocaleString()} kg)
-                    </span>
-                  </div>
-
-                  {/* Customer Filter */}
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={selectedCustomer}
-                      onChange={(e) => setSelectedCustomer(e.target.value)}
-                      className="px-2.5 py-1 apple-glass-input text-slate-800 text-xs font-medium rounded-xl outline-none"
-                    >
-                      <option value="ALL">All Clients ({customers.length})</option>
-                      {customers.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-
-                    <div className="relative">
-                      <Search className="w-3 h-3 text-slate-400 absolute left-2.5 top-2" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search item..."
-                        className="pl-7 pr-2.5 py-1 apple-glass-input text-xs rounded-xl outline-none w-28 sm:w-36"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto max-h-56">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-100/80 text-slate-600 font-bold sticky top-0 border-b border-slate-200">
-                      <tr>
-                        <th className="py-2 px-3">#</th>
-                        <th className="py-2 px-3">Client</th>
-                        <th className="py-2 px-3">Product</th>
-                        <th className="py-2 px-3">Inv #</th>
-                        <th className="py-2 px-3 text-right">Quantity (kg)</th>
-                        <th className="py-2 px-3 text-right">Unit Rate (₹)</th>
-                        <th className="py-2 px-3 text-right">Commission Rate</th>
-                        <th className="py-2 px-3 text-right">Taxable Commission (₹)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredExcelRecords.map((rec, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/60">
-                          <td className="py-1.5 px-3 text-slate-400">{idx + 1}</td>
-                          <td className="py-1.5 px-3 font-medium text-slate-800">{rec.customer}</td>
-                          <td className="py-1.5 px-3 text-slate-900 font-semibold">{rec.product}</td>
-                          <td className="py-1.5 px-3 text-slate-500">{rec.invNo || '-'}</td>
-                          <td className="py-1.5 px-3 text-right font-medium text-slate-900">{rec.qty.toLocaleString()}</td>
-                          <td className="py-1.5 px-3 text-right text-slate-600">{rec.unitPrice ? `₹${rec.unitPrice}` : '-'}</td>
-                          <td className="py-1.5 px-3 text-right font-medium text-blue-700">₹{rec.commPerKg}/kg</td>
-                          <td className="py-1.5 px-3 text-right font-bold text-slate-900">{formatIndianCurrency(rec.commAmt)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
           </div>
-        )}
+
+          {/* GST Tax Type & Rate */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+              Tax Classification
+            </label>
+            <div className="flex items-center space-x-2">
+              <select
+                value={invoiceData.gstType}
+                onChange={(e) => setInvoiceData(prev => ({ ...prev, gstType: e.target.value as GstType }))}
+                className="w-2/3 px-3 py-2.5 apple-glass-input text-xs font-bold text-slate-900 rounded-xl outline-none"
+              >
+                <option value="IGST">Inter-State (IGST)</option>
+                <option value="CGST_SGST">Intra-State (CGST+SGST)</option>
+              </select>
+
+              <select
+                value={invoiceData.gstRate}
+                onChange={(e) => setInvoiceData(prev => ({ ...prev, gstRate: Number(e.target.value) }))}
+                className="w-1/3 px-2 py-2.5 apple-glass-input text-xs font-bold text-blue-700 rounded-xl outline-none"
+              >
+                <option value={18}>18%</option>
+                <option value={12}>12%</option>
+                <option value={5}>5%</option>
+                <option value={28}>28%</option>
+                <option value={0}>0%</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      {/* 4. Active Invoice Line Items: Responsive Mobile Cards + Desktop Table */}
-      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-black flex items-center justify-center shadow-xs">3</span>
-              Invoice Items ({invoiceData.items.length})
-            </h3>
-            <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-              Taxable: {formatIndianCurrency(taxableValue)}
+      {/* 2. Parties Info (Seller & Buyer Preview Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/* Seller Card */}
+        <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+              <Building2 className="w-3.5 h-3.5 text-blue-600" />
+              <span>Supplier / Agency (Seller)</span>
             </span>
+            <button
+              type="button"
+              onClick={onNavigateToSettings}
+              className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
+            >
+              Edit in Profile
+            </button>
+          </div>
+          <div className="pt-1">
+            <h4 className="text-sm font-bold text-slate-900">{invoiceData.seller.name}</h4>
+            <p className="text-xs text-slate-500 mt-0.5">{invoiceData.seller.address}, {invoiceData.seller.cityStateZip}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] text-slate-600">
+              <span><strong>GSTIN:</strong> {invoiceData.seller.gstin}</span>
+              <span>&bull;</span>
+              <span><strong>PAN:</strong> {invoiceData.seller.pan}</span>
+              <span>&bull;</span>
+              <span><strong>Phone:</strong> {invoiceData.seller.phone}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Buyer Card */}
+        <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Billed To (Buyer / Recipient)</span>
+            </span>
+            <button
+              type="button"
+              onClick={onNavigateToSettings}
+              className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
+            >
+              Edit in Profile
+            </button>
+          </div>
+          <div className="pt-1">
+            <input
+              type="text"
+              value={invoiceData.buyer.name}
+              onChange={(e) => setInvoiceData(prev => ({
+                ...prev,
+                buyer: { ...prev.buyer, name: e.target.value }
+              }))}
+              placeholder="e.g. PRAJ INDUSTRIES LIMITED"
+              className="w-full px-2.5 py-1 apple-glass-input text-xs font-bold text-slate-900 rounded-lg outline-none mb-1"
+            />
+            <input
+              type="text"
+              value={invoiceData.buyer.address}
+              onChange={(e) => setInvoiceData(prev => ({
+                ...prev,
+                buyer: { ...prev.buyer, address: e.target.value }
+              }))}
+              placeholder="Buyer Address"
+              className="w-full px-2.5 py-1 apple-glass-input text-xs text-slate-600 rounded-lg outline-none mb-1"
+            />
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <input
+                type="text"
+                value={invoiceData.buyer.gstin}
+                onChange={(e) => setInvoiceData(prev => ({
+                  ...prev,
+                  buyer: { ...prev.buyer, gstin: e.target.value }
+                }))}
+                placeholder="Buyer GSTIN"
+                className="px-2.5 py-1 apple-glass-input text-xs text-slate-800 rounded-lg outline-none"
+              />
+              <input
+                type="text"
+                value={invoiceData.buyer.pan || ''}
+                onChange={(e) => setInvoiceData(prev => ({
+                  ...prev,
+                  buyer: { ...prev.buyer, pan: e.target.value }
+                }))}
+                placeholder="Buyer PAN"
+                className="px-2.5 py-1 apple-glass-input text-xs text-slate-800 rounded-lg outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. Invoice Line Items Editor */}
+      <div className="apple-glass-card rounded-[28px] p-4 sm:p-6 space-y-4 shadow-xs">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Line Items ({invoiceData.items.length})
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Total Weight: <strong>{totalQtyHandled.toLocaleString()} kg</strong> &bull; Taxable Commission:{' '}
+              <strong className="text-blue-700">{formatIndianCurrency(taxableValue)}</strong>
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -774,7 +313,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               <button
                 type="button"
                 onClick={handleClearAllItems}
-                className="px-2.5 py-1 text-slate-500 hover:text-red-600 text-xs font-semibold rounded-lg hover:bg-red-50/50 transition-colors cursor-pointer"
+                className="px-3 py-1.5 apple-glass-btn text-red-600 text-xs font-semibold rounded-xl cursor-pointer"
               >
                 Clear All
               </button>
@@ -783,213 +322,234 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             <button
               type="button"
               onClick={() => onOpenAddItemModal()}
-              className="flex items-center space-x-1 px-3.5 py-1.5 apple-glass-btn text-blue-700 text-xs font-bold rounded-xl active:scale-95 transition-all cursor-pointer"
+              className="flex items-center space-x-1.5 px-3.5 py-2 apple-btn-primary text-white rounded-xl text-xs font-bold active:scale-95 cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Item</span>
+              <span>Add Custom Item</span>
             </button>
           </div>
         </div>
 
+        {/* Items List */}
         {invoiceData.items.length === 0 ? (
-          <div className="py-10 text-center text-slate-500 space-y-2">
-            <p className="text-xs font-semibold">No line items in this invoice yet.</p>
-            <p className="text-xs text-slate-400">
-              Use "Enter Manually" above or "Upload Excel" to populate items.
-            </p>
+          <div className="py-12 text-center text-slate-400 space-y-2">
+            <FileSpreadsheet className="w-10 h-10 mx-auto text-slate-300" />
+            <p className="text-sm font-medium">No items currently in this invoice.</p>
+            {onNavigateToSheet && (
+              <button
+                type="button"
+                onClick={onNavigateToSheet}
+                className="px-4 py-2 bg-blue-50 text-blue-700 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                Select items from uploaded spreadsheet &rarr;
+              </button>
+            )}
           </div>
         ) : (
-          <>
-            {/* Mobile View: Clean Card Items (< 640px) */}
-            <div className="sm:hidden space-y-3.5">
-              {invoiceData.items.map((item, idx) => (
-                <div key={item.id} className="apple-glass-subtle rounded-2xl p-4 space-y-3 border-2 border-slate-200 shadow-sm">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-xs font-bold text-slate-500 block">ITEM #{idx + 1}</span>
-                      <h4 className="text-sm font-black text-slate-900">{item.description}</h4>
-                      {(item.invNo || item.date) && (
-                        <p className="text-xs text-slate-600 mt-0.5">
-                          {item.invNo ? `Inv #${item.invNo}` : ''} {item.date ? `• ${item.date}` : ''}
-                        </p>
+          <div className="space-y-3">
+            {invoiceData.items.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 transition-all shadow-2xs"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-black flex-shrink-0">
+                        {idx + 1}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                        {item.description}
+                      </h4>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-500 ml-7">
+                      <span>HSN/SAC: <strong>{item.hsnSacCode || '998311'}</strong></span>
+                      <span>&bull;</span>
+                      <span>Qty: <strong>{item.qty.toLocaleString()} {item.unit || 'kg'}</strong></span>
+                      {item.unitPrice && (
+                        <>
+                          <span>&bull;</span>
+                          <span>Basic Rate: <strong>₹{item.unitPrice.toLocaleString('en-IN')}</strong></span>
+                        </>
+                      )}
+                      <span>&bull;</span>
+                      <span className="text-blue-700 font-bold">Comm Rate: @ ₹{item.commissionRate.toFixed(2)}/{item.unit || 'kg'}</span>
+                      {item.invNo && (
+                        <>
+                          <span>&bull;</span>
+                          <span>Inv #{item.invNo} {item.date && `(${item.date})`}</span>
+                        </>
                       )}
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <span className="text-[11px] text-slate-500 uppercase block font-bold">Commission</span>
-                      <span className="text-sm font-black text-blue-700">
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    <div className="text-left sm:text-right">
+                      <div className="text-xs sm:text-sm font-black text-slate-900">
                         {formatIndianCurrency(item.commissionAmount)}
-                      </span>
+                      </div>
+                      <div className="text-[10px] text-slate-400">Taxable Value</div>
+                    </div>
+
+                    <div className="flex items-center space-x-1">
+                      <button
+                        type="button"
+                        onClick={() => onOpenAddItemModal(item)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
+                        title="Edit item"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDuplicateItem(item)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                        title="Duplicate item"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                        title="Delete item"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-slate-200 text-xs">
-                    <div>
-                      <span className="text-slate-500 text-[11px] font-semibold block">Quantity</span>
-                      <span className="font-bold text-slate-900">{item.qty.toLocaleString()} {item.unit || 'kg'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 text-[11px] font-semibold block">Unit Price</span>
-                      <span className="font-bold text-slate-900">{item.unitPrice ? `₹${item.unitPrice.toLocaleString('en-IN')}` : '-'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 text-[11px] font-semibold block">Rate</span>
-                      <span className="font-bold text-blue-700">{item.commissionRate ? `₹${item.commissionRate.toFixed(2)}/${item.unit || 'kg'}` : '-'}</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200">
-                    <button
-                      type="button"
-                      onClick={() => onOpenAddItemModal(item)}
-                      className="py-2.5 px-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-blue-200"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      <span>Edit</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDuplicateItem(item)}
-                      className="py-2.5 px-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-slate-200"
-                    >
-                      <Copy className="w-4 h-4" />
-                      <span>Copy</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="py-2.5 px-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-rose-200"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Desktop / Tablet View: Full Table (>= 640px) */}
-            <div className="hidden sm:block overflow-x-auto rounded-2xl border border-slate-200/70">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200/70">
-                  <tr>
-                    <th className="py-2.5 px-3">#</th>
-                    <th className="py-2.5 px-3">Description & Reference</th>
-                    <th className="py-2.5 px-2 text-center">HSN/SAC</th>
-                    <th className="py-2.5 px-3 text-right">Quantity</th>
-                    <th className="py-2.5 px-3 text-right">Unit Price (₹)</th>
-                    <th className="py-2.5 px-3 text-right">Commission Rate</th>
-                    <th className="py-2.5 px-3 text-right">Taxable Commission (₹)</th>
-                    <th className="py-2.5 px-2 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white/40">
-                  {invoiceData.items.map((item, idx) => (
-                    <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3 px-3 text-slate-400 font-bold">{idx + 1}</td>
-                      <td className="py-3 px-3">
-                        <div className="font-bold text-slate-900">{item.description}</div>
-                        {(item.invNo || item.date) && (
-                          <div className="text-[11px] text-slate-500">
-                            {item.invNo ? `Inv #${item.invNo}` : ''} {item.date ? `• ${item.date}` : ''}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-2 text-center font-mono text-slate-600">
-                        {item.hsnSacCode || '998311'}
-                      </td>
-                      <td className="py-3 px-3 text-right font-semibold text-slate-900">
-                        {item.qty.toLocaleString()} {item.unit || 'kg'}
-                      </td>
-                      <td className="py-3 px-3 text-right text-slate-700">
-                        {item.unitPrice ? `₹${item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
-                      </td>
-                      <td className="py-3 px-3 text-right font-medium text-blue-700">
-                        {item.commissionRate ? `₹${item.commissionRate.toFixed(2)}/${item.unit || 'kg'}` : '-'}
-                      </td>
-                      <td className="py-3 px-3 text-right font-bold text-slate-900">
-                        {formatIndianCurrency(item.commissionAmount)}
-                      </td>
-                      <td className="py-3 px-2 text-center">
-                        <div className="flex items-center justify-center space-x-1">
-                          <button
-                            type="button"
-                            onClick={() => onOpenAddItemModal(item)}
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100/70 rounded-lg transition-colors cursor-pointer"
-                            title="Edit"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDuplicateItem(item)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100/70 rounded-lg transition-colors cursor-pointer"
-                            title="Duplicate"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50/50 rounded-lg transition-colors cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         )}
+
       </div>
 
-      {/* 5. Summary & Tax Calculation Card */}
-      <div className="apple-glass-card rounded-[28px] p-5 sm:p-7">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <div className="lg:col-span-7 space-y-3">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Amount in Words
-            </h4>
-            <div className="p-4 apple-glass-subtle rounded-2xl">
-              <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
-                {amountInWords}
-              </p>
-            </div>
-            <p className="text-xs text-slate-500">
-              Integrated GST (IGST {invoiceData.gstRate || 18}%) applicable on taxable commission value.
-            </p>
-          </div>
-
-          <div className="lg:col-span-5 apple-glass-subtle rounded-2xl p-5 space-y-4">
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between text-slate-600">
-                <span>Total Taxable Value:</span>
-                <span className="font-semibold text-slate-900">{formatIndianCurrency(taxableValue)}</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-600">
-                <span>Integrated GST (18%):</span>
-                <span className="font-semibold text-slate-800">{formatIndianCurrency(gstAmount)}</span>
-              </div>
-              <div className="pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-sm">
-                <span className="font-bold text-slate-900">Total Invoice Amount:</span>
-                <span className="font-black text-blue-700 text-base">{formatIndianCurrency(grandTotal)}</span>
-              </div>
-            </div>
-
+      {/* 4. Financial Breakdown & Payment Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/* Bank & Signature Settings */}
+        <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Bank Details & Signature
+            </span>
             <button
               type="button"
-              onClick={onNavigateToPreview}
-              className="w-full flex items-center justify-center space-x-2 py-3 apple-btn-primary text-white font-bold text-xs rounded-2xl active:scale-95 transition-all cursor-pointer"
+              onClick={() => setIsSignatureModalOpen(true)}
+              className="text-xs text-blue-600 font-bold hover:underline flex items-center space-x-1 cursor-pointer"
             >
-              <span>Proceed to Preview & Print</span>
-              <ArrowRight className="w-4 h-4" />
+              <PenTool className="w-3.5 h-3.5" />
+              <span>Digital Sign</span>
             </button>
           </div>
+
+          <div className="text-xs text-slate-600 space-y-1 bg-slate-50/70 p-3 rounded-xl">
+            <div><strong>Bank:</strong> {invoiceData.seller.bankName} &bull; {invoiceData.seller.bankBranch}</div>
+            <div><strong>Account No:</strong> {invoiceData.seller.accountNo}</div>
+            <div><strong>IFSC Code:</strong> {invoiceData.seller.ifscCode}</div>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs font-bold text-slate-700">Include Signature on Invoice</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={invoiceData.showSignature !== false}
+                onChange={(e) => setInvoiceData(prev => ({ ...prev, showSignature: e.target.checked }))}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+
+        {/* Calculation Summary Card */}
+        <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-2.5 bg-gradient-to-br from-white to-blue-50/40">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+            Tax Computation
+          </span>
+
+          <div className="space-y-1.5 text-xs text-slate-700">
+            <div className="flex justify-between">
+              <span>Total Taxable Commission:</span>
+              <strong className="text-slate-900">{formatIndianCurrency(taxableValue)}</strong>
+            </div>
+
+            <div className="flex justify-between">
+              <span>{invoiceData.gstType === 'IGST' ? `Integrated GST (${gstRate}%)` : `CGST + SGST (${gstRate}%)`}:</span>
+              <strong className="text-blue-700">{formatIndianCurrency(gstAmount)}</strong>
+            </div>
+
+            {invoiceData.roundOff !== 0 && (
+              <div className="flex justify-between">
+                <span>Round Off:</span>
+                <span>{invoiceData.roundOff > 0 ? `+₹${invoiceData.roundOff}` : `-₹${Math.abs(invoiceData.roundOff)}`}</span>
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between">
+              <span className="text-sm font-black text-slate-900">Grand Total Payable:</span>
+              <span className="text-lg font-black text-slate-900">{formatIndianCurrency(grandTotal)}</span>
+            </div>
+          </div>
+
+          <div className="pt-2 text-[11px] text-slate-500 italic">
+            <strong>Amount in words:</strong> {amountInWords}
+          </div>
+        </div>
+
+      </div>
+
+      {/* 5. Bottom Navigation CTA */}
+      <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="text-xs text-slate-500">
+          All changes are saved in real-time to your device.
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {onNavigateToSheet && (
+            <button
+              type="button"
+              onClick={onNavigateToSheet}
+              className="px-4 py-2.5 apple-glass-btn text-slate-700 rounded-xl text-xs font-bold active:scale-95 cursor-pointer"
+            >
+              Back to Sheet
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onNavigateToPreview}
+            className="px-6 py-2.5 apple-btn-primary text-white rounded-xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md flex items-center space-x-1.5"
+          >
+            <span>Proceed to Preview & Export</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
+
+      {/* Signature Modal */}
+      <SignatureModal
+        isOpen={isSignatureModalOpen}
+        onClose={() => setIsSignatureModalOpen(false)}
+        currentSignatureUrl={invoiceData.seller.signatureUrl}
+        onSaveSignature={(signatureDataUrl) => {
+          setInvoiceData(prev => ({
+            ...prev,
+            showSignature: true,
+            seller: {
+              ...prev.seller,
+              signatureUrl: signatureDataUrl,
+            },
+          }));
+          setIsSignatureModalOpen(false);
+        }}
+      />
 
     </div>
   );

@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { HeaderNav, ActiveTab } from './components/HeaderNav';
+import { HeaderNav } from './components/HeaderNav';
 import { BottomDockNav } from './components/BottomDockNav';
+import { ExcelImportView } from './components/ExcelImportView';
 import { InvoiceBuilderView } from './components/InvoiceBuilderView';
 import { InvoiceLivePreview } from './components/InvoiceLivePreview';
 import { BusinessSettingsView } from './components/BusinessSettingsView';
 import { ItemFormModal } from './components/ItemFormModal';
-import { InvoiceData, InvoiceItem } from './types';
-import { initialInvoiceData } from './data/sampleData';
+import { InvoiceData, InvoiceItem, ActiveTab, ExcelParsedRecord } from './types';
+import { initialInvoiceData, defaultBuyer } from './data/sampleData';
 import { generateInvoicePDF } from './utils/pdfGenerator';
 import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
+import { convertParsedRecordsToInvoiceItems } from './utils/excelParser';
 import { 
   loadSavedInvoiceData, 
   saveInvoiceData, 
   loadSavedActiveTab, 
   saveActiveTab, 
   loadSavedUiPreferences, 
-  saveUiPreferences 
+  saveUiPreferences,
+  loadSavedSheetRecords
 } from './utils/storageUtils';
 
 export default function App() {
@@ -73,6 +76,26 @@ export default function App() {
     showToast(editingItem ? 'Item updated & auto-saved' : 'Item added & auto-saved');
   };
 
+  const handleApplyItemsFromSheet = (items: InvoiceItem[], customerName?: string) => {
+    setInvoiceData(prev => {
+      const updatedBuyer = customerName && customerName !== 'ALL'
+        ? {
+            ...prev.buyer,
+            name: customerName,
+            // If buyer matches default, maintain standard fields, else update name
+            address: prev.buyer.name === customerName ? prev.buyer.address : (customerName.includes('BIO AGRO') ? 'Bio Agro Energy Site, Telangana' : prev.buyer.address),
+          }
+        : prev.buyer;
+
+      return {
+        ...prev,
+        buyer: updatedBuyer,
+        items,
+      };
+    });
+    showToast(`Transferred ${items.length} items to Tax Invoice`);
+  };
+
   const handleDownloadPdf = () => {
     generateInvoicePDF(invoiceData, false);
     showToast('Tax Invoice PDF downloaded');
@@ -91,6 +114,15 @@ export default function App() {
     setInvoiceData(freshSample);
     saveInvoiceData(freshSample);
     showToast('Reset to reference sample invoice');
+  };
+
+  const handleGenerateFromSheet = () => {
+    const cached = loadSavedSheetRecords();
+    if (cached && cached.records && cached.records.length > 0) {
+      const items = convertParsedRecordsToInvoiceItems(cached.records, cached.customer);
+      handleApplyItemsFromSheet(items, cached.customer !== 'ALL' ? cached.customer : undefined);
+    }
+    setActiveTab('preview');
   };
 
   const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
@@ -115,6 +147,25 @@ export default function App() {
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12">
         <AnimatePresence mode="wait">
+          
+          {/* Step 1: Upload Excel / CSV & Working Sheet */}
+          {activeTab === 'sheet' && (
+            <motion.div
+              key="sheet"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ExcelImportView
+                onApplyItemsToInvoice={handleApplyItemsFromSheet}
+                onNavigateToPreview={() => setActiveTab('preview')}
+                onNavigateToBuilder={() => setActiveTab('builder')}
+              />
+            </motion.div>
+          )}
+
+          {/* Step 2: Invoice Details & Line Items Editor */}
           {activeTab === 'builder' && (
             <motion.div
               key="builder"
@@ -129,10 +180,12 @@ export default function App() {
                 onOpenAddItemModal={handleOpenAddItemModal}
                 onNavigateToPreview={() => setActiveTab('preview')}
                 onNavigateToSettings={() => setActiveTab('settings')}
+                onNavigateToSheet={() => setActiveTab('sheet')}
               />
             </motion.div>
           )}
 
+          {/* Step 3: Live Preview & Vector PDF Export */}
           {activeTab === 'preview' && (
             <motion.div
               key="preview"
@@ -150,6 +203,7 @@ export default function App() {
             </motion.div>
           )}
 
+          {/* Step 4: Business Settings & Profiles */}
           {activeTab === 'settings' && (
             <motion.div
               key="settings"
@@ -173,12 +227,13 @@ export default function App() {
 
       </main>
 
-      {/* Floating Bottom Step Bar */}
+      {/* Floating Bottom Step Bar (Mobile-first for iPhone 17e) */}
       <BottomDockNav
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddItemModal={() => handleOpenAddItemModal()}
         onDownloadPdf={handleDownloadPdf}
+        onGenerateFromSheet={handleGenerateFromSheet}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
       />
