@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { InvoiceData } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
-import { generateInvoicePDF } from '../utils/pdfGenerator';
+import { generateInvoicePDF, shareInvoicePDF } from '../utils/pdfGenerator';
 import { SignatureModal } from './SignatureModal';
 import confetti from 'canvas-confetti';
 
@@ -51,6 +51,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   const [zoomLevel, setZoomLevel] = useState<number>(getDefaultZoom);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const taxableValue = invoiceData.items.reduce((sum, item) => sum + (item.commissionAmount || 0), 0);
   const totalQty = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
@@ -63,6 +64,23 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
   const handlePrint = () => {
     generateInvoicePDF(invoiceData, true);
+  };
+
+  const handleNativeShare = async () => {
+    setIsSharing(true);
+    try {
+      await shareInvoicePDF(invoiceData);
+      confetti({
+        particleCount: 50,
+        spread: 45,
+        origin: { y: 0.8 },
+        colors: ['#0f172a', '#2563eb', '#10b981'],
+      });
+    } catch (err) {
+      console.error('Share failed:', err);
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const handleCelebrationDownload = () => {
@@ -246,63 +264,55 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           </div>
 
           {/* Fast Action Buttons */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleCopySummary}
-              className="flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-bold transition-all active:scale-95 cursor-pointer"
-              title="Copy formatted invoice summary to clipboard"
+              onClick={handleNativeShare}
+              disabled={isSharing}
+              className="flex items-center space-x-1.5 px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer"
+              title="Share PDF via WhatsApp / AirDrop / Mail"
             >
-              {copiedText === 'summary' ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-700">Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-3.5 h-3.5 text-slate-600" />
-                  <span className="hidden sm:inline">Share</span>
-                </>
-              )}
+              <Share2 className="w-4 h-4 text-emerald-600" />
+              <span>Share PDF</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsSignatureModalOpen(true)}
-              className="flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-blue-700 rounded-2xl text-xs font-bold transition-all active:scale-95 cursor-pointer"
+              className="flex items-center space-x-1.5 px-3.5 py-2.5 apple-glass-btn text-blue-700 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer"
               title="Configure Partner Signature"
             >
-              <PenTool className="w-3.5 h-3.5 text-blue-600" />
+              <PenTool className="w-4 h-4 text-blue-600" />
               <span className="hidden sm:inline">Signature</span>
             </button>
 
             <button
               type="button"
               onClick={onEditBuilder}
-              className="flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-bold active:scale-95 cursor-pointer"
+              className="flex items-center space-x-1.5 px-3.5 py-2.5 apple-glass-btn text-slate-700 rounded-2xl text-xs sm:text-sm font-bold active:scale-95 cursor-pointer"
               title="Edit Invoice Details & Line Items"
             >
-              <Edit3 className="w-3.5 h-3.5 text-slate-600" />
+              <Edit3 className="w-4 h-4 text-slate-600" />
               <span>Edit</span>
             </button>
 
             <button
               type="button"
               onClick={handlePrint}
-              className="hidden md:flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-slate-700 rounded-2xl text-xs font-bold active:scale-95 cursor-pointer"
+              className="hidden md:flex items-center space-x-1.5 px-3.5 py-2.5 apple-glass-btn text-slate-700 rounded-2xl text-xs sm:text-sm font-bold active:scale-95 cursor-pointer"
               title="Print Tax Invoice"
             >
-              <Printer className="w-3.5 h-3.5 text-slate-600" />
+              <Printer className="w-4 h-4 text-slate-600" />
               <span>Print</span>
             </button>
 
             <button
               type="button"
               onClick={handleCelebrationDownload}
-              className="flex items-center space-x-1.5 px-4 py-2 apple-btn-primary text-white rounded-2xl text-xs font-black active:scale-95 cursor-pointer shadow-md"
+              className="flex items-center space-x-2 px-4 sm:px-5 py-2.5 apple-btn-primary text-white rounded-2xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md"
               title="Download Tax Invoice PDF"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span>Download PDF</span>
             </button>
           </div>
@@ -602,34 +612,34 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
         </div>
       </div>
 
-      {/* Standard Bottom Navigation Bar with Apple Liquid Glass */}
+      {/* Standard Bottom Navigation Bar with Clean Solid iOS Surface */}
       <div className="apple-glass-card p-4 rounded-[28px] flex flex-col sm:flex-row items-center justify-between gap-3">
         <button
           type="button"
           onClick={onEditBuilder}
-          className="flex items-center space-x-2 px-4 py-2.5 apple-glass-btn text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer"
+          className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-3 apple-glass-btn text-slate-700 text-sm font-bold rounded-2xl transition-all cursor-pointer"
         >
           <Edit3 className="w-4 h-4" />
           <span>Back to Edit Line Items</span>
         </button>
 
-        <div className="flex items-center space-x-2.5">
+        <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end space-x-2.5">
           <button
             type="button"
-            onClick={handlePrint}
-            className="flex items-center space-x-1.5 px-4 py-2.5 apple-glass-btn text-slate-700 text-xs font-bold rounded-2xl transition-all cursor-pointer"
+            onClick={handleNativeShare}
+            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-sm font-bold rounded-2xl transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
-            <span>Print Invoice</span>
+            <Share2 className="w-4 h-4 text-emerald-600" />
+            <span>Share</span>
           </button>
 
           <button
             type="button"
             onClick={handleCelebrationDownload}
-            className="flex items-center space-x-2 px-5 py-2.5 apple-btn-primary text-white text-xs font-black rounded-2xl active:scale-[0.98] transition-all cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-3 apple-btn-primary text-white text-sm font-black rounded-2xl active:scale-[0.98] transition-all cursor-pointer shadow-md"
           >
             <Download className="w-4 h-4" />
-            <span>Download Tax Invoice PDF ({formatIndianCurrency(grandTotal)})</span>
+            <span>Download PDF</span>
           </button>
         </div>
       </div>

@@ -96,15 +96,8 @@ export default function App() {
   const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
 
   return (
-    <div className={`relative min-h-screen max-w-[100vw] overflow-x-hidden bg-slate-50/60 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
+    <div className={`relative min-h-screen max-w-[100vw] overflow-x-hidden bg-slate-100/70 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
       
-      {/* Ambient Liquid Glass Atmosphere (Floating Chromatic Orbs) */}
-      <div className="ambient-glow-mesh">
-        <div className="ambient-orb-1" />
-        <div className="ambient-orb-2" />
-        <div className="ambient-orb-3" />
-      </div>
-
       {/* Top Header Navigation */}
       <HeaderNav
         activeTab={activeTab}

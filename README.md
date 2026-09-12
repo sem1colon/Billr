@@ -75,7 +75,8 @@ flowchart LR
 - **Bank & Remittance Details**: Embeds NEFT/RTGS bank details, IFSC codes, PAN, and GSTIN automatically.
 
 ### 4. 📱 Next-Gen Progressive Web App (PWA)
-- **iPhone 16 & iOS Safari Optimized**: High-resolution Apple touch icons, standalone full-screen display, and safe-area padding.
+- **Senior & Mobile Optimized**: Clean high-contrast typography, $\ge 48\text{px}$ touch targets, and solid readable surfaces.
+- **iPhone 17e & iOS Safari Optimized**: High-resolution Apple touch icons, standalone full-screen display, safe-area padding, and native Web Share Sheet support (`navigator.share`) for 1-tap WhatsApp/AirDrop sharing.
 - **Native iOS Install Guide**: Interactive bottom sheet guiding iPhone users through Safari's "Add to Home Screen" flow.
 - **Offline Reliability**: Service worker caching allows offline invoice generation in remote industrial areas.
 

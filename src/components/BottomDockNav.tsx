@@ -79,37 +79,37 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
        On Tablets, iPads & Desktops, navigation is unified in the top header to prevent repetition and overlap. */
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
       
-      {/* Mobile Liquid Glass Bar */}
-      <div className="pointer-events-auto apple-glass-dock !rounded-t-[32px] !rounded-b-none border-t border-white/95 shadow-[0_-12px_40px_rgba(15,23,42,0.12)] pb-safe pt-2.5 px-4 transition-all">
-        <div className="flex items-center justify-between pb-2 mb-1.5 border-b border-slate-200/50">
+      {/* Mobile Solid iOS Dock Bar */}
+      <div className="pointer-events-auto apple-glass-dock !rounded-t-[32px] !rounded-b-none border-t border-slate-200 shadow-[0_-8px_30px_rgba(15,23,42,0.12)] pb-safe pt-2.5 px-4 transition-all bg-white/95">
+        <div className="flex items-center justify-between pb-2 mb-1.5 border-b border-slate-200">
           <div className="flex items-center">
             {currentStepIndex > 0 ? (
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.92 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={handlePrev}
-                className="flex items-center space-x-1 px-3 py-1.5 apple-glass-btn text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
+                className="flex items-center space-x-1 px-3.5 py-2 apple-glass-btn text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
                 aria-label="Previous step"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Back</span>
               </motion.button>
             ) : (
-              <span className="text-[11px] font-bold text-slate-500 px-2.5 py-1 apple-glass-subtle rounded-lg">
+              <span className="text-xs font-bold text-slate-500 px-3 py-1.5 bg-slate-100 rounded-xl">
                 Step 1 of 3
               </span>
             )}
           </div>
 
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-2">
             {activeTab === 'builder' && (
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.92 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={onOpenAddItemModal}
-                className="flex items-center space-x-1 px-3.5 py-1.5 apple-glass-btn text-blue-700 rounded-xl text-xs font-bold cursor-pointer"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold cursor-pointer shadow-xs"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Add Item</span>
               </motion.button>
             )}
@@ -117,9 +117,9 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
             {currentStepIndex < TABS.length - 1 ? (
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.92 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={handleNext}
-                className="flex items-center space-x-1 px-4 py-1.5 apple-btn-primary text-white rounded-xl text-xs font-bold cursor-pointer"
+                className="flex items-center space-x-1.5 px-5 py-2 apple-btn-primary text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer shadow-md"
               >
                 <span>Next</span>
                 <ChevronRight className="w-4 h-4" />
@@ -127,19 +127,19 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
             ) : (
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.92 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={onDownloadPdf}
-                className="flex items-center space-x-1 px-4 py-1.5 apple-btn-emerald text-white rounded-xl text-xs font-black cursor-pointer"
+                className="flex items-center space-x-1.5 px-5 py-2 apple-btn-emerald text-white rounded-xl text-xs sm:text-sm font-black cursor-pointer shadow-md"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>PDF</span>
+                <Download className="w-4 h-4" />
+                <span>Download PDF</span>
               </motion.button>
             )}
           </div>
         </div>
 
-        {/* Bottom tab icons on mobile with sliding liquid glass pill */}
-        <nav className="flex items-center justify-around relative pt-0.5 pb-0.5">
+        {/* Bottom tab icons on mobile */}
+        <nav className="flex items-center justify-around relative pt-1 pb-1">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -148,12 +148,12 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex flex-col items-center py-1.5 px-5 rounded-xl text-[10px] font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
+                className="relative flex flex-col items-center py-2 px-4 rounded-xl text-xs font-bold cursor-pointer z-10 select-none transition-colors duration-200"
               >
                 {isActive && (
                   <motion.div
-                    layoutId="mobile-dock-liquid-pill"
-                    className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10 shadow-xs"
+                    layoutId="mobile-dock-pill"
+                    className="absolute inset-0 bg-blue-50 border border-blue-200 rounded-xl -z-10 shadow-xs"
                     transition={{
                       type: 'spring',
                       stiffness: 450,
@@ -161,8 +161,8 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                     }}
                   />
                 )}
-                <Icon className={`w-4 h-4 mb-0.5 transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                <span className={`transition-colors duration-200 ${isActive ? 'text-blue-700 font-bold' : 'text-slate-500'}`}>
+                <Icon className={`w-5 h-5 mb-1 transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                <span className={`transition-colors duration-200 ${isActive ? 'text-blue-700 font-extrabold' : 'text-slate-600'}`}>
                   {tab.shortLabel}
                 </span>
               </button>
