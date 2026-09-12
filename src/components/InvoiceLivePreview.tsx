@@ -325,293 +325,260 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
           className="transition-transform duration-200"
         >
-          {/* Authentic High-Precision Tax Invoice Document */}
-          <div className="w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl p-10 font-sans border border-slate-300 rounded-sm relative flex flex-col justify-between">
+          {/* Authentic High-Precision Tax Invoice Document Matching Reference Exactly */}
+          <div className="w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl p-6 font-sans border-2 border-slate-900 rounded-none relative flex flex-col justify-between">
             
             <div>
-              {/* Document Header */}
-              <div className="border-b-2 border-slate-900 pb-3 mb-4 text-center">
-                <h1 className="text-xl font-black tracking-wider text-slate-900 uppercase">
-                  GST TAX INVOICE
+              {/* 1. Top Shaded Header Banner */}
+              <div className="bg-[#c0c0c0] border border-slate-900 py-1.5 text-center">
+                <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
+                  TAX INVOICE
                 </h1>
-                <p className="text-[11px] font-semibold text-slate-500 tracking-wide mt-0.5">
-                  (ORIGINAL FOR RECIPIENT &bull; RULE 46 OF CGST RULES, 2017)
-                </p>
               </div>
 
-              {/* Seller & Header Info */}
-              <div className="text-center mb-5 pb-4 border-b border-slate-200">
-                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  {invoiceData.seller.name}
+              {/* 2. Seller Agency Banner */}
+              <div className="text-center py-4 px-2 border-x border-b border-slate-900 bg-white">
+                <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
+                  {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                 </h2>
-                <p className="text-xs text-slate-700 mt-1 max-w-lg mx-auto leading-relaxed">
-                  {invoiceData.seller.address}, {invoiceData.seller.cityStateZip}
+                <p className="text-xs text-slate-800 mt-1">
+                  {invoiceData.seller.address || '104 Rukmini Apartment Yousufguda Check Post'}
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-2.5">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/90 rounded-md text-xs border border-slate-200/80 shadow-2xs">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">State</span>
-                    <span className="font-bold text-slate-900">Telangana (36)</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/90 rounded-md text-xs border border-slate-200/80 shadow-2xs">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">GSTIN</span>
-                    <span className="font-mono font-bold text-slate-900">{invoiceData.seller.gstin}</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/90 rounded-md text-xs border border-slate-200/80 shadow-2xs">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PAN</span>
-                    <span className="font-mono font-bold text-slate-900">{invoiceData.seller.pan}</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/90 rounded-md text-xs border border-slate-200/80 shadow-2xs">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Phone</span>
-                    <span className="font-bold text-slate-900">{invoiceData.seller.phone}</span>
-                  </div>
-                </div>
+                <p className="text-xs text-slate-800 mt-0.5">
+                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'} Partner:- {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} Ph: {invoiceData.seller.phone || '9849187125'}
+                </p>
+                <p className="text-xs font-bold text-slate-900 mt-1.5 tracking-wide">
+                  GSTIN No : {invoiceData.seller.gstin || '36ABXFM3174B1Z1'} &nbsp;&nbsp; PAN Number : {invoiceData.seller.pan || 'ABXFM3174B'}
+                </p>
               </div>
 
-              {/* Buyer & Invoice Specs Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-4 text-xs">
-                {/* Left: Buyer Details */}
-                <div className="border border-slate-300 rounded p-3 bg-slate-50/60 space-y-2">
+              {/* 3. Three-Column Parties & Metadata Grid */}
+              <div className="grid grid-cols-12 border-x border-b border-slate-900 text-xs bg-white">
+                
+                {/* Column 1: Billed To */}
+                <div className="col-span-5 p-2.5 border-r border-slate-900 flex flex-col justify-between">
                   <div>
-                    <span className="font-extrabold text-slate-900 text-[11px] block uppercase tracking-wider">
-                      Details of Receiver / Billed To:
+                    <span className="font-bold text-slate-900 text-[11px] block">
+                      Billed To:
                     </span>
-                    <h3 className="font-bold text-slate-900 text-sm mt-1">
-                      {invoiceData.buyer.name}
+                    <h3 className="font-bold text-slate-900 text-xs mt-0.5 uppercase">
+                      {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
                     </h3>
-                    <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">
+                    <p className="text-slate-800 text-[11px] mt-0.5 leading-snug">
                       {invoiceData.buyer.address}, {invoiceData.buyer.cityStateZip}
                     </p>
-                    <p className="font-bold text-slate-900 text-xs mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                      <span>GSTIN: {invoiceData.buyer.gstin || 'N/A'}</span>
-                      {invoiceData.buyer.pan && <span className="text-slate-700">PAN: {invoiceData.buyer.pan}</span>}
-                    </p>
                   </div>
-
-                  {invoiceData.buyer.placeOfSupply && (
-                    <div className="pt-2 border-t border-slate-200">
-                      <span className="font-extrabold text-slate-900 text-[10px] block uppercase tracking-wider">
-                        Place of Supply / Service
-                      </span>
-                      <p className="text-slate-600 text-[10px] whitespace-pre-line leading-snug mt-0.5">
-                        {invoiceData.buyer.placeOfSupply}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: Invoice Specs Box */}
-                <div className="border border-slate-300 rounded p-3 bg-slate-50/60 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-500 font-semibold">INVOICE No.:</span>
-                      <span className="font-bold text-slate-900 font-mono text-xs">{invoiceData.invoiceNumber}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-500 font-semibold">Invoice Date:</span>
-                      <span className="font-bold text-slate-900">{invoiceData.invoiceDate}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-500 font-semibold">Place of Supply:</span>
-                      <span className="font-bold text-slate-800 text-[11px]">Maharashtra (Code: 27)</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-500 font-semibold">Supply Category:</span>
-                      <span className="font-bold text-slate-900 text-[11px]">
-                        Inter-State (IGST {gstRate}%)
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-500 font-semibold">SAC / Service Code:</span>
-                      <span className="font-bold text-slate-900 text-[11px]">998311</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Reverse Charge (RCM):</span>
-                      <span className="font-bold text-slate-900 text-[11px]">No</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Line Items Table with Quantity, Unit Price & Commission */}
-              <div className="border border-slate-300 rounded overflow-hidden mb-4">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-900 text-white font-bold text-[11px]">
-                      <th className="py-2.5 px-2 text-center border-r border-slate-700 w-8">#</th>
-                      <th className="py-2.5 px-3 border-r border-slate-700">Description of Services & Products</th>
-                      <th className="py-2.5 px-2 text-center border-r border-slate-700 w-20">HSN/SAC</th>
-                      <th className="py-2.5 px-2 text-right border-r border-slate-700 w-20">Quantity</th>
-                      <th className="py-2.5 px-2 text-right border-r border-slate-700 w-24">Unit Price</th>
-                      <th className="py-2.5 px-2 text-right border-r border-slate-700 w-24">Comm. Rate</th>
-                      <th className="py-2.5 px-3 text-right w-28">Amount (INR)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 text-slate-800">
-                    {invoiceData.items.map((item, index) => (
-                      <tr key={item.id} className="hover:bg-slate-50/50">
-                        <td className="py-2.5 px-2 text-center border-r border-slate-200 text-slate-500 text-[11px]">
-                          {index + 1}
-                        </td>
-                        <td className="py-2.5 px-3 border-r border-slate-200 font-medium text-slate-900">
-                          <span className="font-semibold text-slate-900">{item.description}</span>
-                          {item.customer && !item.description.toLowerCase().includes(item.customer.toLowerCase()) && (
-                            <span className="block text-[11px] text-blue-700 font-bold mt-0.5">
-                              Party / Customer: {item.customer}
-                            </span>
-                          )}
-                          {(item.invNo || item.date) && (
-                            <span className="block text-[10px] text-slate-500 font-mono mt-0.5">
-                              {item.invNo ? `(Inv #${item.invNo}` : ''}{item.date ? ` dt ${item.date})` : item.invNo ? ')' : ''}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-2 text-center border-r border-slate-200 font-mono text-[11px] text-slate-600">
-                          {item.hsnSacCode || '998311'}
-                        </td>
-                        <td className="py-2.5 px-2 text-right border-r border-slate-200 font-semibold text-slate-900">
-                          {item.qty.toLocaleString()} <span className="text-[10px] text-slate-500 font-normal">{item.unit || 'kg'}</span>
-                        </td>
-                        <td className="py-2.5 px-2 text-right border-r border-slate-200 text-slate-700 font-mono text-[11px]">
-                          {item.unitPrice ? `₹${item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
-                        </td>
-                        <td className="py-2.5 px-2 text-right border-r border-slate-200 text-blue-900 font-bold font-mono text-[11px]">
-                          {item.commissionRate ? `₹${item.commissionRate.toFixed(2)}/${item.unit || 'kg'}` : '-'}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-bold text-slate-900">
-                          {item.commissionAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                      </tr>
-                    ))}
-                    {invoiceData.items.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="py-8 text-center text-slate-400 italic">
-                          No line items added.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr className="bg-slate-100/80 font-bold text-xs border-t border-slate-300">
-                      <td colSpan={3} className="py-2 px-3 text-right border-r border-slate-300 text-slate-600">
-                        Total Quantity Handled:
-                      </td>
-                      <td className="py-2 px-2 text-right border-r border-slate-300 font-bold text-slate-900">
-                        {totalQty.toLocaleString()} kg
-                      </td>
-                      <td colSpan={2} className="py-2 px-3 text-right border-r border-slate-300 text-slate-600">
-                        Total Taxable Commission:
-                      </td>
-                      <td className="py-2 px-3 text-right font-bold text-slate-900">
-                        {taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-
-              {/* Tax Computation & Breakdown */}
-              <div className="grid grid-cols-12 gap-4 mb-4">
-                {/* Left: Bank Details */}
-                <div className="col-span-7 border border-slate-300 rounded p-3 bg-slate-50/50 space-y-1.5 text-xs">
-                  <span className="font-extrabold text-slate-900 text-[11px] block uppercase tracking-wider">
-                    Bank Account Details for Payment:
-                  </span>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] pt-1">
-                    <div>
-                      <span className="text-slate-500">Bank Name:</span>
-                      <strong className="block text-slate-900">{invoiceData.seller.bankName}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Branch:</span>
-                      <strong className="block text-slate-900">{invoiceData.seller.bankBranch}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Current A/C No:</span>
-                      <strong className="block text-slate-900 font-mono">{invoiceData.seller.accountNo}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">RTGS/NEFT IFSC:</span>
-                      <strong className="block text-slate-900 font-mono">{invoiceData.seller.ifscCode}</strong>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-slate-600 pt-1 border-t border-slate-200">
-                    {invoiceData.seller.notes}
+                  <p className="font-bold text-slate-900 text-[11px] mt-2">
+                    GSTIN No:- {invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}
                   </p>
                 </div>
 
-                {/* Right: Tax Breakdown */}
-                <div className="col-span-5 border border-slate-300 rounded p-3 bg-slate-50/50 space-y-2 text-xs">
-                  <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                    <span className="text-slate-600 font-semibold">Total Taxable Value:</span>
-                    <span className="font-bold text-slate-900">
-                      ₹{taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {/* Column 2: Place of Supply / Service */}
+                <div className="col-span-4 p-2.5 border-r border-slate-900">
+                  <span className="font-bold text-slate-900 text-[11px] block">
+                    Place of Supply / Service:
+                  </span>
+                  <h4 className="font-bold text-slate-900 text-xs mt-0.5 uppercase">
+                    PRAJ INDUSTRIES LTD
+                  </h4>
+                  <p className="text-slate-800 text-[11px] mt-0.5 whitespace-pre-line leading-snug">
+                    {invoiceData.buyer.placeOfSupply || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108."}
+                  </p>
+                </div>
+
+                {/* Column 3: INVOICE No. & DATE Stacked Boxes */}
+                <div className="col-span-3 flex flex-col justify-between divide-y divide-slate-900">
+                  <div className="p-2">
+                    <span className="font-bold text-slate-900 text-[11px] block">
+                      INVOICE No.
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs mt-0.5 block font-mono">
+                      {invoiceData.invoiceNumber || '004/26-27'}
                     </span>
                   </div>
-                  <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                    <span className="text-slate-600 font-semibold">Integrated GST ({gstRate}%):</span>
-                    <span className="font-bold text-slate-900">
-                      ₹{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+                  <div className="p-2">
+                    <span className="font-bold text-slate-900 text-[11px] block">
+                      DATE
                     </span>
-                  </div>
-                  {invoiceData.roundOff !== 0 && (
-                    <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-slate-600">Round Off:</span>
-                      <span className="font-bold text-slate-900">₹{invoiceData.roundOff.toFixed(2)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between pt-1 text-sm font-extrabold text-slate-900">
-                    <span>Grand Total:</span>
-                    <span className="text-blue-900">
-                      ₹{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                      {invoiceData.invoiceDate || '10-Aug-26'}
                     </span>
                   </div>
                 </div>
+
               </div>
 
-              {/* Amount in Words */}
-              <div className="p-2.5 bg-slate-100/90 rounded border border-slate-300 mb-6 text-xs">
-                <span className="font-bold text-slate-700">Total Amount in Words (INR): </span>
-                <span className="font-extrabold text-slate-900">{amountInWords}</span>
-              </div>
-            </div>
+              {/* 4. Line Items Table with Customer Groupings matching reference */}
+              <div className="border-x border-b border-slate-900 overflow-hidden">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#c0c0c0] text-slate-900 font-bold border-b border-slate-900 text-[11px]">
+                      <th className="py-2 px-2.5 border-r border-slate-900 w-[65%]">Description of Services</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[15%]">HSN/SAC CODE</th>
+                      <th className="py-2 px-2.5 text-right w-[20%]">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-300 text-slate-900">
+                    {(() => {
+                      // Group items by Customer
+                      const groups: { customer: string; items: InvoiceItem[] }[] = [];
+                      invoiceData.items.forEach(item => {
+                        const custName = item.customer || 'General Items';
+                        let g = groups.find(x => x.customer === custName);
+                        if (!g) {
+                          g = { customer: custName, items: [] };
+                          groups.push(g);
+                        }
+                        g.items.push(item);
+                      });
 
-            {/* Document Footer with Signature */}
-            <div className="pt-6 border-t border-slate-300">
-              <div className="flex justify-between items-end">
-                <div className="text-[10px] text-slate-400">
-                  {/* Clean minimal footer */}
+                      if (invoiceData.items.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={3} className="py-8 text-center text-slate-400 italic">
+                              No line items added.
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return groups.map(group => (
+                        <React.Fragment key={group.customer}>
+                          {/* Customer Group Header Row */}
+                          {group.customer && group.customer !== 'General Items' && (
+                            <tr className="bg-slate-100 border-t border-b border-slate-400 font-bold">
+                              <td colSpan={3} className="py-1 px-2.5 text-slate-900 font-bold text-xs tracking-wide">
+                                Customer : {group.customer}
+                              </td>
+                            </tr>
+                          )}
+
+                          {/* Line items for this customer */}
+                          {group.items.map(item => {
+                            let desc = '';
+                            if (item.invNo) desc += `Inv. No. ${item.invNo}`;
+                            if (item.date) desc += `${desc ? ', ' : ''}dt. ${item.date}`;
+                            const prodName = item.description.replace(/\s*\([^)]*\)\s*$/, '').trim();
+                            if (prodName) desc += `${desc ? ', ' : ''}${prodName}`;
+                            if (item.qty) desc += `, ${item.qty.toLocaleString()}${item.unit || 'kg'}`;
+                            if (item.commissionRate) desc += `, Commission @ ${item.commissionRate}`;
+
+                            return (
+                              <tr key={item.id} className="hover:bg-slate-50">
+                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-relaxed">
+                                  {desc || item.description}
+                                </td>
+                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px]">
+                                  {item.hsnSacCode || '998311'}
+                                </td>
+                                <td className="py-1.5 px-2.5 text-right font-medium text-slate-900 text-[11px]">
+                                  {item.commissionAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
+                      ));
+                    })()}
+
+                    {/* Summary Calculation Rows inside Table */}
+                    <tr className="border-t-2 border-slate-900 font-bold bg-white">
+                      <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                        Taxable Value
+                      </td>
+                      <td className="border-r border-slate-900"></td>
+                      <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
+                        {taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+
+                    <tr className="border-t border-slate-900 font-bold bg-white">
+                      <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                        ADD: IGST {gstRate}%
+                      </td>
+                      <td className="border-r border-slate-900"></td>
+                      <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
+                        {gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+
+                    <tr className="border-t-2 border-slate-900 font-bold bg-[#f2f2f2]">
+                      <td className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
+                        Total
+                      </td>
+                      <td className="border-r border-slate-900 bg-[#f2f2f2]"></td>
+                      <td className="py-2 px-2.5 text-right font-black text-slate-900 text-xs">
+                        {grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 5. Amount in Words Box */}
+              <div className="border-x border-b border-slate-900 p-2.5 text-xs bg-white">
+                <span className="text-slate-800 text-[11px] block">Amount Chargeable (in words):</span>
+                <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                  {amountInWords}
+                </span>
+              </div>
+
+              {/* 6. Bottom Split Box: Bank Details (Left) and Signatory (Right) */}
+              <div className="grid grid-cols-12 border-x border-b border-slate-900 text-xs bg-white">
+                
+                {/* Left: Bank Details and PAN */}
+                <div className="col-span-8 p-3 border-r border-slate-900 space-y-1">
+                  <p className="font-bold text-slate-900 text-[11px]">
+                    Company's PAN : {invoiceData.seller.pan || 'ABXFM3174B'}
+                  </p>
+                  <p className="font-bold text-slate-900 text-[11px] pt-1">
+                    Note:- Please make cheques in favor of "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
+                  </p>
+                  <p className="text-slate-900 text-[11px] pt-0.5">
+                    {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SANJEVAREDDYNAGAR, HYDERABAD-500038.'}
+                  </p>
+                  <p className="font-bold text-slate-900 text-[11px]">
+                    A/C NO. {invoiceData.seller.accountNo || '50200084425696'}
+                  </p>
+                  <p className="font-bold text-slate-900 text-[11px]">
+                    ISFC CODE: {invoiceData.seller.ifscCode || 'HDFC0000642'}
+                  </p>
                 </div>
 
-                {/* Authorized Signatory */}
-                <div className="text-right">
-                  <span className="text-xs font-extrabold text-slate-900 block uppercase">
-                    For {invoiceData.seller.name}
+                {/* Right: Authorized Signatory */}
+                <div className="col-span-4 p-3 flex flex-col justify-between text-right">
+                  <span className="font-bold text-slate-900 text-[11px] block uppercase">
+                    For {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                   </span>
 
-                  <div className="h-16 flex items-center justify-end my-1">
+                  <div className="h-14 flex items-center justify-end my-1">
                     {invoiceData.showSignature !== false && invoiceData.seller.signatureUrl ? (
                       <img 
                         src={invoiceData.seller.signatureUrl} 
                         alt="Authorized Partner Signature" 
                         referrerPolicy="no-referrer"
-                        className="h-14 max-w-[170px] object-contain"
+                        className="h-12 max-w-[150px] object-contain"
                       />
                     ) : (
-                      <div className="h-12 w-36 border border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-400">
+                      <div className="h-10 w-28 border border-dashed border-slate-300 rounded flex items-center justify-center text-[10px] text-slate-400">
                         Signature on file
                       </div>
                     )}
                   </div>
 
-                  <span className="text-xs font-bold text-slate-900 block">
-                    (Partner / Authorised Signatory)
-                  </span>
-                  <span className="text-[10px] text-slate-600 block">
-                    {invoiceData.seller.partnerName}
+                  <span className="font-bold text-slate-900 text-[11px] block">
+                    Partner
                   </span>
                 </div>
+
               </div>
+
             </div>
+
+          </div>
+        </div>
+      </div>
 
           </div>
         </div>
