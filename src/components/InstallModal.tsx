@@ -33,7 +33,7 @@ export const InstallModal: React.FC<InstallModalProps> = ({
   onClose,
   deferredPrompt,
   onTriggerInstall,
-  isInstalled: isInstalledProp
+  isInstalled: isInstalledProp = false,
 }) => {
   // Detect current platform accurately
   const getDetectedPlatform = (): PlatformType => {
@@ -125,19 +125,18 @@ export const InstallModal: React.FC<InstallModalProps> = ({
 
             {/* Header */}
             <div className="flex items-start justify-between pb-3.5 border-b border-slate-200/50 pr-8">
-              <div className="flex items-center space-x-3">
-                <BillrLogo size="sm" showSubtitle={false} />
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                    {isStandalone ? 'Billr App' : 'Install Billr'}
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 apple-glass-badge text-blue-700 rounded-full">
-                      {isStandalone ? 'Installed' : 'Offline Ready'}
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isStandalone ? 'Running locally in standalone PWA mode' : 'Fast, private tax billing on your home screen'}
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <BillrLogo size="sm" showSubtitle={false} />
+                  <span className="text-slate-300">/</span>
+                  <span className="text-slate-700">{isStandalone ? 'App' : 'Install'}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 apple-glass-badge text-blue-700 rounded-full">
+                    {isStandalone ? 'Installed' : 'Offline Ready'}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {isStandalone ? 'Running locally in standalone PWA mode' : 'Fast, private tax billing on your home screen'}
+                </p>
               </div>
             </div>
 

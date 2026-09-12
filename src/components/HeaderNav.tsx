@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
+  FileSpreadsheet,
   FileText, 
   Eye, 
   UserCheck, 
@@ -10,15 +11,16 @@ import {
   Smartphone,
   MoreVertical,
   Check,
-  Zap,
   Info,
-  CheckCircle2
+  Building2,
+  Sparkles
 } from 'lucide-react';
 import { BillrLogo } from './BillrLogo';
 import { InstallModal } from './InstallModal';
 import { AboutModal } from './AboutModal';
+import type { ActiveTab } from '../types';
 
-export type ActiveTab = 'builder' | 'preview' | 'settings';
+export type { ActiveTab };
 
 interface HeaderNavProps {
   activeTab: ActiveTab;
@@ -104,14 +106,20 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
   const navTabs = [
     { 
+      id: 'sheet' as ActiveTab, 
+      label: '1. Upload Sheet', 
+      shortLabel: 'Sheet',
+      icon: FileSpreadsheet
+    },
+    { 
       id: 'builder' as ActiveTab, 
-      label: 'Invoice Builder', 
+      label: '2. Invoice Editor', 
       shortLabel: 'Invoice',
       icon: FileText
     },
     { 
       id: 'preview' as ActiveTab, 
-      label: 'Live Preview', 
+      label: '3. Preview & Print', 
       shortLabel: 'Preview',
       icon: Eye 
     },
@@ -119,13 +127,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       id: 'settings' as ActiveTab, 
       label: 'Agency Profile', 
       shortLabel: 'Profile',
-      icon: UserCheck 
+      icon: Building2 
     },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-3xl border-b border-white/90 text-slate-900 shadow-[0_8px_32px_-4px_rgba(30,58,138,0.08)] transition-all">
+      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-2xl border-b border-slate-200/80 text-slate-900 shadow-xs transition-all pt-safe">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-2 sm:gap-4 h-16">
             
@@ -133,17 +141,17 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             <div className="flex items-center flex-shrink-0">
               <motion.button 
                 type="button" 
-                onClick={() => setActiveTab('builder')}
-                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab('sheet')}
+                whileTap={{ scale: 0.96 }}
                 className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-2xl cursor-pointer"
-                title="Billr — Tax Invoice Generator"
+                title="Billr — Excel to Tax Invoice"
               >
                 <BillrLogo size="md" showSubtitle={false} />
               </motion.button>
             </div>
 
-            {/* Center: Apple iOS 26 Liquid Glass Segmented Sliding Pill (Desktop & Tablet) */}
-            <nav className="hidden md:flex items-center relative apple-glass-segmented p-1.5 rounded-2xl flex-shrink-0">
+            {/* Center: Fluid UI Segmented Sliding Pill (Desktop & Tablet / iPad) */}
+            <nav className="hidden md:flex items-center relative apple-glass-segmented p-1 rounded-2xl flex-shrink-0">
               {navTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -152,13 +160,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className="relative flex items-center space-x-1.5 lg:space-x-2 px-3 lg:px-4 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
+                    className="relative flex items-center space-x-1.5 lg:space-x-2 px-3 lg:px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer z-10 select-none transition-colors duration-200"
                   >
-                    {/* Continuous Fluid Sliding Liquid Pill */}
+                    {/* Fluid Active Pill */}
                     {isActive && (
                       <motion.div
                         layoutId="header-liquid-active-pill"
-                        className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10"
+                        className="absolute inset-0 apple-glass-segmented-active rounded-xl -z-10 shadow-xs"
                         transition={{
                           type: 'spring',
                           stiffness: 450,
@@ -168,7 +176,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                     )}
 
                     <Icon className={`w-3.5 h-3.5 flex-shrink-0 transition-colors duration-200 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                    <span className={`transition-colors duration-200 ${isActive ? 'text-blue-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}>
+                    <span className={`transition-colors duration-200 ${isActive ? 'text-blue-700 font-extrabold' : 'text-slate-600 hover:text-slate-900'}`}>
                       <span className="hidden lg:inline">{tab.label}</span>
                       <span className="inline lg:hidden">{tab.shortLabel}</span>
                     </span>
@@ -201,7 +209,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   type="button"
                   whileTap={{ scale: 0.95 }}
                   onClick={onDownloadPdf}
-                  className="hidden sm:flex items-center space-x-1.5 px-3.5 lg:px-4 py-1.5 apple-btn-primary text-white rounded-xl text-xs font-black transition-all cursor-pointer"
+                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-1.5 apple-btn-primary text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-sm"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download PDF</span>
@@ -215,7 +223,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className={`p-2 rounded-xl text-slate-600 hover:text-slate-900 apple-glass-btn transition-all cursor-pointer ${
-                    isMenuOpen ? '!bg-white/95 shadow-sm border-white' : ''
+                    isMenuOpen ? '!bg-white shadow-sm border-slate-300' : ''
                   }`}
                   aria-label="More options"
                   title="Settings & utilities"
@@ -223,7 +231,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   <MoreVertical className="w-4 h-4" />
                 </motion.button>
 
-                {/* Dropdown Popover with Liquid Glass Surface */}
+                {/* Dropdown Popover */}
                 <AnimatePresence>
                   {isMenuOpen && (
                     <motion.div 
@@ -231,7 +239,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -4 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-                      className="!absolute right-0 top-[calc(100%+8px)] w-64 max-w-[calc(100vw-2rem)] apple-glass-card !bg-white/98 rounded-3xl p-2.5 z-50 text-xs shadow-2xl border border-white/95 backdrop-blur-3xl"
+                      className="!absolute right-0 top-[calc(100%+8px)] w-64 max-w-[calc(100vw-2rem)] apple-glass-card rounded-2xl p-2 z-50 text-xs shadow-xl border border-slate-200 backdrop-blur-2xl"
                     >
                       
                       {/* Accessibility Font Size Toggle */}
@@ -242,84 +250,56 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                             onToggleLargeText();
                             setIsMenuOpen(false);
                           }}
-                          className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
                         >
                           <span className="flex items-center space-x-2.5">
                             <Type className="w-4 h-4 text-slate-500" />
                             <span className="font-semibold">Large Text Mode (A+)</span>
                           </span>
-                          {isLargeText && <Check className="w-4 h-4 text-blue-600 font-bold" />}
+                          {isLargeText && <Check className="w-3.5 h-3.5 text-blue-600 font-bold" />}
                         </button>
                       )}
 
-                      {/* Reset to Reference Sample Invoice */}
+                      {/* Load Sample Invoice */}
                       <button
                         type="button"
                         onClick={() => {
                           onLoadSample();
                           setIsMenuOpen(false);
                         }}
-                        className="w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-2xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
+                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-4 h-4 text-slate-500" />
-                        <div>
-                          <div className="font-bold text-slate-900">Load Reference Sample</div>
-                          <div className="text-[11px] text-slate-500">Reset to MCA sample statement</div>
-                        </div>
+                        <span className="font-semibold">Load Sample Statement</span>
                       </button>
 
-                      {/* Install Guide (Shown ONLY if not already installed as standalone PWA) */}
-                      {!isInstalled && (
-                        <>
-                          <div className="my-1 border-t border-slate-200/60" />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsInstallModalOpen(true);
-                              setIsMenuOpen(false);
-                            }}
-                            className="w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-2xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
-                          >
-                            <Smartphone className="w-4 h-4 text-blue-600" />
-                            <div>
-                              <div className="font-bold text-slate-900">Install App</div>
-                              <div className="text-[11px] text-slate-500">Add to Home Screen / PC</div>
-                            </div>
-                          </button>
-                        </>
-                      )}
+                      {/* Go to Settings */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('settings');
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
+                      >
+                        <Building2 className="w-4 h-4 text-slate-500" />
+                        <span className="font-semibold">Agency Profile & Bank</span>
+                      </button>
 
-                      <div className="my-1 border-t border-slate-200/60" />
+                      <div className="my-1 border-t border-slate-200/80" />
 
-                      {/* About Billr & Developer Dialog */}
+                      {/* About / Help */}
                       <button
                         type="button"
                         onClick={() => {
                           setIsAboutModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className="w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-2xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
+                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
                       >
-                        <Info className="w-4 h-4 text-blue-600" />
-                        <div>
-                          <div className="font-bold text-slate-900">About Billr</div>
-                          <div className="text-[11px] text-slate-500">Engine & Developer Credit</div>
-                        </div>
+                        <Info className="w-4 h-4 text-slate-500" />
+                        <span className="font-semibold">About Billr</span>
                       </button>
-
-                      {/* App Version Info / Installed Status */}
-                      <div className="px-3.5 py-2 text-[10px] text-slate-400 border-t border-slate-200/60 mt-1 flex items-center justify-between">
-                        <span className="font-semibold">Billr v1.0</span>
-                        {isInstalled ? (
-                          <span className="flex items-center gap-1 text-emerald-600 font-semibold apple-glass-badge px-2 py-0.5 rounded-full">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Installed
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-blue-600 font-semibold apple-glass-badge px-2 py-0.5 rounded-full">
-                            <Zap className="w-3 h-3 text-amber-500" /> Offline Ready
-                          </span>
-                        )}
-                      </div>
 
                     </motion.div>
                   )}
@@ -332,16 +312,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         </div>
       </header>
 
-      {/* Multi-Platform Universal Installation Guide Sheet (Android, iOS & Desktop) */}
+      {/* Universal Install Modal */}
       <InstallModal
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
-        deferredPrompt={deferredPrompt}
-        onTriggerInstall={handleInstallClick}
-        isInstalled={isInstalled}
       />
 
-      {/* Discreet Creative About Billr & Developer Modal */}
+      {/* About Modal */}
       <AboutModal
         isOpen={isAboutModalOpen}
         onClose={() => setIsAboutModalOpen(false)}

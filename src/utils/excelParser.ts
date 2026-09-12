@@ -7,31 +7,52 @@ export interface ParseResult {
   totalQty: number;
   totalCommissionAmount: number;
   sheetNames: string[];
+  activeSheetName: string;
   rawHeaders: string[];
-  ignoredColumns: string[];
 }
 
-export function parseExcelFile(fileData: ArrayBuffer | Uint8Array): ParseResult {
-  const workbook = XLSX.read(fileData, { type: 'array' });
-  const sheetNames = workbook.SheetNames;
-  
-  if (sheetNames.length === 0) {
-    throw new Error('The uploaded file does not contain any sheets.');
+/**
+ * Universal Excel & CSV file parser
+ * Supports: .xlsx, .xls, .csv, .tsv, .txt
+ */
+export function parseExcelFile(
+  fileData: ArrayBuffer | Uint8Array | string, 
+  targetSheetName?: string
+): ParseResult {
+  let workbook: XLSX.WorkBook;
+
+  if (typeof fileData === 'string') {
+    workbook = XLSX.read(fileData, { type: 'string', raw: true });
+  } else {
+    workbook = XLSX.read(fileData, { type: 'array' });
   }
 
-  // Look for sheets named 'Working', 'Commission', 'Statement', or default to first sheet
-  let activeSheetName = sheetNames[0];
-  const preferredSheet = sheetNames.find(s => 
-    s.toLowerCase().includes('working') || 
-    s.toLowerCase().includes('commission') || 
-    s.toLowerCase().includes('statement')
-  );
-  if (preferredSheet) {
-    activeSheetName = preferredSheet;
+  const sheetNames = workbook.SheetNames;
+  if (!sheetNames || sheetNames.length === 0) {
+    throw new Error('The uploaded file does not contain any readable sheets or data.');
+  }
+
+  // Determine active sheet
+  let activeSheetName = targetSheetName && sheetNames.includes(targetSheetName)
+    ? targetSheetName
+    : sheetNames[0];
+
+  if (!targetSheetName) {
+    const preferredSheet = sheetNames.find(s => {
+      const lower = s.toLowerCase();
+      return lower.includes('working') || lower.includes('commission') || lower.includes('statement') || lower.includes('mca');
+    });
+    if (preferredSheet) {
+      activeSheetName = preferredSheet;
+    }
   }
 
   const worksheet = workbook.Sheets[activeSheetName];
-  // Parse rows as raw array of arrays
+  if (!worksheet) {
+    throw new Error(`Sheet "${activeSheetName}" could not be loaded.`);
+  }
+
+  // Parse raw rows (array of arrays)
   const rawRows: (string | number | null | undefined)[][] = XLSX.utils.sheet_to_json(worksheet, {
     header: 1,
     defval: '',
@@ -39,12 +60,12 @@ export function parseExcelFile(fileData: ArrayBuffer | Uint8Array): ParseResult 
   });
 
   if (rawRows.length === 0) {
-    throw new Error('The selected sheet is empty.');
+    throw new Error(`The sheet "${activeSheetName}" is empty.`);
   }
 
   // Search for the header row
   let headerRowIndex = -1;
-  let colIndices = {
+  const colIndices = {
     customer: -1,
     invNo: -1,
     date: -1,
@@ -55,57 +76,63 @@ export function parseExcelFile(fileData: ArrayBuffer | Uint8Array): ParseResult 
     commAmt: -1,
   };
 
-  const ignoredColumns: string[] = [];
-
-  for (let r = 0; r < Math.min(rawRows.length, 12); r++) {
+  // Inspect first 15 rows for header row keywords
+  for (let r = 0; r < Math.min(rawRows.length, 15); r++) {
     const row = rawRows[r].map(c => String(c ?? '').trim().toLowerCase());
     
-    // Check if this row looks like a header row
-    const hasProductOrItem = row.some(c => c.includes('product') || c.includes('item') || c.includes('description') || c.includes('service') || c.includes('particular'));
-    const hasQty = row.some(c => c === 'qty' || c.includes('quantity') || c.includes('weight'));
-    const hasComm = row.some(c => c.includes('comm') || c.includes('rate') || c.includes('price') || c.includes('amt') || c.includes('amount'));
+    const hasProductOrItem = row.some(c => 
+      c.includes('product') || c.includes('item') || c.includes('desc') || 
+      c.includes('service') || c.includes('particular') || c.includes('material')
+    );
+    const hasQty = row.some(c => 
+      c === 'qty' || c.includes('quantity') || c.includes('weight') || c.includes('kgs') || c.includes('lot')
+    );
+    const hasComm = row.some(c => 
+      c.includes('comm') || c.includes('rate') || c.includes('price') || c.includes('amt') || c.includes('amount') || c.includes('brokerage')
+    );
+    const hasCustomer = row.some(c => 
+      c.includes('customer') || c.includes('client') || c.includes('buyer') || c.includes('party')
+    );
 
-    if ((hasProductOrItem && (hasQty || hasComm)) || (row.includes('customer') && row.some(c => c.includes('inv')))) {
+    if ((hasProductOrItem && (hasQty || hasComm)) || (hasCustomer && (row.some(c => c.includes('inv') || c.includes('bill')) || hasQty))) {
       headerRowIndex = r;
       
       row.forEach((colName, idx) => {
-        if (colName.includes('customer') || colName.includes('client') || colName.includes('buyer') || colName.includes('party')) {
-          colIndices.customer = idx;
-        } else if (colName.includes('inv') || colName.includes('bill') || colName.includes('invoice')) {
-          colIndices.invNo = idx;
-        } else if (colName.includes('date') || colName.includes('dt')) {
-          colIndices.date = idx;
-        } else if (colName.includes('product') || colName.includes('desc') || colName.includes('particular') || colName.includes('item') || colName.includes('service')) {
-          colIndices.product = idx;
-        } else if (colName === 'qty' || colName.includes('quantity') || colName.includes('weight') || colName.includes('kgs')) {
-          colIndices.qty = idx;
-        } else if (colName.includes('sales price') || colName.includes('sale price') || colName.includes('unit price') || colName.includes('product rate') || colName.includes('basic price') || colName.includes('selling price')) {
-          colIndices.unitPrice = idx;
-        } else if (colName.includes('comm/kg') || colName.includes('comm rate') || colName.includes('rate/kg') || colName.includes('comm/unit') || (colName.includes('comm') && !colName.includes('amt') && !colName.includes('amount'))) {
-          colIndices.commRate = idx;
-        } else if (colName.includes('comm amt') || colName.includes('comm amount') || colName.includes('commission amt') || (colName.includes('amt') && !colName.includes('sales')) || colName.includes('total')) {
-          if (colIndices.commAmt === -1) {
-            colIndices.commAmt = idx;
-          }
+        if (colName.includes('customer') || colName.includes('client') || colName.includes('buyer') || colName.includes('party') || colName.includes('account')) {
+          if (colIndices.customer === -1) colIndices.customer = idx;
+        } else if (colName.includes('inv') || colName.includes('bill') || colName.includes('invoice') || colName.includes('doc') || colName.includes('ref')) {
+          if (colIndices.invNo === -1) colIndices.invNo = idx;
+        } else if (colName.includes('date') || colName.includes('dt') || colName === 'd.o.b') {
+          if (colIndices.date === -1) colIndices.date = idx;
+        } else if (colName.includes('product') || colName.includes('desc') || colName.includes('particular') || colName.includes('item') || colName.includes('service') || colName.includes('material')) {
+          if (colIndices.product === -1) colIndices.product = idx;
+        } else if (colName === 'qty' || colName.includes('quantity') || colName.includes('weight') || colName.includes('kgs') || colName.includes('volume')) {
+          if (colIndices.qty === -1) colIndices.qty = idx;
+        } else if (colName.includes('sales price') || colName.includes('sale price') || colName.includes('unit price') || colName.includes('product rate') || colName.includes('basic price') || colName.includes('selling price') || colName.includes('rate/unit') || colName.includes('sales rate')) {
+          if (colIndices.unitPrice === -1) colIndices.unitPrice = idx;
+        } else if (colName.includes('comm/kg') || colName.includes('comm rate') || colName.includes('rate/kg') || colName.includes('comm/unit') || colName.includes('comm %') || (colName.includes('comm') && !colName.includes('amt') && !colName.includes('amount')) || colName.includes('brokerage rate')) {
+          if (colIndices.commRate === -1) colIndices.commRate = idx;
+        } else if (colName.includes('comm amt') || colName.includes('comm amount') || colName.includes('commission amt') || colName.includes('taxable') || (colName.includes('amt') && !colName.includes('sales')) || colName.includes('brokerage amt')) {
+          if (colIndices.commAmt === -1) colIndices.commAmt = idx;
         }
       });
       break;
     }
   }
 
-  // Fallback if header wasn't found by keywords: assume first non-empty row
+  // Fallback if header wasn't found by strict keywords: assume first non-empty row
   if (headerRowIndex === -1) {
     headerRowIndex = 0;
     const row = rawRows[0].map(c => String(c ?? '').trim().toLowerCase());
     row.forEach((colName, idx) => {
-      if (colName.includes('cust')) colIndices.customer = idx;
-      else if (colName.includes('inv')) colIndices.invNo = idx;
-      else if (colName.includes('date')) colIndices.date = idx;
-      else if (colName.includes('prod') || colName.includes('desc')) colIndices.product = idx;
-      else if (colName.includes('qty')) colIndices.qty = idx;
+      if (colName.includes('cust') || colName.includes('party')) colIndices.customer = idx;
+      else if (colName.includes('inv') || colName.includes('bill')) colIndices.invNo = idx;
+      else if (colName.includes('date') || colName.includes('dt')) colIndices.date = idx;
+      else if (colName.includes('prod') || colName.includes('desc') || colName.includes('item')) colIndices.product = idx;
+      else if (colName.includes('qty') || colName.includes('weight')) colIndices.qty = idx;
       else if (colName.includes('sales') || colName.includes('unit')) colIndices.unitPrice = idx;
       else if (colName.includes('rate') || colName.includes('comm')) colIndices.commRate = idx;
-      else if (colName.includes('amt')) colIndices.commAmt = idx;
+      else if (colName.includes('amt') || colName.includes('total') || colName.includes('val')) colIndices.commAmt = idx;
     });
   }
 
@@ -117,59 +144,71 @@ export function parseExcelFile(fileData: ArrayBuffer | Uint8Array): ParseResult 
     const row = rawRows[r];
     if (!row || row.length === 0) continue;
 
-    // Check if this is a "TOTAL" row
+    // Check if this is a "TOTAL" or header-like row
     const firstCell = String(row[0] ?? '').trim().toUpperCase();
-    if (firstCell.includes('TOTAL') || firstCell.includes('SUBTOTAL') || firstCell.includes('TAXABLE')) {
+    const secondCell = String(row[1] ?? '').trim().toUpperCase();
+    if (
+      firstCell.includes('TOTAL') || firstCell.includes('SUBTOTAL') || firstCell.includes('TAXABLE') ||
+      secondCell.includes('TOTAL') || secondCell.includes('GRAND TOTAL')
+    ) {
       continue;
     }
 
-    const customer = colIndices.customer !== -1 ? String(row[colIndices.customer] ?? '').trim() : 'General Customer';
+    const customer = colIndices.customer !== -1 ? String(row[colIndices.customer] ?? '').trim() : '';
     const invNo = colIndices.invNo !== -1 ? String(row[colIndices.invNo] ?? '').trim() : '';
     let dateVal = colIndices.date !== -1 ? String(row[colIndices.date] ?? '').trim() : '';
     
     // Excel date numeric formatting handling
-    if (typeof row[colIndices.date] === 'number') {
+    if (colIndices.date !== -1 && typeof row[colIndices.date] === 'number') {
       const parsedDate = XLSX.SSF.parse_date_code(row[colIndices.date] as number);
       if (parsedDate) {
-        dateVal = `${parsedDate.d}-${parsedDate.m}-${parsedDate.y}`;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        dateVal = `${parsedDate.d}-${monthNames[parsedDate.m - 1] || parsedDate.m}-${String(parsedDate.y).slice(-2)}`;
       }
     }
 
     const product = colIndices.product !== -1 ? String(row[colIndices.product] ?? '').trim() : '';
     
-    // Skip completely empty product rows
-    if (!product && !customer && !invNo) continue;
+    // Clean numeric inputs
+    const cleanNumber = (val: any): number => {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      const str = String(val).replace(/[@₹$,\s%]/g, '').trim();
+      const num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    };
 
-    const rawQty = colIndices.qty !== -1 ? String(row[colIndices.qty] ?? '').replace(/,/g, '').trim() : '0';
-    const rawUnitPrice = colIndices.unitPrice !== -1 ? String(row[colIndices.unitPrice] ?? '').replace(/[@₹$,]/g, '').trim() : '0';
-    const rawRate = colIndices.commRate !== -1 ? String(row[colIndices.commRate] ?? '').replace(/[@₹$,]/g, '').trim() : '0';
-    const rawAmt = colIndices.commAmt !== -1 ? String(row[colIndices.commAmt] ?? '').replace(/[@₹$,]/g, '').trim() : '0';
+    const qty = colIndices.qty !== -1 ? cleanNumber(row[colIndices.qty]) : 0;
+    const unitPrice = colIndices.unitPrice !== -1 ? cleanNumber(row[colIndices.unitPrice]) : 0;
+    let commPerKg = colIndices.commRate !== -1 ? cleanNumber(row[colIndices.commRate]) : 0;
+    let commAmt = colIndices.commAmt !== -1 ? cleanNumber(row[colIndices.commAmt]) : 0;
 
-    const qty = parseFloat(rawQty) || 0;
-    const unitPrice = parseFloat(rawUnitPrice) || 0;
-    let commPerKg = parseFloat(rawRate) || 0;
-    let commAmt = parseFloat(rawAmt) || 0;
+    // Skip empty lines
+    if (!product && !customer && !invNo && qty === 0 && commAmt === 0) {
+      continue;
+    }
 
-    // If amount is missing but qty and rate exist, compute it
+    // Auto-calculate missing commission amount or rate
     if (commAmt === 0 && qty > 0 && commPerKg > 0) {
       commAmt = Number((qty * commPerKg).toFixed(2));
     } else if (commPerKg === 0 && qty > 0 && commAmt > 0) {
       commPerKg = Number((commAmt / qty).toFixed(4));
     }
 
-    if (customer) {
-      customersSet.add(customer);
-    }
+    const resolvedCustomer = customer || 'General Customer';
+    customersSet.add(resolvedCustomer);
 
     records.push({
-      customer: customer || 'General Customer',
+      id: `record-${r}-${Date.now()}`,
+      customer: resolvedCustomer,
       invNo,
       date: dateVal,
-      product: product || 'Commission Service',
+      product: product || 'Chemical Agency Commission',
       qty,
       unitPrice,
       commPerKg,
       commAmt,
+      selected: true,
     });
   }
 
@@ -183,18 +222,24 @@ export function parseExcelFile(fileData: ArrayBuffer | Uint8Array): ParseResult 
     totalQty,
     totalCommissionAmount,
     sheetNames,
+    activeSheetName,
     rawHeaders,
-    ignoredColumns,
   };
 }
 
-export function convertParsedRecordsToInvoiceItems(records: ExcelParsedRecord[], selectedCustomer?: string): InvoiceItem[] {
-  const filtered = selectedCustomer && selectedCustomer !== 'ALL'
-    ? records.filter(r => r.customer === selectedCustomer)
-    : records;
+/**
+ * Converts selected parsed records into official GST Invoice Line Items
+ */
+export function convertParsedRecordsToInvoiceItems(
+  records: ExcelParsedRecord[], 
+  selectedCustomer?: string
+): InvoiceItem[] {
+  const filtered = records
+    .filter(r => r.selected !== false)
+    .filter(r => !selectedCustomer || selectedCustomer === 'ALL' || r.customer === selectedCustomer);
 
   return filtered.map((r, idx) => {
-    const desc = selectedCustomer === 'ALL' && r.customer
+    const desc = (!selectedCustomer || selectedCustomer === 'ALL') && r.customer
       ? `${r.product} (${r.customer})`
       : r.product;
 
@@ -205,14 +250,14 @@ export function convertParsedRecordsToInvoiceItems(records: ExcelParsedRecord[],
     return {
       id: `imported-${Date.now()}-${idx}`,
       description: desc || 'Commission Item',
-      hsnSacCode: '998311', // Standard Indian SAC code for Business Auxiliary / Commission agent services
+      hsnSacCode: '998311', // SAC code for Business Auxiliary / Commercial Agency services
       qty: qtyVal,
       unit: qtyVal > 1 ? 'kg' : 'Lot',
       unitPrice: unitPriceVal > 0 ? unitPriceVal : undefined,
       productAmount: productAmountVal,
       commissionType: 'PER_UNIT',
       commissionRate: r.commPerKg || 0,
-      commissionAmount: r.commAmt || (qtyVal * (r.commPerKg || 0)),
+      commissionAmount: r.commAmt || Number((qtyVal * (r.commPerKg || 0)).toFixed(2)),
       invNo: r.invNo,
       date: r.date,
       customer: r.customer,
@@ -220,9 +265,12 @@ export function convertParsedRecordsToInvoiceItems(records: ExcelParsedRecord[],
   });
 }
 
+/**
+ * Export standard Excel workbook template with sample data (MCA Commission Working)
+ */
 export function exportSampleExcelWorkbook(): void {
   const data = [
-    ['MURTHY CHEMICAL AGENCIES - COMMISSION STATEMENT'],
+    ['MURTHY CHEMICAL AGENCIES - COMMISSION WORKING SHEET'],
     ['Customer', 'Inv.No', 'Date', 'Product', 'Qty', 'Unit Price (₹)', 'Comm/kg (₹)', 'Comm Amt (₹)'],
     ['BIO AGRO ENERGY PVT LTD', '800086408', '28-Jan-26', 'SPIRIZYME ADV ULTI', 360, 550, 16.5, 5940],
     ['BIO AGRO ENERGY PVT LTD', '800087967', '6-Mar-26', 'SPIRIZYME ADV ULTI', 3480, 550, 16.5, 57420],
@@ -240,6 +288,34 @@ export function exportSampleExcelWorkbook(): void {
 
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Working');
-  XLSX.writeFile(wb, 'MCA_Commission_Statement_Sample.xlsx');
+  XLSX.utils.book_append_sheet(wb, ws, 'MCA Commission');
+  XLSX.writeFile(wb, 'MCA_Commission_working_08.08.2026.xlsx');
+}
+
+/**
+ * Export sample CSV template
+ */
+export function exportSampleCsv(): void {
+  const csvContent = `Customer,Inv.No,Date,Product,Qty,Unit Price,Comm/kg,Comm Amt
+BIO AGRO ENERGY PVT LTD,800086408,28-Jan-26,SPIRIZYME ADV ULTI,360,550.00,16.50,5940.00
+BIO AGRO ENERGY PVT LTD,800087967,6-Mar-26,SPIRIZYME ADV ULTI,3480,550.00,16.50,57420.00
+BIO AGRO ENERGY PVT LTD,800089619,14-Apr-26,EFFYGREN,30,2800.00,84.00,2520.00
+BIO AGRO ENERGY PVT LTD,800089619,14-Apr-26,RM-20,10,26000.00,780.00,7800.00
+BIO AGRO ENERGY PVT LTD,800089619,14-Apr-26,SPIRIZYME ADV ULTI,1590,550.00,16.50,26235.00
+BIO AGRO ENERGY PVT LTD,800089619,14-Apr-26,FORTIVA REVO X,375,1965.00,58.95,22106.25
+BIO AGRO ENERGY PVT LTD,800089619,14-Apr-26,ALCOHOL ACTIVE DR,320,640.00,19.20,6144.00
+RAVINDRA AND COMPANY LTD,800089707,17-Apr-26,EFFYMOLL+,75,2700.00,780.00,58500.00
+SNJ SUGARS AND PRODUCTS LTD,800091196,4-Jun-26,EFFYGREN,350,3000.00,600.00,210000.00
+THE ANDHRA SUGARS LTD,800091867,23-Jun-26,EFFYMOLL+,50,3300.00,779.00,38950.00
+VISHWA SAMUDRA BIO ENERGY PVT LTD,800082526,30-Oct-25,FORTIVA REVO X,1002,1608.75,9.6525,9671.80
+VISHWA SAMUDRA BIO ENERGY PVT LTD,800082526,30-Oct-25,SPIRIZYME ADV ULTI,8249,483.45,2.9007,23927.87`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'MCA_Commission_Template.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

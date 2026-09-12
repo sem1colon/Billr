@@ -1,3 +1,5 @@
+export type ActiveTab = 'sheet' | 'builder' | 'preview' | 'settings';
+
 export interface BusinessProfile {
   name: string;
   address: string;
@@ -57,6 +59,7 @@ export interface InvoiceData {
 }
 
 export interface ExcelParsedRecord {
+  id: string;
   customer: string;
   invNo: string;
   date: string;
@@ -65,4 +68,5 @@ export interface ExcelParsedRecord {
   unitPrice?: number; // Product sales/unit rate
   commPerKg: number; // Commission rate per kg/unit
   commAmt: number; // Commission total amount
+  selected?: boolean;
 }

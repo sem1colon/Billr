@@ -1,13 +1,14 @@
-import { InvoiceData } from '../types';
+import { InvoiceData, ActiveTab, ExcelParsedRecord } from '../types';
 import { initialInvoiceData, defaultSeller } from '../data/sampleData';
 import { getDefaultSignatureDataUrl } from './signatureUtils';
-import { ActiveTab } from '../components/HeaderNav';
 
 const STORAGE_KEYS = {
   INVOICE_DATA: 'billr_invoice_state_v1',
   ACTIVE_TAB: 'billr_active_tab_v1',
   UI_PREFS: 'billr_ui_preferences_v1',
   LAST_SAVED_TIMESTAMP: 'billr_last_saved_time_v1',
+  PARSED_SHEET_RECORDS: 'billr_parsed_records_v1',
+  SHEET_CUSTOMER: 'billr_sheet_customer_v1',
 };
 
 /**
@@ -93,19 +94,19 @@ export function clearSavedInvoiceData(): void {
 }
 
 /**
- * Loads the last active navigation tab.
+ * Loads the last active navigation tab. Defaults to 'sheet' for the upload-first workflow.
  */
 export function loadSavedActiveTab(): ActiveTab {
-  if (typeof window === 'undefined') return 'builder';
+  if (typeof window === 'undefined') return 'sheet';
   try {
     const tab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) as ActiveTab;
-    if (tab === 'builder' || tab === 'preview' || tab === 'settings') {
+    if (tab === 'sheet' || tab === 'builder' || tab === 'preview' || tab === 'settings') {
       return tab;
     }
   } catch (e) {
     // fallback
   }
-  return 'builder';
+  return 'sheet';
 }
 
 /**
@@ -121,14 +122,54 @@ export function saveActiveTab(tab: ActiveTab): void {
 }
 
 /**
+ * Saves cached parsed records from Excel/CSV
+ */
+export function saveSavedSheetRecords(records: ExcelParsedRecord[], customer: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.PARSED_SHEET_RECORDS, JSON.stringify(records));
+    localStorage.setItem(STORAGE_KEYS.SHEET_CUSTOMER, customer);
+  } catch (e) {
+    // ignore
+  }
+}
+
+/**
+ * Loads cached parsed records from Excel/CSV
+ */
+export function loadSavedSheetRecords(): { records: ExcelParsedRecord[]; customer: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PARSED_SHEET_RECORDS);
+    const customer = localStorage.getItem(STORAGE_KEYS.SHEET_CUSTOMER) || 'ALL';
+    if (raw) {
+      const records = JSON.parse(raw);
+      if (Array.isArray(records) && records.length > 0) {
+        return { records, customer };
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null;
+}
+
+export interface UiPreferences {
+  isLargeText: boolean;
+}
+
+/**
  * Loads UI preferences like large text mode.
  */
-export function loadSavedUiPreferences(): { isLargeText: boolean } {
+export function loadSavedUiPreferences(): UiPreferences {
   if (typeof window === 'undefined') return { isLargeText: false };
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.UI_PREFS);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      return {
+        isLargeText: Boolean(parsed.isLargeText),
+      };
     }
   } catch (e) {
     // fallback
@@ -139,7 +180,7 @@ export function loadSavedUiPreferences(): { isLargeText: boolean } {
 /**
  * Saves UI preferences.
  */
-export function saveUiPreferences(prefs: { isLargeText: boolean }): void {
+export function saveUiPreferences(prefs: UiPreferences): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(STORAGE_KEYS.UI_PREFS, JSON.stringify(prefs));

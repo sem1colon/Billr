@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { InvoiceData } from '../types';
 import { numberToIndianRupees } from './numberToWords';
 
-export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = false): void {
+export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -321,6 +321,12 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
   doc.setTextColor(71, 85, 105);
   doc.text(invoiceData.seller.partnerName, pageWidth - margin, footerY + 21.5, { align: 'right' });
 
+  return doc;
+}
+
+export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = false): void {
+  const doc = createInvoicePdfDoc(invoiceData);
+
   // Save / Print
   if (openPrintDialog) {
     doc.autoPrint();
@@ -330,4 +336,40 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
     const cleanNum = invoiceData.invoiceNumber.replace(/[^a-zA-Z0-9_-]/g, '_');
     doc.save(`Invoice_${cleanNum}.pdf`);
   }
+}
+
+export async function shareInvoicePDF(invoiceData: InvoiceData): Promise<boolean> {
+  const doc = createInvoicePdfDoc(invoiceData);
+  const cleanNum = invoiceData.invoiceNumber.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const fileName = `Invoice_${cleanNum}.pdf`;
+
+  try {
+    const pdfBlob = doc.output('blob');
+    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: `GST Tax Invoice ${invoiceData.invoiceNumber}`,
+        text: `Tax Invoice ${invoiceData.invoiceNumber} from ${invoiceData.seller.name}`,
+        files: [file],
+      });
+      return true;
+    } else if (navigator.share) {
+      // Fallback share without file
+      await navigator.share({
+        title: `GST Tax Invoice ${invoiceData.invoiceNumber}`,
+        text: `Tax Invoice ${invoiceData.invoiceNumber} for ${invoiceData.buyer.name}`,
+      });
+      doc.save(fileName);
+      return true;
+    }
+  } catch (err: any) {
+    if (err.name !== 'AbortError') {
+      console.warn('Share not completed, falling back to download:', err);
+    }
+  }
+
+  // Default fallback: direct download
+  doc.save(fileName);
+  return false;
 }

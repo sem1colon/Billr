@@ -8,7 +8,10 @@ interface AboutModalProps {
   onClose: () => void;
 }
 
-export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+export const AboutModal: React.FC<AboutModalProps> = ({ 
+  isOpen, 
+  onClose,
+}) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,12 +45,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <X className="w-4 h-4 flex-shrink-0" />
             </motion.button>
 
-            {/* Brand Icon & Name */}
+            {/* Brand Name & Info */}
             <div className="flex flex-col items-center text-center pt-2 pb-3">
-              <BillrLogo size="lg" showText={false} className="mb-3" />
-              <h3 className="text-xl font-black tracking-tight text-slate-900">
-                Billr
-              </h3>
+              <BillrLogo size="xl" className="mb-1" />
               <p className="text-xs font-bold text-blue-600 mt-0.5">
                 Version 1.0.0
               </p>
@@ -70,7 +70,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" />
                 <div className="text-left">
                   <span className="font-bold text-slate-800 block">Instant Vector PDF</span>
-                  <span className="text-[11px] text-slate-500">Crystal-clear print ready A4 commercial format.</span>
+                  <span className="text-[11px] text-slate-500">Crystal-clear print-ready commercial format.</span>
                 </div>
               </div>
 

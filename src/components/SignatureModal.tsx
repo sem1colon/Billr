@@ -45,21 +45,65 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
     }
   }, [isOpen, currentSignatureUrl, showSignature]);
 
-  // Canvas drawing handlers
+  // Set up high-DPI canvas when switching to draw mode
+  useEffect(() => {
+    if (activeMode === 'draw' && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = inkColor;
+    }
+  }, [activeMode, inkColor]);
+
+  // Helper to extract canvas point accurately on iPhone retina touch screens
+  const getCanvasPoint = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    let clientX = 0;
+    let clientY = 0;
+
+    if ('touches' in e) {
+      if (e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if (e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      }
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  };
+
+  // Canvas drawing handlers with touch-action prevention
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if ('touches' in e) {
+      e.stopPropagation();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-
+    const { x, y } = getCanvasPoint(e);
     ctx.strokeStyle = inkColor;
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x, y);
 
@@ -69,15 +113,15 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
+    if ('touches' in e) {
+      e.stopPropagation();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-
+    const { x, y } = getCanvasPoint(e);
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -95,7 +139,8 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const dpr = window.devicePixelRatio || 1;
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
     setHasDrawn(false);
     setPreviewUrl('');
   };
@@ -128,118 +173,124 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="apple-glass-card rounded-[32px] max-w-lg w-full shadow-2xl border border-white/95 overflow-hidden"
+        className="apple-glass-card rounded-t-[32px] sm:rounded-[32px] max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Specular Top Rim */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200/50 flex items-center justify-between bg-white/30 backdrop-blur-md">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl apple-glass-badge text-blue-700">
-              <PenTool className="w-4 h-4" />
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-blue-100 text-blue-700">
+              <PenTool className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
-                Authorized Signatory Signature
+              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">
+                Sign Invoice
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-600 font-medium">
                 {partnerName || 'R.S.N. Murthy'} &bull; Murthy Chemical Agencies
               </p>
             </div>
           </div>
           <button 
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-slate-100/70 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+            aria-label="Close signature dialog"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Mode Switcher */}
-          <div className="flex items-center p-1 apple-glass-segmented rounded-2xl text-xs font-semibold gap-1">
+          <div className="grid grid-cols-3 p-1 bg-slate-100 rounded-2xl text-xs sm:text-sm font-semibold gap-1">
             <button
+              type="button"
               onClick={() => { setActiveMode('default'); handleSetToDefault(); }}
-              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`py-2.5 px-1 text-center rounded-xl transition-all cursor-pointer ${
                 activeMode === 'default'
-                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
+                  ? 'bg-white text-blue-700 shadow font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Official Signature
+              Official Sign
             </button>
             <button
+              type="button"
               onClick={() => setActiveMode('draw')}
-              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`py-2.5 px-1 text-center rounded-xl transition-all cursor-pointer ${
                 activeMode === 'draw'
-                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
+                  ? 'bg-white text-blue-700 shadow font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Draw Custom
+              Draw Finger
             </button>
             <button
+              type="button"
               onClick={() => setActiveMode('upload')}
-              className={`flex-1 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`py-2.5 px-1 text-center rounded-xl transition-all cursor-pointer ${
                 activeMode === 'upload'
-                  ? 'bg-white text-blue-700 shadow-sm font-bold border border-white/95'
+                  ? 'bg-white text-blue-700 shadow font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Upload File
+              Upload Photo
             </button>
           </div>
 
           {/* Mode 1: Default Official Signature Preview */}
           {activeMode === 'default' && (
             <div className="apple-glass-subtle rounded-2xl p-4 flex flex-col items-center justify-center space-y-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Official Pre-Configured Signature
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Official Agency Signature (Instant)
               </span>
-              <div className="h-24 w-full bg-white/90 border border-slate-200/80 rounded-2xl flex items-center justify-center p-2 shadow-inner">
+              <div className="h-28 w-full bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-center p-3 shadow-sm">
                 {previewUrl ? (
                   <img 
                     src={previewUrl} 
                     alt="Default Partner Signature" 
-                    className="max-h-20 max-w-full object-contain"
+                    className="max-h-24 max-w-full object-contain"
                   />
                 ) : (
-                  <span className="text-xs text-slate-400">Loading signature...</span>
+                  <span className="text-sm text-slate-400">Loading signature...</span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 text-center font-medium">
-                Stylized blue-ink signature for <strong>{partnerName || 'R.S.N. Murthy'}</strong> on behalf of Murthy Chemical Agencies.
+              <p className="text-xs text-slate-600 text-center font-medium">
+                Verified signature of <strong>{partnerName || 'R.S.N. Murthy'}</strong> for Murthy Chemical Agencies.
               </p>
             </div>
           )}
 
           {/* Mode 2: Draw Custom Signature */}
           {activeMode === 'draw' && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">
-                  Draw with Mouse or Touch
+                <span className="text-sm font-bold text-slate-800">
+                  Draw with your finger:
                 </span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[11px] text-slate-500">Ink Color:</span>
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setInkColor('#1e3a8a')}
+                      className={`w-7 h-7 rounded-full bg-blue-900 cursor-pointer ${inkColor === '#1e3a8a' ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}
+                      title="Royal Blue Ink"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setInkColor('#0f172a')}
+                      className={`w-7 h-7 rounded-full bg-slate-900 cursor-pointer ${inkColor === '#0f172a' ? 'ring-2 ring-slate-400 ring-offset-2' : ''}`}
+                      title="Black Ink"
+                    />
+                  </div>
                   <button
-                    onClick={() => setInkColor('#1e3a8a')}
-                    className={`w-5 h-5 rounded-full bg-blue-900 cursor-pointer ${inkColor === '#1e3a8a' ? 'ring-2 ring-blue-400' : ''}`}
-                    title="Royal Blue"
-                  />
-                  <button
-                    onClick={() => setInkColor('#0f172a')}
-                    className={`w-5 h-5 rounded-full bg-slate-900 cursor-pointer ${inkColor === '#0f172a' ? 'ring-2 ring-slate-400' : ''}`}
-                    title="Black"
-                  />
-                  <button
+                    type="button"
                     onClick={handleClearCanvas}
-                    className="p-1 rounded-md text-xs text-red-600 hover:bg-red-50 flex items-center gap-1 font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 flex items-center gap-1 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Clear</span>
@@ -247,11 +298,10 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 </div>
               </div>
 
-              <div className="border-2 border-dashed border-slate-300/80 rounded-2xl bg-white overflow-hidden touch-none flex items-center justify-center">
+              <div className="border-2 border-dashed border-blue-300 rounded-2xl bg-white overflow-hidden touch-none flex items-center justify-center shadow-inner">
                 <canvas
                   ref={canvasRef}
-                  width={440}
-                  height={140}
+                  style={{ touchAction: 'none', width: '100%', height: '160px' }}
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}
@@ -259,19 +309,22 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                   onTouchStart={startDrawing}
                   onTouchMove={draw}
                   onTouchEnd={stopDrawing}
-                  className="w-full h-36 cursor-crosshair bg-white"
+                  className="cursor-crosshair bg-white select-none"
                 />
               </div>
+              <p className="text-xs text-slate-500 text-center">
+                Tip: Use your finger directly in the box above to sign smoothly.
+              </p>
             </div>
           )}
 
           {/* Mode 3: Upload Image */}
           {activeMode === 'upload' && (
             <div className="space-y-3">
-              <label className="border-2 border-dashed border-slate-300/80 hover:border-blue-500 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors apple-glass-subtle hover:bg-blue-50/40">
-                <Upload className="w-8 h-8 text-blue-600 mb-2" />
-                <span className="text-xs font-bold text-slate-800">Click to upload signature image</span>
-                <span className="text-[11px] text-slate-500 mt-0.5">Supports PNG, JPG (transparent background recommended)</span>
+              <label className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-white hover:bg-blue-50/40">
+                <Upload className="w-9 h-9 text-blue-600 mb-2" />
+                <span className="text-sm font-bold text-slate-800">Tap to upload signature photo</span>
+                <span className="text-xs text-slate-500 mt-1">PNG or JPG with signature</span>
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -281,14 +334,15 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               </label>
 
               {previewUrl && (
-                <div className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between shadow-2xs">
+                <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                   <div className="flex items-center space-x-3">
-                    <img src={previewUrl} alt="Uploaded signature" className="h-10 w-auto max-w-[120px] object-contain border p-1 rounded" />
-                    <span className="text-xs font-semibold text-slate-700">Signature Loaded</span>
+                    <img src={previewUrl} alt="Uploaded signature" className="h-12 w-auto max-w-[140px] object-contain border p-1 rounded-lg" />
+                    <span className="text-xs font-bold text-emerald-700">Photo Loaded ✓</span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setPreviewUrl('')}
-                    className="text-xs text-red-600 font-semibold hover:underline cursor-pointer"
+                    className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
                   >
                     Remove
                   </button>
@@ -298,22 +352,24 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
           )}
 
           {/* Visibility Toggle */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl apple-glass-subtle shadow-2xs">
-            <div className="flex items-center space-x-2.5">
-              {visible ? <Eye className="w-4 h-4 text-emerald-600" /> : <EyeOff className="w-4 h-4 text-slate-400" />}
+          <div className="flex items-center justify-between p-4 rounded-2xl apple-glass-subtle">
+            <div className="flex items-center space-x-3">
+              {visible ? <Eye className="w-5 h-5 text-emerald-600" /> : <EyeOff className="w-5 h-5 text-slate-400" />}
               <div>
-                <p className="text-xs font-bold text-slate-800">Display Signature on Invoice & PDF</p>
-                <p className="text-[11px] text-slate-500">Automatically stamps the signature above partner name</p>
+                <p className="text-sm font-bold text-slate-800">Include Signature on Invoice</p>
+                <p className="text-xs text-slate-500">Stamps partner signature on PDF copy</p>
               </div>
             </div>
             <button
+              type="button"
               onClick={() => setVisible(!visible)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors cursor-pointer ${
                 visible ? 'bg-blue-600' : 'bg-slate-300'
               }`}
+              aria-label="Toggle signature visibility"
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md ${
                   visible ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
@@ -322,28 +378,31 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200/50 bg-white/30 backdrop-blur-md flex items-center justify-between">
+        <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3 pb-safe">
           <button
+            type="button"
             onClick={handleSetToDefault}
-            className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 apple-glass-btn px-3 py-1.5 rounded-xl cursor-pointer"
+            className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1.5 apple-glass-btn px-3.5 py-2.5 rounded-xl cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Default</span>
+            <RotateCcw className="w-4 h-4" />
+            <span>Reset Official</span>
           </button>
 
           <div className="flex items-center space-x-2">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 apple-glass-btn rounded-xl transition-all cursor-pointer"
+              className="px-4 py-2.5 text-xs font-bold text-slate-700 apple-glass-btn rounded-xl transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSave}
-              className="px-5 py-2 apple-btn-primary text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 apple-btn-primary text-white text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
             >
               <Check className="w-4 h-4" />
-              <span>Apply Signature</span>
+              <span>Save & Apply</span>
             </button>
           </div>
         </div>
