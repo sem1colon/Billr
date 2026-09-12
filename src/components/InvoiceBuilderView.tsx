@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { InvoiceData, InvoiceItem, GstType } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
+import { calculateInvoiceTotals } from '../utils/invoiceCalculations';
 import { SignatureModal } from './SignatureModal';
 
 interface InvoiceBuilderViewProps {
@@ -46,10 +47,8 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
 }) => {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
-  const taxableValue = invoiceData.items.reduce((sum, item) => sum + (item.commissionAmount || 0), 0);
-  const gstRate = invoiceData.gstRate || 18;
-  const gstAmount = (taxableValue * gstRate) / 100;
-  const grandTotal = taxableValue + gstAmount + (invoiceData.roundOff || 0);
+  const { taxableValue, cgstAmount, sgstAmount, igstAmount, grandTotal, roundOff } = calculateInvoiceTotals(invoiceData);
+  const gstRate = invoiceData.gstRate || 0;
   const totalQtyHandled = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
 
   const amountInWords = numberToIndianRupees(grandTotal);
@@ -250,13 +249,12 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             <input
               type="text"
               value={invoiceData.buyer.name}
-              onChange={(e) => setInvoiceData(prev => ({
-                ...prev,
-                buyer: { ...prev.buyer, name: e.target.value }
-              }))}
+              readOnly
+              aria-describedby="fixed-recipient-note"
               placeholder="e.g. PRAJ INDUSTRIES LIMITED"
               className="w-full px-2.5 py-1 apple-glass-input text-xs font-bold text-slate-900 rounded-lg outline-none mb-1"
             />
+            <p id="fixed-recipient-note" className="text-[11px] text-slate-600 mb-1">Invoice Recipient: fixed to PRAJ INDUSTRIES LIMITED. Source Customers remain transaction context only.</p>
             <input
               type="text"
               value={invoiceData.buyer.address}
@@ -488,15 +486,22 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               <strong className="text-slate-900">{formatIndianCurrency(taxableValue)}</strong>
             </div>
 
-            <div className="flex justify-between">
-              <span>{invoiceData.gstType === 'IGST' ? `Integrated GST (${gstRate}%)` : `CGST + SGST (${gstRate}%)`}:</span>
-              <strong className="text-blue-700">{formatIndianCurrency(gstAmount)}</strong>
-            </div>
+            {invoiceData.gstType === 'IGST' ? (
+              <div className="flex justify-between">
+                <span>Integrated GST ({gstRate}%):</span>
+                <strong className="text-blue-700">{formatIndianCurrency(igstAmount)}</strong>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between"><span>CGST ({gstRate / 2}%):</span><strong className="text-blue-700">{formatIndianCurrency(cgstAmount)}</strong></div>
+                <div className="flex justify-between"><span>SGST ({gstRate / 2}%):</span><strong className="text-blue-700">{formatIndianCurrency(sgstAmount)}</strong></div>
+              </>
+            )}
 
             {invoiceData.roundOff !== 0 && (
               <div className="flex justify-between">
                 <span>Round Off:</span>
-                <span>{invoiceData.roundOff > 0 ? `+₹${invoiceData.roundOff}` : `-₹${Math.abs(invoiceData.roundOff)}`}</span>
+                <span>{roundOff > 0 ? `+₹${roundOff.toFixed(2)}` : `-₹${Math.abs(roundOff).toFixed(2)}`}</span>
               </div>
             )}
 

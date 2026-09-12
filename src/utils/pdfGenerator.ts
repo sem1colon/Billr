@@ -2,7 +2,16 @@ import jsPDF from 'jspdf';
 import autoTable, { RowInput } from 'jspdf-autotable';
 import { InvoiceData, InvoiceItem } from '../types';
 import { numberToIndianRupees } from './numberToWords';
-import { calculateInvoiceTotals, gstLabel } from './invoiceCalculations';
+import { calculateInvoiceTotals } from './invoiceCalculations';
+
+export function getInvoicePdfFileName(invoiceNumber: string): string {
+  const normalized = (invoiceNumber || '').normalize('NFKD').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const fiscalNumber = normalized.match(/2026_27_(\d{1,})$/)?.[1]
+    || normalized.match(/^(\d{1,})_(?:26_27|2026_27)/)?.[1]
+    || normalized.match(/^(?:MCA_)?(\d{1,})$/)?.[1];
+  const sequence = fiscalNumber ? fiscalNumber.padStart(3, '0') : '001';
+  return `Invoice_MCA_2026-27_${sequence}.pdf`;
+}
 
 /**
  * Generates an exact match PDF document replicating reference format (Inv.004_121102.pdf)
@@ -194,7 +203,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     });
   });
 
-  const { taxableValue, gstAmount, grandTotal, igstAmount } = calculateInvoiceTotals(invoiceData);
+  const { taxableValue, gstAmount, cgstAmount, sgstAmount, grandTotal, igstAmount } = calculateInvoiceTotals(invoiceData);
   const gstRate = invoiceData.gstRate || 0;
 
   // Summary Rows inside the Table
@@ -210,17 +219,33 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     },
   ]);
 
-  tableBody.push([
-    {
-      content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-    '',
-    {
-      content: (invoiceData.gstType === 'IGST' ? igstAmount : gstAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-  ]);
+  if (invoiceData.gstType === 'IGST') {
+    tableBody.push([
+      { content: `ADD: IGST ${gstRate}%`, styles: { fontStyle: 'bold', halign: 'right' } },
+      '',
+      { content: igstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+    ]);
+  } else {
+    tableBody.push([
+      { content: `ADD: CGST ${gstRate / 2}%`, styles: { fontStyle: 'bold', halign: 'right' } },
+      '',
+      { content: cgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+    ]);
+    tableBody.push([
+      { content: `ADD: SGST ${gstRate / 2}%`, styles: { fontStyle: 'bold', halign: 'right' } },
+      '',
+      { content: sgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+    ]);
+  }
+
+  const { roundOff } = calculateInvoiceTotals(invoiceData);
+  if (roundOff !== 0) {
+    tableBody.push([
+      { content: 'Round Off', styles: { fontStyle: 'bold', halign: 'right' } },
+      '',
+      { content: roundOff.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+    ]);
+  }
 
   tableBody.push([
     {
@@ -361,15 +386,13 @@ export function generateInvoicePDF(invoiceData: InvoiceData, openPrintDialog = f
     const blobUrl = doc.output('bloburl');
     window.open(blobUrl, '_blank');
   } else {
-    const cleanNum = (invoiceData.invoiceNumber || 'Invoice').replace(/[^a-zA-Z0-9_-]/g, '_');
-    doc.save(`Invoice_${cleanNum}.pdf`);
+    doc.save(getInvoicePdfFileName(invoiceData.invoiceNumber));
   }
 }
 
 export async function shareInvoicePDF(invoiceData: InvoiceData): Promise<boolean> {
   const doc = createInvoicePdfDoc(invoiceData);
-  const cleanNum = (invoiceData.invoiceNumber || 'Invoice').replace(/[^a-zA-Z0-9_-]/g, '_');
-  const fileName = `Invoice_${cleanNum}.pdf`;
+  const fileName = getInvoicePdfFileName(invoiceData.invoiceNumber);
 
   try {
     const pdfBlob = doc.output('blob');

@@ -6,6 +6,7 @@ export interface InvoiceTotals {
   cgstAmount: number;
   sgstAmount: number;
   igstAmount: number;
+  roundOff: number;
   grandTotal: number;
 }
 
@@ -24,9 +25,10 @@ export function calculateInvoiceTotals(invoiceData: Pick<InvoiceData, 'items' | 
   const igstAmount = isIgst ? gstAmount : 0;
   const cgstAmount = isIgst ? 0 : roundCurrency(gstAmount / 2);
   const sgstAmount = isIgst ? 0 : roundCurrency(gstAmount - cgstAmount);
-  const grandTotal = roundCurrency(taxableValue + gstAmount + (Number(invoiceData.roundOff) || 0));
+  const roundOff = roundCurrency(Number.isFinite(Number(invoiceData.roundOff)) ? Number(invoiceData.roundOff) : 0);
+  const grandTotal = roundCurrency(taxableValue + gstAmount + roundOff);
 
-  return { taxableValue, gstAmount, cgstAmount, sgstAmount, igstAmount, grandTotal };
+  return { taxableValue, gstAmount, cgstAmount, sgstAmount, igstAmount, roundOff, grandTotal };
 }
 
 export function gstLabel(gstType: InvoiceData['gstType'], gstRate: number): string {

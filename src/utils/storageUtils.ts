@@ -10,7 +10,18 @@ const STORAGE_KEYS = {
   PARSED_SHEET_RECORDS: 'billr_parsed_records_v2',
   SHEET_CUSTOMER: 'billr_sheet_customer_v2',
   SAVED_SIGNATURE: 'billr_saved_signature_v1',
+  WORKBOOK_STATE: 'billr_workbook_state_v1',
 };
+
+export interface SavedWorkbookState {
+  version: 1;
+  records: ExcelParsedRecord[];
+  fileName: string;
+  activeSheetName: string;
+  availableSheets: string[];
+  selectedCustomer: string;
+  searchQuery: string;
+}
 
 /**
  * Loads the user's custom saved signature or null if not set.
@@ -104,10 +115,17 @@ export function loadSavedInvoiceData(): InvoiceData {
       saveSavedSignature(mergedSeller.signatureUrl);
     }
 
+    const normalizedBuyer = {
+      ...initialInvoiceData.buyer,
+      ...(parsed.buyer || {}),
+      name: initialInvoiceData.buyer.name,
+    };
+
     return {
       ...initialInvoiceData,
       ...parsed,
-      seller: mergedSeller,
+      seller: { ...mergedSeller, name: defaultSeller.name },
+      buyer: normalizedBuyer,
       items: parsed.items,
       showSignature: parsed.showSignature !== undefined ? parsed.showSignature : true,
     };
@@ -120,6 +138,46 @@ export function loadSavedInvoiceData(): InvoiceData {
         signatureUrl: defaultSig,
       },
     };
+  }
+}
+
+export function saveWorkbookState(state: Omit<SavedWorkbookState, 'version'>): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    localStorage.setItem(STORAGE_KEYS.WORKBOOK_STATE, JSON.stringify({ version: 1, ...state }));
+    return true;
+  } catch (err) {
+    console.error('Failed to save workbook state to localStorage:', err);
+    return false;
+  }
+}
+
+export function loadWorkbookState(): SavedWorkbookState | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.WORKBOOK_STATE) || 'null') as Partial<SavedWorkbookState> | null;
+    if (parsed?.version !== 1 || !Array.isArray(parsed.records)) return null;
+    return {
+      version: 1,
+      records: parsed.records,
+      fileName: typeof parsed.fileName === 'string' ? parsed.fileName : '',
+      activeSheetName: typeof parsed.activeSheetName === 'string' ? parsed.activeSheetName : '',
+      availableSheets: Array.isArray(parsed.availableSheets) ? parsed.availableSheets.filter((value): value is string => typeof value === 'string') : [],
+      selectedCustomer: typeof parsed.selectedCustomer === 'string' ? parsed.selectedCustomer : 'ALL',
+      searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
+    };
+  } catch (err) {
+    console.warn('Failed to load workbook state from localStorage:', err);
+    return null;
+  }
+}
+
+export function clearSavedWorkbookState(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEYS.WORKBOOK_STATE);
+  } catch (err) {
+    console.warn('Failed to clear workbook state from localStorage:', err);
   }
 }
 

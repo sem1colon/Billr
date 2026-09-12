@@ -32,6 +32,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
   const handleSellerChange = (field: string, value: string) => {
+    if (field === 'name') return;
     setInvoiceData(prev => ({
       ...prev,
       seller: { ...prev.seller, [field]: value }
@@ -131,9 +132,11 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <input
               type="text"
               value={invoiceData.seller.name}
-              onChange={(e) => handleSellerChange('name', e.target.value)}
+              readOnly
+              aria-describedby="seller-identity-note"
               className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
+            <p id="seller-identity-note" className="mt-1 text-[11px] text-slate-600">Seller / Agency is fixed to MURTHY CHEMICAL AGENCIES for this invoice workflow.</p>
           </div>
 
           <div>
@@ -311,9 +314,11 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             <input
               type="text"
               value={invoiceData.buyer.name}
-              onChange={(e) => handleBuyerChange('name', e.target.value)}
+              readOnly
+              aria-describedby="recipient-identity-note"
               className="w-full px-3.5 py-2.5 text-sm font-bold text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
             />
+            <p id="recipient-identity-note" className="mt-1 text-[11px] text-slate-600">Invoice Recipient is fixed to PRAJ INDUSTRIES LIMITED. You may correct address, GSTIN, and place of supply.</p>
           </div>
 
           <div className="sm:col-span-2">

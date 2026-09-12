@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   UploadCloud,
@@ -25,6 +25,7 @@ import {
 import { ExcelParsedRecord, InvoiceItem } from '../types';
 import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWorkbook, exportSampleCsv } from '../utils/excelParser';
 import { formatIndianCurrency } from '../utils/numberToWords';
+import { loadWorkbookState, saveWorkbookState } from '../utils/storageUtils';
 
 interface ExcelImportViewProps {
   onApplyItemsToInvoice: (items: InvoiceItem[]) => void;
@@ -37,14 +38,15 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   onNavigateToPreview,
   onNavigateToBuilder,
 }) => {
+  const savedWorkbook = loadWorkbookState();
   const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState<string>('');
-  const [activeSheetName, setActiveSheetName] = useState<string>('');
-  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
-  const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>([]);
+  const [fileName, setFileName] = useState<string>(savedWorkbook?.fileName || '');
+  const [activeSheetName, setActiveSheetName] = useState<string>(savedWorkbook?.activeSheetName || '');
+  const [availableSheets, setAvailableSheets] = useState<string[]>(savedWorkbook?.availableSheets || []);
+  const [parsedRecords, setParsedRecords] = useState<ExcelParsedRecord[]>(savedWorkbook?.records || []);
 
-  const [selectedCustomer, setSelectedCustomer] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>(savedWorkbook?.selectedCustomer || 'ALL');
+  const [searchQuery, setSearchQuery] = useState<string>(savedWorkbook?.searchQuery || '');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ExcelParsedRecord | null>(null);
@@ -52,6 +54,17 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const rawFileBufferRef = useRef<ArrayBuffer | null>(null);
+
+  useEffect(() => {
+    saveWorkbookState({
+      records: parsedRecords,
+      fileName,
+      activeSheetName,
+      availableSheets,
+      selectedCustomer,
+      searchQuery,
+    });
+  }, [parsedRecords, fileName, activeSheetName, availableSheets, selectedCustomer, searchQuery]);
 
   // Extract unique customer list
   const customers = Array.from(new Set(parsedRecords.map(r => r.customer).filter(Boolean)));

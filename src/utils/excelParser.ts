@@ -11,6 +11,16 @@ export interface ParseResult {
   rawHeaders: string[];
 }
 
+function stableRecordId(customer: string, invNo: string, date: string, product: string, rowIndex: number): string {
+  const source = [customer, invNo, date, product, String(rowIndex)].join('|').toLowerCase();
+  let hash = 2166136261;
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `record-${(hash >>> 0).toString(16)}`;
+}
+
 /**
  * Universal Excel & CSV file parser
  * Supports: .xlsx, .xls, .csv, .tsv, .txt
@@ -241,7 +251,7 @@ export function parseExcelFile(
     }
 
     records.push({
-      id: `record-${r}-${Date.now()}`,
+      id: stableRecordId(resolvedCustomer, invNo, dateVal, product || 'Chemical Agency Commission', r),
       customer: resolvedCustomer,
       invNo,
       date: dateVal,
@@ -280,7 +290,7 @@ export function convertParsedRecordsToInvoiceItems(
     .filter(r => r.selected !== false)
     .filter(r => !selectedCustomer || selectedCustomer === 'ALL' || r.customer === selectedCustomer);
 
-  return filtered.map((r, idx) => {
+  return filtered.map((r) => {
     // Include customer name in description if not already present
     const hasCustomerInProduct = r.customer && r.product.toLowerCase().includes(r.customer.toLowerCase());
     const desc = r.customer && !hasCustomerInProduct
@@ -292,7 +302,7 @@ export function convertParsedRecordsToInvoiceItems(
     const productAmountVal = unitPriceVal > 0 ? Number((qtyVal * unitPriceVal).toFixed(2)) : undefined;
 
     return {
-      id: `imported-${Date.now()}-${idx}`,
+      id: `imported-${r.id}`,
       description: desc || 'Commission Item',
       hsnSacCode: '998311', // SAC code for Business Auxiliary / Commercial Agency services
       qty: qtyVal,

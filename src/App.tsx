@@ -21,7 +21,9 @@ import {
   loadSavedUiPreferences, 
   saveUiPreferences,
   loadSavedSheetRecords,
-  getDefaultOrSavedSignature
+  getDefaultOrSavedSignature,
+  clearSavedInvoiceData,
+  clearSavedWorkbookState,
 } from './utils/storageUtils';
 
 export default function App() {
@@ -79,13 +81,29 @@ export default function App() {
   };
 
   const handleApplyItemsFromSheet = (items: InvoiceItem[]) => {
+    const existingIds = new Set(invoiceData.items.map(item => item.id));
+    const newItems = items.filter(item => !existingIds.has(item.id));
     setInvoiceData(prev => {
       return {
         ...prev,
-        items,
+        items: [...prev.items, ...newItems],
       };
     });
-    showToast(`Transferred ${items.length} items to Tax Invoice`);
+    showToast(newItems.length > 0 ? `Added ${newItems.length} new item${newItems.length === 1 ? '' : 's'}; existing edits were preserved` : 'No new rows added; duplicate source rows were skipped');
+  };
+
+  const handleStartNewInvoice = () => {
+    if (!window.confirm('Start a new invoice? This clears the saved invoice and workbook draft on this device.')) return;
+    const freshInvoice: InvoiceData = {
+      ...initialInvoiceData,
+      seller: { ...initialInvoiceData.seller, signatureUrl: getDefaultOrSavedSignature() },
+      buyer: { ...defaultBuyer },
+      items: [],
+    };
+    clearSavedInvoiceData();
+    clearSavedWorkbookState();
+    setInvoiceData(freshInvoice);
+    showToast('Started a new invoice');
   };
 
   const handleDownloadPdf = () => {
@@ -135,6 +153,10 @@ export default function App() {
           setIsLargeText(!isLargeText);
         }}
       />
+
+      <button type="button" onClick={handleStartNewInvoice} className="sr-only focus:not-sr-only fixed top-2 right-2 z-50 apple-glass-btn rounded-xl px-3 py-2 text-xs font-bold">
+        Start new invoice
+      </button>
 
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12">
