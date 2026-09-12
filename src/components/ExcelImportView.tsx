@@ -27,7 +27,7 @@ import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWo
 import { formatIndianCurrency } from '../utils/numberToWords';
 
 interface ExcelImportViewProps {
-  onApplyItemsToInvoice: (items: InvoiceItem[], customerName?: string) => void;
+  onApplyItemsToInvoice: (items: InvoiceItem[]) => void;
   onNavigateToPreview: () => void;
   onNavigateToBuilder: () => void;
 }
@@ -199,11 +199,11 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   // Handler: Generate Invoice
   const handleGenerateInvoice = (directToPreview = false) => {
     if (selectedVisibleRecords.length === 0) {
-      alert('Please select at least one transaction row to generate an invoice.');
+      setErrorMsg('Select at least one transaction row before creating an invoice.');
       return;
     }
     const items = convertParsedRecordsToInvoiceItems(parsedRecords, selectedCustomer);
-    onApplyItemsToInvoice(items, selectedCustomer !== 'ALL' ? selectedCustomer : undefined);
+    onApplyItemsToInvoice(items);
 
     if (directToPreview) {
       onNavigateToPreview();
@@ -226,10 +226,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               <span className="text-xs text-slate-400 font-medium">Auto-Parsing Engine</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1.5">
-              Upload Commission Working Sheet
+              MCA Commission Working Sheet
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Upload your Excel (<strong>.xlsx</strong>, <strong>.xls</strong>) or <strong>.csv</strong> statement to auto-generate GST Tax Invoices.
+              Upload your MCA workbook, review commission transactions, and prepare the Praj Industries tax invoice.
             </p>
           </div>
 
@@ -272,6 +272,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             <input
               type="file"
               ref={fileInputRef}
+              id="workbook-upload"
+              name="workbook"
               onChange={(e) => e.target.files && e.target.files[0] && handleFileProcess(e.target.files[0])}
               accept=".xlsx,.xls,.csv,.tsv,.txt"
               className="hidden"
@@ -321,10 +323,17 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
               >
-                {sheet}
+                {sheet}{sheet.toLowerCase() === 'sheet1' ? ' (Recommended)' : ''}
               </button>
             ))}
           </div>
+        )}
+
+        {fileName && activeSheetName && (
+          <p className="mt-3 text-xs text-slate-600" role="status">
+            <strong>{fileName}</strong> is using worksheet <strong>{activeSheetName}</strong>.
+            {activeSheetName.toLowerCase() === 'sheet1' && ' Sheet1 contains the detailed invoice rows.'}
+          </p>
         )}
 
         {/* Error Notice */}

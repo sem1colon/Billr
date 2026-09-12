@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable, { RowInput } from 'jspdf-autotable';
 import { InvoiceData, InvoiceItem } from '../types';
 import { numberToIndianRupees } from './numberToWords';
+import { calculateInvoiceTotals, gstLabel } from './invoiceCalculations';
 
 /**
  * Generates an exact match PDF document replicating reference format (Inv.004_121102.pdf)
@@ -42,17 +43,17 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text(invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES', pageWidth / 2, currentY + 22, { align: 'center' });
+  doc.text(invoiceData.seller.name, pageWidth / 2, currentY + 22, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(invoiceData.seller.address || '104 Rukmini Apartment Yousufguda Check Post', pageWidth / 2, currentY + 36, { align: 'center' });
+  doc.text(invoiceData.seller.address, pageWidth / 2, currentY + 36, { align: 'center' });
 
-  const partnerPhone = `${invoiceData.seller.cityStateZip || 'Hyderabad-500045.'} Partner:- ${invoiceData.seller.partnerName || 'R.S.N.MURTHY'} Ph: ${invoiceData.seller.phone || '9849187125'}`;
+  const partnerPhone = `${invoiceData.seller.cityStateZip} Partner:- ${invoiceData.seller.partnerName} Ph: ${invoiceData.seller.phone}`;
   doc.text(partnerPhone, pageWidth / 2, currentY + 48, { align: 'center' });
 
   doc.setFont('helvetica', 'bold');
-  const gstinPanLine = `GSTIN No : ${invoiceData.seller.gstin || '36ABXFM3174B1Z1'}   PAN Number : ${invoiceData.seller.pan || 'ABXFM3174B'}`;
+  const gstinPanLine = `GSTIN No : ${invoiceData.seller.gstin}   PAN Number : ${invoiceData.seller.pan}`;
   doc.text(gstinPanLine, pageWidth / 2, currentY + 62, { align: 'center' });
 
   // Border around seller block
@@ -87,7 +88,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.text('Billed To:', col1X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8.5);
-  doc.text(invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED', col1X + 6, partiesBlockStartY + 23);
+  doc.text(invoiceData.buyer.name, col1X + 6, partiesBlockStartY + 23);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
@@ -98,7 +99,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const buyerAddrEndY = partiesBlockStartY + 34 + Math.min(splitBuyerAddr.length, 3) * 8.5;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
-  doc.text(`GSTIN No:- ${invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}`, col1X + 6, Math.min(buyerAddrEndY + 4, partiesBlockStartY + 68));
+  doc.text(`GSTIN No:- ${invoiceData.buyer.gstin}`, col1X + 6, Math.min(buyerAddrEndY + 4, partiesBlockStartY + 68));
 
   // Col 2 Content: Place of Supply
   doc.setFont('helvetica', 'bold');
@@ -106,11 +107,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.text('Place of Supply / Service:', col2X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8);
-  doc.text('PRAJ INDUSTRIES LTD', col2X + 6, partiesBlockStartY + 23);
+  doc.text(invoiceData.buyer.name, col2X + 6, partiesBlockStartY + 23);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  const posText = invoiceData.buyer.placeOfSupply || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108.";
+  const posText = invoiceData.buyer.placeOfSupply;
   const splitPos = doc.splitTextToSize(posText, col2Width - 12);
   doc.text(splitPos, col2X + 6, partiesBlockStartY + 34);
 
@@ -123,14 +124,14 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7.5);
   doc.text('INVOICE No.', col3X + 6, partiesBlockStartY + 13);
   doc.setFontSize(8.5);
-  doc.text(invoiceData.invoiceNumber || '004/26-27', col3X + 6, partiesBlockStartY + 27);
+  doc.text(invoiceData.invoiceNumber, col3X + 6, partiesBlockStartY + 27);
 
   // Bottom half: Date
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
   doc.text('DATE', col3X + 6, partiesBlockStartY + metaHalfHeight + 13);
   doc.setFontSize(8.5);
-  doc.text(invoiceData.invoiceDate || '10-Aug-26', col3X + 6, partiesBlockStartY + metaHalfHeight + 27);
+  doc.text(invoiceData.invoiceDate, col3X + 6, partiesBlockStartY + metaHalfHeight + 27);
 
   currentY += partiesBlockHeight;
 
@@ -193,10 +194,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     });
   });
 
-  const taxableValue = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0);
-  const gstRate = invoiceData.gstRate || 18;
-  const gstAmount = Number(((taxableValue * gstRate) / 100).toFixed(2));
-  const grandTotal = Number((taxableValue + gstAmount + (invoiceData.roundOff || 0)).toFixed(2));
+  const { taxableValue, gstAmount, grandTotal, igstAmount } = calculateInvoiceTotals(invoiceData);
+  const gstRate = invoiceData.gstRate || 0;
 
   // Summary Rows inside the Table
   tableBody.push([
@@ -213,12 +212,12 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   tableBody.push([
     {
-      content: `ADD: IGST ${gstRate}%`,
+      content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
       styles: { fontStyle: 'bold', halign: 'right' },
     },
     '',
     {
-      content: gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      content: (invoiceData.gstType === 'IGST' ? igstAmount : gstAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       styles: { fontStyle: 'bold', halign: 'right' },
     },
   ]);

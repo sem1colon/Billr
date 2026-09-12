@@ -12,6 +12,7 @@ import { initialInvoiceData, defaultBuyer, sampleInvoiceItems } from './data/sam
 import { generateInvoicePDF } from './utils/pdfGenerator';
 import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
 import { convertParsedRecordsToInvoiceItems } from './utils/excelParser';
+import { calculateInvoiceTotals } from './utils/invoiceCalculations';
 import { 
   loadSavedInvoiceData, 
   saveInvoiceData, 
@@ -77,20 +78,10 @@ export default function App() {
     showToast(editingItem ? 'Item updated & auto-saved' : 'Item added & auto-saved');
   };
 
-  const handleApplyItemsFromSheet = (items: InvoiceItem[], customerName?: string) => {
+  const handleApplyItemsFromSheet = (items: InvoiceItem[]) => {
     setInvoiceData(prev => {
-      const updatedBuyer = customerName && customerName !== 'ALL'
-        ? {
-            ...prev.buyer,
-            name: customerName,
-            // If buyer matches default, maintain standard fields, else update name
-            address: prev.buyer.name === customerName ? prev.buyer.address : (customerName.includes('BIO AGRO') ? 'Bio Agro Energy Site, Telangana' : prev.buyer.address),
-          }
-        : prev.buyer;
-
       return {
         ...prev,
-        buyer: updatedBuyer,
         items,
       };
     });
@@ -122,12 +113,12 @@ export default function App() {
     const cached = loadSavedSheetRecords();
     if (cached && cached.records && cached.records.length > 0) {
       const items = convertParsedRecordsToInvoiceItems(cached.records, cached.customer);
-      handleApplyItemsFromSheet(items, cached.customer !== 'ALL' ? cached.customer : undefined);
+      handleApplyItemsFromSheet(items);
     }
     setActiveTab('preview');
   };
 
-  const grandTotal = invoiceData.items.reduce((s, i) => s + (i.commissionAmount || 0), 0) * (1 + (invoiceData.gstRate || 18) / 100);
+  const { grandTotal } = calculateInvoiceTotals(invoiceData);
 
   return (
     <div className={`relative min-h-screen max-w-[100vw] overflow-x-hidden bg-slate-100/70 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
@@ -137,7 +128,6 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onDownloadPdf={handleDownloadPdf}
-        onLoadSample={handleLoadSample}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
         isLargeText={isLargeText}

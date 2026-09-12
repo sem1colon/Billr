@@ -1,3 +1,4 @@
+import { calculateInvoiceTotals, gstLabel } from '../utils/invoiceCalculations';
 import React, { useState } from 'react';
 import { 
   Download, 
@@ -19,7 +20,7 @@ import {
   Layers,
   Scale
 } from 'lucide-react';
-import { InvoiceData } from '../types';
+import { InvoiceData, InvoiceItem } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
 import { generateInvoicePDF, shareInvoicePDF } from '../utils/pdfGenerator';
 import { SignatureModal } from './SignatureModal';
@@ -53,11 +54,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
-  const taxableValue = invoiceData.items.reduce((sum, item) => sum + (item.commissionAmount || 0), 0);
+  const { taxableValue, gstAmount, grandTotal } = calculateInvoiceTotals(invoiceData);
   const totalQty = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
-  const gstRate = invoiceData.gstRate || 18;
-  const gstAmount = Number(((taxableValue * gstRate) / 100).toFixed(2));
-  const grandTotal = Number((taxableValue + gstAmount + (invoiceData.roundOff || 0)).toFixed(2));
+  const gstRate = invoiceData.gstRate || 0;
   const amountInWords = numberToIndianRupees(grandTotal);
 
   const isSigned = Boolean(invoiceData.showSignature !== false && invoiceData.seller?.signatureUrl);
@@ -111,7 +110,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 🏢 Recipient: ${invoiceData.buyer.name} (GSTIN: ${invoiceData.buyer.gstin})
 📦 Items: ${invoiceData.items.length} lines (${totalQty.toLocaleString()} kg)
 💰 Taxable Value: ₹${taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-📊 IGST (${gstRate}%): ₹${gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+📊 ${gstLabel(invoiceData.gstType, gstRate)}: ₹${gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
 💵 Grand Total: ₹${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
       await navigator.clipboard.writeText(summaryText);
@@ -156,7 +155,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               </span>
               
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold apple-glass-badge text-blue-700 shadow-2xs">
-                {gstRate}% IGST Interstate
+                {gstLabel(invoiceData.gstType, gstRate)}
               </span>
 
               {/* Interactive Signature Status Pill */}
@@ -495,7 +494,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
                     <tr className="border-t border-slate-900 font-bold bg-white">
                       <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
-                        ADD: IGST {gstRate}%
+                        ADD: {gstLabel(invoiceData.gstType, gstRate)}
                       </td>
                       <td className="border-r border-slate-900"></td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">

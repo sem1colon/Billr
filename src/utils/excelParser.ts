@@ -38,13 +38,12 @@ export function parseExcelFile(
     : sheetNames[0];
 
   if (!targetSheetName) {
-    const preferredSheet = sheetNames.find(s => {
+    const recommendedSheet = sheetNames.find(s => s.toLowerCase() === 'sheet1');
+    const preferredSheet = recommendedSheet || sheetNames.find(s => {
       const lower = s.toLowerCase();
       return lower.includes('working') || lower.includes('commission') || lower.includes('statement') || lower.includes('mca');
     });
-    if (preferredSheet) {
-      activeSheetName = preferredSheet;
-    }
+    if (preferredSheet) activeSheetName = preferredSheet;
   }
 
   const worksheet = workbook.Sheets[activeSheetName];
