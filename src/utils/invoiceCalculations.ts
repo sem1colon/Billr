@@ -11,21 +11,28 @@ export interface InvoiceTotals {
 }
 
 export function roundCurrency(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+  const safeValue = Number.isFinite(value) ? value : 0;
+  return Math.round((safeValue + Number.EPSILON) * 100) / 100;
 }
 
 export function calculateTaxableValue(items: InvoiceItem[]): number {
-  return roundCurrency(items.reduce((sum, item) => sum + (Number(item.commissionAmount) || 0), 0));
+  return roundCurrency(items.reduce((sum, item) => {
+    const amount = Number(item.commissionAmount);
+    return sum + (Number.isFinite(amount) && amount > 0 ? amount : 0);
+  }, 0));
 }
 
 export function calculateInvoiceTotals(invoiceData: Pick<InvoiceData, 'items' | 'gstRate' | 'gstType' | 'roundOff'>): InvoiceTotals {
   const taxableValue = calculateTaxableValue(invoiceData.items);
-  const gstAmount = roundCurrency(taxableValue * ((Number(invoiceData.gstRate) || 0) / 100));
+  const gstRate = Number(invoiceData.gstRate);
+  const safeGstRate = Number.isFinite(gstRate) && gstRate > 0 ? gstRate : 0;
+  const gstAmount = roundCurrency(taxableValue * (safeGstRate / 100));
   const isIgst = invoiceData.gstType === 'IGST';
   const igstAmount = isIgst ? gstAmount : 0;
   const cgstAmount = isIgst ? 0 : roundCurrency(gstAmount / 2);
   const sgstAmount = isIgst ? 0 : roundCurrency(gstAmount - cgstAmount);
-  const roundOff = roundCurrency(Number.isFinite(Number(invoiceData.roundOff)) ? Number(invoiceData.roundOff) : 0);
+  const requestedRoundOff = Number(invoiceData.roundOff);
+  const roundOff = roundCurrency(Number.isFinite(requestedRoundOff) ? requestedRoundOff : 0);
   const grandTotal = roundCurrency(taxableValue + gstAmount + roundOff);
 
   return { taxableValue, gstAmount, cgstAmount, sgstAmount, igstAmount, roundOff, grandTotal };

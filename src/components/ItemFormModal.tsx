@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { InvoiceItem } from '../types';
 import { formatIndianCurrency } from '../utils/numberToWords';
+import { useModalAccessibility } from '../utils/useModalAccessibility';
 
 interface ItemFormModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   onSave,
   initialItem,
 }) => {
+  const dialogRef = useModalAccessibility(isOpen, onClose);
   const [description, setDescription] = useState('');
   const [hsnSacCode, setHsnSacCode] = useState('998311');
   const [qty, setQty] = useState<number>(1000);
@@ -181,7 +183,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm" role="presentation">
         
         {/* Senior-Friendly Modal Container */}
         <motion.div 
@@ -189,6 +191,10 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="item-form-dialog-title"
           className="w-full sm:max-w-xl apple-glass-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden max-h-[92dvh] flex flex-col z-10"
         >
           {/* Modal Header */}
@@ -198,7 +204,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                 <Package className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                <h3 id="item-form-dialog-title" className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
                   {initialItem ? 'Edit Line Item' : 'Add Product / Line Item'}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">

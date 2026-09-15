@@ -54,7 +54,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
-  const { taxableValue, gstAmount, grandTotal } = calculateInvoiceTotals(invoiceData);
+  const { taxableValue, gstAmount, grandTotal, roundOff } = calculateInvoiceTotals(invoiceData);
   const totalQty = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
   const gstRate = invoiceData.gstRate || 0;
   const amountInWords = numberToIndianRupees(grandTotal);
@@ -461,7 +461,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                             const prodName = item.description.replace(/\s*\([^)]*\)\s*$/, '').trim();
                             if (prodName) desc += `${desc ? ', ' : ''}${prodName}`;
                             if (item.qty) desc += `, ${item.qty.toLocaleString()}${item.unit || 'kg'}`;
-                            if (item.commissionRate) desc += `, Commission @ ${item.commissionRate}`;
+                            if (item.commissionRate) desc += `, Commission @ ${item.commissionRate.toFixed(2)}`;
 
                             return (
                               <tr key={item.id} className="hover:bg-slate-50">
@@ -501,6 +501,14 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                         {gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
+
+                    {roundOff !== 0 && (
+                      <tr className="border-t border-slate-900 font-bold bg-white">
+                        <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">Round Off</td>
+                        <td className="border-r border-slate-900"></td>
+                        <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">{roundOff.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      </tr>
+                    )}
 
                     <tr className="border-t-2 border-slate-900 font-bold bg-[#f2f2f2]">
                       <td className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">

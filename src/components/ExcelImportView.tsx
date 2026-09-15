@@ -26,6 +26,7 @@ import { ExcelParsedRecord, InvoiceItem } from '../types';
 import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWorkbook, exportSampleCsv } from '../utils/excelParser';
 import { formatIndianCurrency } from '../utils/numberToWords';
 import { loadWorkbookState, saveWorkbookState } from '../utils/storageUtils';
+import { useModalAccessibility } from '../utils/useModalAccessibility';
 
 interface ExcelImportViewProps {
   onApplyItemsToInvoice: (items: InvoiceItem[]) => void;
@@ -51,6 +52,11 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ExcelParsedRecord | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const closeRowModal = () => {
+    setEditingRecord(null);
+    setIsAddModalOpen(false);
+  };
+  const rowDialogRef = useModalAccessibility(isAddModalOpen, closeRowModal);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const rawFileBufferRef = useRef<ArrayBuffer | null>(null);
@@ -74,16 +80,23 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     setIsProcessing(true);
     setFileName(file.name);
 
-    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    const extension = file.name.toLowerCase().split('.').pop() || '';
+    const supportedExtensions = new Set(['xlsx', 'xls', 'csv', 'tsv', 'txt']);
+    if (!supportedExtensions.has(extension)) {
+      setErrorMsg(`Unsupported file type .${extension || 'unknown'}. Upload an .xlsx, .xls, .csv, .tsv, or .txt workbook instead.`);
+      setIsProcessing(false);
+      return;
+    }
+    const isTextFile = ['csv', 'tsv', 'txt'].includes(extension);
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        if (isCsv) {
+        if (isTextFile) {
           const text = e.target?.result as string;
           const result = parseExcelFile(text);
           if (result.records.length === 0) {
-            setErrorMsg('No valid commission rows found in CSV file.');
+            setErrorMsg('No valid commission rows found. Add data rows below the header and upload the corrected file again.');
             setIsProcessing(false);
             return;
           }
@@ -96,7 +109,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           rawFileBufferRef.current = buffer;
           const result = parseExcelFile(buffer);
           if (result.records.length === 0) {
-            setErrorMsg('No valid commission rows found. Ensure columns contain Product, Qty, and Commission.');
+            setErrorMsg('No valid commission rows found. Add Product, Qty, and Commission Amount columns, then upload the corrected workbook again.');
             setIsProcessing(false);
             return;
           }
@@ -107,18 +120,18 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         }
       } catch (err: any) {
         console.error('Error parsing file:', err);
-        setErrorMsg(err.message || 'Failed to parse file. Please verify columns.');
+        setErrorMsg(err.message || 'The file could not be read. Verify the workbook is not corrupted, then upload it again.');
       } finally {
         setIsProcessing(false);
       }
     };
 
     reader.onerror = () => {
-      setErrorMsg('Error reading file.');
+      setErrorMsg('The file could not be read. Check that it is available locally and upload it again.');
       setIsProcessing(false);
     };
 
-    if (isCsv) {
+    if (isTextFile) {
       reader.readAsText(file);
     } else {
       reader.readAsArrayBuffer(file);
@@ -351,7 +364,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
         {/* Error Notice */}
         {errorMsg && (
-          <div className="mt-4 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center space-x-2 text-xs font-semibold">
+          <div className="mt-4 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center space-x-2 text-xs font-semibold" role="alert" aria-live="assertive">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -768,11 +781,11 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* Inline Modal for Adding / Editing a Record */}
       {isAddModalOpen && editingRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
-          <div className="apple-glass-card rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in" role="presentation">
+          <div ref={rowDialogRef} role="dialog" aria-modal="true" aria-labelledby="row-dialog-title" className="apple-glass-card rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92dvh] overflow-y-auto">
 
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 id="row-dialog-title" className="text-sm font-bold text-slate-900">
                 {editingRecord.product ? 'Edit Transaction Row' : 'Add Transaction Row'}
               </h3>
               <button

@@ -201,6 +201,15 @@ export function saveInvoiceData(data: InvoiceData): boolean {
   }
 }
 
+export function hasSavedInvoiceData(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return Boolean(localStorage.getItem(STORAGE_KEYS.INVOICE_DATA));
+  } catch (err) {
+    return false;
+  }
+}
+
 /**
  * Clears saved invoice data and resets to factory sample data.
  */

@@ -7,6 +7,7 @@ import { InvoiceBuilderView } from './components/InvoiceBuilderView';
 import { InvoiceLivePreview } from './components/InvoiceLivePreview';
 import { BusinessSettingsView } from './components/BusinessSettingsView';
 import { ItemFormModal } from './components/ItemFormModal';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { InvoiceData, InvoiceItem, ActiveTab, ExcelParsedRecord } from './types';
 import { initialInvoiceData, defaultBuyer, sampleInvoiceItems } from './data/sampleData';
 import { generateInvoicePDF } from './utils/pdfGenerator';
@@ -24,6 +25,7 @@ import {
   getDefaultOrSavedSignature,
   clearSavedInvoiceData,
   clearSavedWorkbookState,
+  hasSavedInvoiceData,
 } from './utils/storageUtils';
 
 export default function App() {
@@ -33,6 +35,8 @@ export default function App() {
   const [editingItem, setEditingItem] = useState<InvoiceItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLargeText, setIsLargeText] = useState<boolean>(() => loadSavedUiPreferences().isLargeText);
+  const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
+  const [hasShownRestoreNotice, setHasShownRestoreNotice] = useState(false);
   const isInitialMount = useRef(true);
 
   // Auto-persist invoiceData to localStorage
@@ -41,8 +45,17 @@ export default function App() {
       isInitialMount.current = false;
       return;
     }
-    saveInvoiceData(invoiceData);
+    if (!saveInvoiceData(invoiceData)) {
+      showToast('Draft save failed. Keep this tab open and check device storage before leaving.');
+    }
   }, [invoiceData]);
+
+  useEffect(() => {
+    if (!hasShownRestoreNotice && hasSavedInvoiceData()) {
+      setHasShownRestoreNotice(true);
+      showToast('Draft restored from this device');
+    }
+  }, [hasShownRestoreNotice]);
 
   // Auto-persist activeTab to localStorage
   useEffect(() => {
@@ -93,7 +106,6 @@ export default function App() {
   };
 
   const handleStartNewInvoice = () => {
-    if (!window.confirm('Start a new invoice? This clears the saved invoice and workbook draft on this device.')) return;
     const freshInvoice: InvoiceData = {
       ...initialInvoiceData,
       seller: { ...initialInvoiceData.seller, signatureUrl: getDefaultOrSavedSignature() },
@@ -103,6 +115,7 @@ export default function App() {
     clearSavedInvoiceData();
     clearSavedWorkbookState();
     setInvoiceData(freshInvoice);
+    setIsNewInvoiceDialogOpen(false);
     showToast('Started a new invoice');
   };
 
@@ -154,7 +167,7 @@ export default function App() {
         }}
       />
 
-      <button type="button" onClick={handleStartNewInvoice} className="sr-only focus:not-sr-only fixed top-2 right-2 z-50 apple-glass-btn rounded-xl px-3 py-2 text-xs font-bold">
+      <button type="button" onClick={() => setIsNewInvoiceDialogOpen(true)} className="fixed top-3 right-3 z-40 apple-glass-btn rounded-xl px-3 py-2 text-xs font-bold">
         Start new invoice
       </button>
 
@@ -260,9 +273,18 @@ export default function App() {
         initialItem={editingItem}
       />
 
+      <ConfirmDialog
+        isOpen={isNewInvoiceDialogOpen}
+        title="Start a new invoice?"
+        description="This removes the saved invoice and workbook draft from this device. Your current invoice items and edits will be cleared."
+        confirmLabel="Start new invoice"
+        onConfirm={handleStartNewInvoice}
+        onCancel={() => setIsNewInvoiceDialogOpen(false)}
+      />
+
       {/* Floating Toast Notification (Apple Liquid Glass Pill) */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 apple-glass-card !bg-slate-900/90 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 border border-white/20 animate-in fade-in slide-in-from-top-3 duration-200">
+        <div className="fixed top-20 right-4 z-50 apple-glass-card !bg-slate-900/90 text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center space-x-2 border border-white/20 animate-in fade-in slide-in-from-top-3 duration-200" role="status" aria-live="polite">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>{toastMessage}</span>
         </div>

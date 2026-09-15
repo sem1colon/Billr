@@ -141,7 +141,7 @@ export function parseExcelFile(
           if (colIndices.unitPrice === -1) colIndices.unitPrice = idx;
         } else if (colName.includes('comm/kg') || colName.includes('comm rate') || colName.includes('rate/kg') || colName.includes('comm/unit') || colName.includes('comm %') || (colName.includes('comm') && !colName.includes('amt') && !colName.includes('amount')) || colName.includes('brokerage rate')) {
           if (colIndices.commRate === -1) colIndices.commRate = idx;
-        } else if (colName.includes('comm amt') || colName.includes('comm amount') || colName.includes('commission amt') || colName.includes('taxable') || (colName.includes('amt') && !colName.includes('sales')) || colName.includes('brokerage amt')) {
+        } else if (colName.includes('comm amt') || colName.includes('comm amount') || colName.includes('commission amt') || colName.includes('commission amount') || colName.includes('taxable') || (colName.includes('amt') && !colName.includes('sales')) || colName.includes('brokerage amt') || colName.includes('brokerage amount')) {
           if (colIndices.commAmt === -1) colIndices.commAmt = idx;
         }
       });
@@ -177,6 +177,15 @@ export function parseExcelFile(
   }
 
   const rawHeaders = rawRows[headerRowIndex]?.map(c => String(c ?? '').trim()) || [];
+  if (colIndices.product === -1) {
+    throw new Error('Missing product column. Add a Product, Item, Description, or Service column and upload the file again.');
+  }
+  if (colIndices.qty === -1) {
+    throw new Error('Missing quantity column. Add a Qty, Quantity, Weight, or Volume column and upload the file again.');
+  }
+  if (colIndices.commAmt === -1) {
+    throw new Error('Missing commission amount column. Add a Commission Amount, Taxable, or Brokerage Amount column and upload the file again.');
+  }
   const records: ExcelParsedRecord[] = [];
   const customersSet = new Set<string>();
   let lastCustomer = '';

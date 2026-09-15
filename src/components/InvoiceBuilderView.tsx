@@ -27,6 +27,7 @@ import { InvoiceData, InvoiceItem, GstType } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
 import { calculateInvoiceTotals } from '../utils/invoiceCalculations';
 import { SignatureModal } from './SignatureModal';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface InvoiceBuilderViewProps {
   invoiceData: InvoiceData;
@@ -46,6 +47,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
   onNavigateToSheet,
 }) => {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const [isClearItemsDialogOpen, setIsClearItemsDialogOpen] = useState(false);
 
   const { taxableValue, cgstAmount, sgstAmount, igstAmount, grandTotal, roundOff } = calculateInvoiceTotals(invoiceData);
   const gstRate = invoiceData.gstRate || 0;
@@ -74,9 +76,12 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
 
   const handleClearAllItems = () => {
     if (invoiceData.items.length === 0) return;
-    if (window.confirm('Are you sure you want to clear all line items?')) {
-      setInvoiceData(prev => ({ ...prev, items: [] }));
-    }
+    setIsClearItemsDialogOpen(true);
+  };
+
+  const confirmClearAllItems = () => {
+    setInvoiceData(prev => ({ ...prev, items: [] }));
+    setIsClearItemsDialogOpen(false);
   };
 
   const handleSetTodayDate = () => {
@@ -564,6 +569,15 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
           }));
           setIsSignatureModalOpen(false);
         }}
+      />
+
+      <ConfirmDialog
+        isOpen={isClearItemsDialogOpen}
+        title="Clear all invoice items?"
+        description="Every line item currently in this invoice will be removed. Invoice details and buyer information will remain unchanged."
+        confirmLabel="Clear all items"
+        onConfirm={confirmClearAllItems}
+        onCancel={() => setIsClearItemsDialogOpen(false)}
       />
 
     </div>

@@ -5,11 +5,16 @@ import { numberToIndianRupees } from './numberToWords';
 import { calculateInvoiceTotals } from './invoiceCalculations';
 
 export function getInvoicePdfFileName(invoiceNumber: string): string {
-  const normalized = (invoiceNumber || '').normalize('NFKD').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-  const fiscalNumber = normalized.match(/2026_27_(\d{1,})$/)?.[1]
-    || normalized.match(/^(\d{1,})_(?:26_27|2026_27)/)?.[1]
-    || normalized.match(/^(?:MCA_)?(\d{1,})$/)?.[1];
-  const sequence = fiscalNumber ? fiscalNumber.padStart(3, '0') : '001';
+  const normalized = (invoiceNumber || '')
+    .normalize('NFKD')
+    .replace(/\.pdf$/i, '')
+    .replace(/[^a-zA-Z0-9/ -]/g, '')
+    .trim();
+  const parts = normalized.split(/[\\/]+/).map(part => part.trim()).filter(Boolean);
+  const numericParts = parts.filter(part => /^\d+$/.test(part) && !/^(?:19|20)\d{2}$/.test(part));
+  const sequencePart = numericParts[numericParts.length - 1]
+    || (/(?:19|20)\d{2}[- ]\d{2}/.test(normalized) ? undefined : normalized.match(/(?:^|[^\d])(\d{1,})(?:[^\d]|$)/)?.[1]);
+  const sequence = sequencePart ? sequencePart.padStart(3, '0') : '001';
   return `Invoice_MCA_2026-27_${sequence}.pdf`;
 }
 
@@ -188,7 +193,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       if (prodName) desc += `${desc ? ', ' : ''}${prodName}`;
       
       if (item.qty) desc += `, ${item.qty.toLocaleString()}${item.unit || 'kg'}`;
-      if (item.commissionRate) desc += `, Commission @ ${item.commissionRate}`;
+      if (item.commissionRate) desc += `, Commission @ ${item.commissionRate.toFixed(2)}`;
 
       const amountFormatted = item.commissionAmount.toLocaleString('en-IN', {
         minimumFractionDigits: 2,
@@ -227,12 +232,12 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     ]);
   } else {
     tableBody.push([
-      { content: `ADD: CGST ${gstRate / 2}%`, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: `ADD: CGST ${(gstRate / 2).toFixed(2)}%`, styles: { fontStyle: 'bold', halign: 'right' } },
       '',
       { content: cgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
     tableBody.push([
-      { content: `ADD: SGST ${gstRate / 2}%`, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: `ADD: SGST ${(gstRate / 2).toFixed(2)}%`, styles: { fontStyle: 'bold', halign: 'right' } },
       '',
       { content: sgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);

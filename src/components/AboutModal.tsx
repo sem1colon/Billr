@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ExternalLink, ShieldCheck, Zap, HardDrive, Globe } from 'lucide-react';
 import { BillrLogo } from './BillrLogo';
+import { useModalAccessibility } from '../utils/useModalAccessibility';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -12,12 +13,17 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   isOpen, 
   onClose,
 }) => {
+  const dialogRef = useModalAccessibility(isOpen, onClose);
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
           {/* Backdrop */}
           <motion.div 
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-dialog-title"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -47,6 +53,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 
             {/* Brand Name & Info */}
             <div className="flex flex-col items-center text-center pt-2 pb-3">
+              <h2 id="about-dialog-title" className="sr-only">About Billr</h2>
               <BillrLogo size="xl" className="mb-1" />
               <p className="text-xs font-bold text-blue-600 mt-0.5">
                 Version 1.0.0

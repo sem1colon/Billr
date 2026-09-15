@@ -17,6 +17,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { BillrLogo } from './BillrLogo';
+import { useModalAccessibility } from '../utils/useModalAccessibility';
 
 export type PlatformType = 'android' | 'ios' | 'desktop';
 
@@ -35,6 +36,7 @@ export const InstallModal: React.FC<InstallModalProps> = ({
   onTriggerInstall,
   isInstalled: isInstalledProp = false,
 }) => {
+  const dialogRef = useModalAccessibility(isOpen, onClose);
   // Detect current platform accurately
   const getDetectedPlatform = (): PlatformType => {
     if (typeof window === 'undefined') return 'desktop';
@@ -92,7 +94,7 @@ export const InstallModal: React.FC<InstallModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" role="presentation">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -104,11 +106,15 @@ export const InstallModal: React.FC<InstallModalProps> = ({
 
           {/* Universal Liquid Glass Install Modal */}
           <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="install-dialog-title"
             initial={{ opacity: 0, y: 60, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.96 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="relative w-full max-w-lg apple-glass-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl border border-white/95 overflow-hidden z-10 pb-6 pt-5 px-6 max-h-[92vh] flex flex-col"
+              className="relative w-full max-w-lg apple-glass-card rounded-t-[32px] sm:rounded-[32px] shadow-2xl border border-white/95 overflow-hidden z-10 pb-6 pt-5 px-6 max-h-[92dvh] overflow-y-auto flex flex-col"
           >
             {/* Grabber bar on mobile */}
             <div className="w-12 h-1.5 bg-slate-300/80 rounded-full mx-auto mb-3 sm:hidden" />
@@ -126,7 +132,7 @@ export const InstallModal: React.FC<InstallModalProps> = ({
             {/* Header */}
             <div className="flex items-start justify-between pb-3.5 border-b border-slate-200/50 pr-8">
               <div>
-                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <h3 id="install-dialog-title" className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                   <BillrLogo size="sm" showSubtitle={false} />
                   <span className="text-slate-300">/</span>
                   <span className="text-slate-700">{isStandalone ? 'App' : 'Install'}</span>

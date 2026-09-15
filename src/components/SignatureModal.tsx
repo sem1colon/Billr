@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { getDefaultSignatureDataUrl } from '../utils/signatureUtils';
 import { saveSavedSignature, getDefaultOrSavedSignature, loadSavedSignature } from '../utils/storageUtils';
+import { useModalAccessibility } from '../utils/useModalAccessibility';
 
 interface SignatureModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   partnerName = 'R.S.N. Murthy',
   onSaveSignature,
 }) => {
+  const dialogRef = useModalAccessibility(isOpen, onClose);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [activeMode, setActiveMode] = useState<'draw' | 'upload' | 'default'>('default');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -179,8 +181,12 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200" role="presentation">
       <div 
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signature-dialog-title"
         className="apple-glass-card rounded-t-[32px] sm:rounded-[32px] max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -192,7 +198,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             </div>
             <div>
               <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">
-                Sign Invoice
+                <span id="signature-dialog-title">Sign Invoice</span>
               </h3>
               <p className="text-xs text-slate-600 font-medium">
                 {partnerName || 'R.S.N. Murthy'} &bull; Murthy Chemical Agencies
