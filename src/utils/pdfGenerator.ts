@@ -221,7 +221,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
         {
           content: `CUSTOMER  |  ${custName}`,
           colSpan: 4,
-          styles: { fontStyle: 'bold', fillColor: [30, 64, 175], textColor: [255, 255, 255], lineColor: [30, 64, 175], lineWidth: 0.8, cellPadding: { top: 5, right: 4, bottom: 5, left: 7 } },
+          styles: { fontStyle: 'bold', fontSize: 7.6, fillColor: [226, 232, 240], textColor: [127, 29, 29], lineColor: [71, 85, 105], lineWidth: 0.7, cellPadding: { top: 4, right: 4, bottom: 4, left: 7 } },
         },
       ]);
     }
@@ -235,7 +235,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
             getInvoiceItemMeta(item),
             pricingLine,
           ].filter(Boolean).join('\n'),
-          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 11 }, fontSize: 7.6, lineColor: [203, 213, 225] },
+          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 11 }, fontSize: 7.6, lineColor: [203, 203, 203] },
         },
         item.hsnSacCode || '998311',
         formatInvoiceQuantity(item),
