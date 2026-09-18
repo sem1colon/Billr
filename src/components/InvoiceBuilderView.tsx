@@ -100,12 +100,12 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-700 tracking-wide">
-                STEP 2 &bull; INVOICE CUSTOMIZER
+                Step 2 • Invoice Customizer
               </span>
-              <span className="text-xs text-slate-400 font-medium">Rule 46 CGST Compliant</span>
+              <span className="text-xs text-slate-400 font-medium">Rule 46 CGST compliant</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1.5">
-              Invoice Details & Line Items
+              Invoice details & line items
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Review and adjust invoice parameters, tax classification, and line items.

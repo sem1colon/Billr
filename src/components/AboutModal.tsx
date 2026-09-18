@@ -59,7 +59,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                 Version 1.0.0
               </p>
               <p className="text-xs text-slate-500 mt-2 max-w-[240px] leading-relaxed">
-                Fast commercial GST billing & tax invoice automation engine.
+                Fast GST billing and tax-invoice automation for businesses.
               </p>
             </div>
 
@@ -68,7 +68,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               <div className="flex items-center space-x-3 p-2.5 rounded-2xl apple-glass-subtle text-xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                 <div className="text-left">
-                  <span className="font-bold text-slate-800 block">Private & Local</span>
+                  <span className="font-bold text-slate-800 block">Private and local</span>
                   <span className="text-[11px] text-slate-500">Zero cloud transmission; data stays on device.</span>
                 </div>
               </div>
@@ -76,7 +76,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               <div className="flex items-center space-x-3 p-2.5 rounded-2xl apple-glass-subtle text-xs">
                 <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" />
                 <div className="text-left">
-                  <span className="font-bold text-slate-800 block">Instant Vector PDF</span>
+                  <span className="font-bold text-slate-800 block">Instant PDF export</span>
                   <span className="text-[11px] text-slate-500">Crystal-clear print-ready commercial format.</span>
                 </div>
               </div>
@@ -84,8 +84,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               <div className="flex items-center space-x-3 p-2.5 rounded-2xl apple-glass-subtle text-xs">
                 <HardDrive className="w-4 h-4 text-blue-600 flex-shrink-0" />
                 <div className="text-left">
-                  <span className="font-bold text-slate-800 block">Universal PWA</span>
-                  <span className="text-[11px] text-slate-500">Works 100% offline across Android, iOS & Desktop.</span>
+                  <span className="font-bold text-slate-800 block">Works across devices</span>
+                  <span className="text-[11px] text-slate-500">Works fully offline across Android, iOS, and desktop.</span>
                 </div>
               </div>
             </div>

@@ -102,7 +102,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
             <>
               <div className="mt-5 grid grid-cols-3 gap-3 border-y border-slate-200/80 py-4 text-sm">
                 <div><span className="block text-xs text-slate-500">Items</span><strong>{invoiceData.items.length}</strong></div>
-                <div><span className="block text-xs text-slate-500">Taxable</span><strong>{formatIndianCurrency(draftTotal)}</strong></div>
+                <div><span className="block text-xs text-slate-500">Total</span><strong>{formatIndianCurrency(draftTotal)}</strong></div>
                 <div><span className="block text-xs text-slate-500">Updated</span><strong>{lastSavedTimestamp ? formatSavedAt(lastSavedTimestamp) : 'Recently'}</strong></div>
               </div>
               <button type="button" onClick={onResumeDraft} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-bold text-blue-700 hover:bg-blue-50">
