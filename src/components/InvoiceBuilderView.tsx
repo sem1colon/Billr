@@ -257,46 +257,12 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
             </button>
           </div>
           <div className="pt-1">
-            <input
-              type="text"
-              value={invoiceData.buyer.name}
-              readOnly
-              aria-describedby="fixed-recipient-note"
-              placeholder="e.g. PRAJ INDUSTRIES LIMITED"
-              className="w-full px-2.5 py-1 apple-glass-input text-xs font-bold text-slate-900 rounded-lg outline-none mb-1"
-            />
-            <p id="fixed-recipient-note" className="text-[11px] text-slate-600 mb-1">Invoice Recipient: fixed to PRAJ INDUSTRIES LIMITED. Source Customers remain transaction context only.</p>
-            <input
-              type="text"
-              value={invoiceData.buyer.address}
-              onChange={(e) => setInvoiceData(prev => ({
-                ...prev,
-                buyer: { ...prev.buyer, address: e.target.value }
-              }))}
-              placeholder="Buyer Address"
-              className="w-full px-2.5 py-1 apple-glass-input text-xs text-slate-600 rounded-lg outline-none mb-1"
-            />
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              <input
-                type="text"
-                value={invoiceData.buyer.gstin}
-                onChange={(e) => setInvoiceData(prev => ({
-                  ...prev,
-                  buyer: { ...prev.buyer, gstin: e.target.value }
-                }))}
-                placeholder="Buyer GSTIN"
-                className="px-2.5 py-1 apple-glass-input text-xs text-slate-800 rounded-lg outline-none"
-              />
-              <input
-                type="text"
-                value={invoiceData.buyer.pan || ''}
-                onChange={(e) => setInvoiceData(prev => ({
-                  ...prev,
-                  buyer: { ...prev.buyer, pan: e.target.value }
-                }))}
-                placeholder="Buyer PAN"
-                className="px-2.5 py-1 apple-glass-input text-xs text-slate-800 rounded-lg outline-none"
-              />
+            <h4 className="text-sm font-bold text-slate-900">{invoiceData.buyer.name}</h4>
+            <p className="text-xs text-slate-500 mt-0.5">{invoiceData.buyer.address}, {invoiceData.buyer.cityStateZip}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] text-slate-600">
+              <span><strong>GSTIN:</strong> {invoiceData.buyer.gstin}</span>
+              <span>&bull;</span>
+              <span><strong>PAN:</strong> {invoiceData.buyer.pan || 'Not provided'}</span>
             </div>
           </div>
         </div>
