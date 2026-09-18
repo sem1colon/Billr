@@ -28,8 +28,7 @@ Billr is a responsive, installable invoice workspace for turning commission or s
 ## Design decisions
 
 ### 4. Senior legibility and high contrast
-- **Problem**: Translucent glassmorphism with rotating chromatic blur orbs caused visual glare, low text contrast, and battery drain.
-- **Solution**: Replaced with clean solid `#FFFFFF` cards, clear `#E2E8F0` structural borders, and high WCAG AAA contrast typography (`#0F172A` text on `#F1F5F9` background).
+- **Solution**: Uses restrained frosted surfaces, clear structural borders, and high-contrast typography (`#0F172A` text on a light `#F8FAFC` background).
 - **Font & Input Sizing**: Enforced 16px+ text inputs to prevent iOS Safari auto-zoom while maintaining effortless legibility.
 
 ---
@@ -44,14 +43,21 @@ Billr is a responsive, installable invoice workspace for turning commission or s
 ### 6. 1-tap PDF sharing
 - Integrated `navigator.share` with PDF file blob attachments (`shareInvoicePDF`).
 - On iPhone, tapping **"Share PDF"** brings up the native iOS Share Sheet to send the invoice directly via WhatsApp, Mail, or AirDrop.
+- If sharing fails or is unavailable, Billr keeps the PDF download action available and reports the failure in the preview.
 
 ---
 
-### 7. Local-first persistence
+### 7. Invoice presentation and export reliability
+- Invoice dates are formatted consistently in the preview, copied summary, and PDF.
+- Line items show customer grouping plus product, source, and pricing metadata.
+- The invoice clearly separates seller, recipient, bank, and authorized signatory information.
+- Required fields are validated before print/PDF export, and export failures are reported without crashing the workflow.
+
+### 8. Local-first persistence
 - Invoice drafts, active navigation, UI preferences, workbook state, signatures, and export history use browser storage.
 - The Home dashboard makes saved state visible and provides explicit backup and clear-data controls.
 
-### 8. Large touch targets and responsive layouts
+### 9. Large touch targets and responsive layouts
 - Replaced dense desktop tables on mobile screens with chunky 48px+ touch cards.
 - Dedicated, spaced-out **Edit**, **Copy**, and **Delete** buttons to eliminate mis-taps.
 - Quick 1-tap product presets with pre-calculated commission rates.

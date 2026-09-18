@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as XLSX from 'xlsx';
-import { convertParsedRecordsToInvoiceItems, parseExcelFile } from './excelParser';
+import { convertParsedRecordsToInvoiceItems, normalizeExcelDate, parseExcelFile } from './excelParser';
 
 const csv = `Customer,Invoice Number,Date,Product,Quantity,Commission Rate,Commission Amount\nAlpha,001,2026-01-01,Same Product,2,5,10\nBeta,001,2026-01-02,Same Product,3,4,12\nAlpha,002,2026-01-03,Other Product,1,7,7`;
 
@@ -58,6 +58,10 @@ describe('workbook parsing and invoice transfer', () => {
     const items = convertParsedRecordsToInvoiceItems(result.records);
 
     expect(items[0]).toMatchObject({ unitPrice: 250, productAmount: 500 });
+  });
+
+  it('normalizes ISO workbook timestamps to the India invoice date', () => {
+    expect(normalizeExcelDate('2026-01-27T18:29:50.000Z')).toBe('28-Jan-26');
   });
 
   it.each([

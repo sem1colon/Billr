@@ -21,6 +21,32 @@ function stableRecordId(customer: string, invNo: string, date: string, product: 
   return `record-${(hash >>> 0).toString(16)}`;
 }
 
+export function normalizeExcelDate(value: unknown): string {
+  if (typeof value === 'number') {
+    const parsedDate = XLSX.SSF.parse_date_code(value);
+    if (parsedDate) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${parsedDate.d}-${monthNames[parsedDate.m - 1] || parsedDate.m}-${String(parsedDate.y).slice(-2)}`;
+    }
+  }
+
+  const dateText = String(value ?? '').trim();
+  if (/^\d{4}-\d{2}-\d{2}T/.test(dateText)) {
+    const timestampMatch = dateText.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (timestampMatch) {
+      const [, year, month, day, hour, minute] = timestampMatch;
+      const utcMinutes = Number(hour) * 60 + Number(minute);
+      const indiaMinutes = utcMinutes + 331;
+      const dayOffset = Math.floor(indiaMinutes / 1440);
+      const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day) + dayOffset));
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${date.getUTCDate()}-${monthNames[date.getUTCMonth()]}-${String(date.getUTCFullYear()).slice(-2)}`;
+    }
+  }
+
+  return dateText;
+}
+
 /**
  * Universal Excel & CSV file parser
  * Supports: .xlsx, .xls, .csv, .tsv, .txt
@@ -282,16 +308,9 @@ export function parseExcelFile(
 
     let customer = colIndices.customer !== -1 ? String(row[colIndices.customer] ?? '').trim() : '';
     const invNo = colIndices.invNo !== -1 ? String(row[colIndices.invNo] ?? '').trim() : '';
-    let dateVal = colIndices.date !== -1 ? String(row[colIndices.date] ?? '').trim() : '';
+    let dateVal = colIndices.date !== -1 ? normalizeExcelDate(row[colIndices.date]) : '';
     
     // Excel date numeric formatting handling
-    if (colIndices.date !== -1 && typeof row[colIndices.date] === 'number') {
-      const parsedDate = XLSX.SSF.parse_date_code(row[colIndices.date] as number);
-      if (parsedDate) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        dateVal = `${parsedDate.d}-${monthNames[parsedDate.m - 1] || parsedDate.m}-${String(parsedDate.y).slice(-2)}`;
-      }
-    }
 
     const product = colIndices.product !== -1 ? String(row[colIndices.product] ?? '').trim() : '';
     const isSummaryRow = summaryMode && !product && colIndices.customer !== -1;

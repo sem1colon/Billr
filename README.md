@@ -3,7 +3,7 @@
   <img src="public/icon.svg" alt="Billr Logo" width="110" height="110" />
 
   # Billr
-  ### Excel to Tax Invoice Generator
+  ### Commission Data to Tax Invoice Generator
 
   <p align="center">
     <b>Import commission data, select the rows you need, edit the invoice, and export a GST-ready PDF in minutes.</b>
@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19" />
     <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
     <img src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
-    <img src="https://img.shields.io/badge/xlsx-Excel_%26_CSV-3776AB?style=flat-square&logo=microsoftexcel&logoColor=white" alt="xlsx" />
+    <img src="https://img.shields.io/badge/xlsx-Excel_%7C_CSV_%7C_TSV_%7C_TXT-3776AB?style=flat-square&logo=microsoftexcel&logoColor=white" alt="xlsx, CSV, TSV, and TXT" />
     <img src="https://img.shields.io/badge/jsPDF-PDF_Export-DC2626?style=flat-square&logo=adobe-acrobat-reader&logoColor=white" alt="jsPDF" />
     <img src="https://img.shields.io/badge/PWA-iPhone_%26_Web-0284C7?style=flat-square&logo=pwa&logoColor=white" alt="PWA" />
   </p>
@@ -93,7 +93,10 @@ flowchart LR
 ### PDF export and preview
 - Generate a clean, print-ready invoice preview in the app
 - Export a PDF for sharing, printing, or record keeping
+- Share the generated PDF through the native device share sheet when supported
+- Display formatted invoice dates, customer groups, pricing metadata, seller details, bank details, and signatory information
 - Validate required invoice data before export and show live totals, GST, and round-off
+- Show a recoverable error message when printing or sharing fails; PDF download remains available
 - Built for a quick business workflow without requiring a backend service
 
 ### Mobile-first, installable app
@@ -108,7 +111,7 @@ flowchart LR
 - React 19
 - TypeScript
 - Vite
-- xlsx for Excel/CSV parsing
+- xlsx for Excel, CSV, TSV, and TXT parsing
 - jsPDF + jspdf-autotable for PDF generation
 - Lucide icons and motion-based UI interactions
 - Progressive Web App setup for installable mobile use
