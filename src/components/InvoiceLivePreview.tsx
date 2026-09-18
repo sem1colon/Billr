@@ -397,7 +397,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                 <div className="col-span-5 p-2.5 border-r border-slate-900 flex flex-col justify-between items-start text-left">
                   <div className="w-full">
                     <span className="block border-l-2 border-blue-600 pl-2 font-bold text-[11px] uppercase tracking-wide text-slate-900">
-                      BILLED TO
+                      BILLED TO:
                     </span>
                     <h3 className="font-bold text-slate-900 text-xs mt-1 uppercase leading-tight">
                       {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
@@ -429,7 +429,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                   <div className="grid h-full grid-rows-2">
                     <div className="flex flex-col justify-center border-b border-slate-900 bg-slate-50 px-2 py-1.5 text-left">
                       <span className="border-l-2 border-blue-600 pl-1.5 font-black text-slate-700 text-[10px] tracking-wide uppercase leading-none">
-                        INVOICE No.
+                        INVOICE No.:
                       </span>
                       <span className="font-black text-slate-950 text-xs mt-1 font-mono leading-none break-all">
                         {invoiceData.invoiceNumber || 'Invoice number'}
@@ -438,7 +438,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
                     <div className="flex flex-col justify-center bg-slate-50 px-2 py-1.5 text-left">
                       <span className="border-l-2 border-blue-600 pl-1.5 font-black text-slate-700 text-[10px] tracking-wide uppercase leading-none">
-                        DATE
+                        DATE:
                       </span>
                       <span className="font-black text-slate-950 text-xs mt-1 leading-none">
                         {formatInvoiceDate(invoiceData.invoiceDate)}
