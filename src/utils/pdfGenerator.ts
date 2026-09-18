@@ -222,7 +222,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.rect(col3X, partiesBlockStartY, col3Width, metaHalfHeight, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text('INVOICE No.', col3X + 6, partiesBlockStartY + 13);
+  doc.text('INVOICE No.:', col3X + 6, partiesBlockStartY + 13);
   doc.setFontSize(11);
   doc.text(invoiceNumberLines, col3X + 6, partiesBlockStartY + 28);
 
@@ -231,16 +231,16 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.rect(col3X, partiesBlockStartY + metaHalfHeight, col3Width, metaHalfHeight, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text('DATE', col3X + 6, partiesBlockStartY + metaHalfHeight + 13);
+  doc.text('DATE:', col3X + 6, partiesBlockStartY + metaHalfHeight + 13);
   doc.setFontSize(10.5);
   doc.text(invoiceDateLines, col3X + 6, partiesBlockStartY + metaHalfHeight + 28);
 
   // Draw the grid after filling the cells so no border is covered by a background fill.
   doc.setDrawColor(...slate);
   doc.setLineWidth(0.8);
-  doc.rect(col1X, partiesBlockStartY, col1Width, partiesBlockHeight, 'S');
-  doc.rect(col2X, partiesBlockStartY, col2Width, partiesBlockHeight, 'S');
-  doc.rect(col3X, partiesBlockStartY, col3Width, partiesBlockHeight, 'S');
+  doc.rect(col1X, partiesBlockStartY, contentWidth, partiesBlockHeight, 'S');
+  doc.line(col2X, partiesBlockStartY, col2X, partiesBlockStartY + partiesBlockHeight);
+  doc.line(col3X, partiesBlockStartY, col3X, partiesBlockStartY + partiesBlockHeight);
   doc.line(col3X, partiesBlockStartY + metaHalfHeight, col3X + col3Width, partiesBlockStartY + metaHalfHeight);
 
   currentY += partiesBlockHeight;
@@ -371,7 +371,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.48, lineWidth: { right: 0.8 } },
+      0: { halign: 'left', cellWidth: contentWidth * 0.48 },
       1: { halign: 'center', cellWidth: contentWidth * 0.14 },
       2: { halign: 'center', cellWidth: contentWidth * 0.14 },
       3: { halign: 'right', cellWidth: contentWidth * 0.24 },
