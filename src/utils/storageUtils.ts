@@ -137,6 +137,9 @@ export function loadSavedInvoiceData(): InvoiceData {
     return {
       ...initialInvoiceData,
       ...parsed,
+      invoiceNumber: typeof parsed.invoiceNumber === 'string' && parsed.invoiceNumber.trim()
+        ? parsed.invoiceNumber
+        : initialInvoiceData.invoiceNumber,
       seller: { ...mergedSeller, name: defaultSeller.name },
       buyer: normalizedBuyer,
       invoiceDate: typeof parsed.invoiceDate === 'string'
