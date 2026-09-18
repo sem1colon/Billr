@@ -392,7 +392,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const wordsBoxHeight = Math.max(28, 16 + amountWordLines.length * 8);
 
   const pageHeight = doc.internal.pageSize.getHeight();
-  const bottomBoxHeight = 58;
+  const bottomBoxHeight = 64;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
   const summaryHeightEstimate = summaryRows.length * 18;
