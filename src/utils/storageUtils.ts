@@ -1,6 +1,7 @@
 import { InvoiceData, ActiveTab, ExcelParsedRecord } from '../types';
 import { initialInvoiceData, defaultSeller } from '../data/sampleData';
 import { getDefaultSignatureDataUrl } from './signatureUtils';
+import { toIsoDateValue } from './invoiceFormatting';
 
 const STORAGE_KEYS = {
   INVOICE_DATA: 'billr_invoice_state_v2',
@@ -128,7 +129,9 @@ export function loadSavedInvoiceData(): InvoiceData {
     const normalizedBuyer = {
       ...initialInvoiceData.buyer,
       ...(parsed.buyer || {}),
-      name: initialInvoiceData.buyer.name,
+      name: typeof parsed.buyer?.name === 'string' && parsed.buyer.name.trim()
+        ? parsed.buyer.name
+        : initialInvoiceData.buyer.name,
     };
 
     return {
@@ -136,7 +139,15 @@ export function loadSavedInvoiceData(): InvoiceData {
       ...parsed,
       seller: { ...mergedSeller, name: defaultSeller.name },
       buyer: normalizedBuyer,
-      items: parsed.items,
+      invoiceDate: typeof parsed.invoiceDate === 'string'
+        ? (toIsoDateValue(parsed.invoiceDate) || initialInvoiceData.invoiceDate)
+        : initialInvoiceData.invoiceDate,
+      items: parsed.items.map(item => ({
+        ...item,
+        date: typeof item.date === 'string' && item.date
+          ? (toIsoDateValue(item.date) || item.date)
+          : item.date,
+      })),
       showSignature: parsed.showSignature !== undefined ? parsed.showSignature : true,
     };
   } catch (err) {
