@@ -221,7 +221,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
         {
           content: `CUSTOMER  |  ${custName}`,
           colSpan: 4,
-          styles: { fontStyle: 'bold', fontSize: 7.6, fillColor: [226, 232, 240], textColor: [15, 23, 42], lineColor: [71, 85, 105], lineWidth: 0.7, cellPadding: { top: 4, right: 4, bottom: 4, left: 7 } },
+          styles: { fontStyle: 'bold', fontSize: 7.6, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 4, right: 4, bottom: 4, left: 7 } },
         },
       ]);
     }
