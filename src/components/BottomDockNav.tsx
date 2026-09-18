@@ -97,7 +97,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
       
       {/* Mobile Solid iOS / Fluent Dock Bar */}
       <div className="pointer-events-auto apple-glass-dock rounded-t-[32px] rounded-b-none border-t border-slate-200/90 shadow-[0_-10px_32px_rgba(15,23,42,0.12)] pb-safe pt-2.5 px-3.5 transition-all bg-white/95 backdrop-blur-2xl">
-        <div className="flex items-center justify-between pb-2 mb-1.5 border-b border-slate-200/80">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1.5 border-b border-slate-200/80">
           <div className="flex items-center">
             {currentStepIndex > 0 ? (
               <motion.button
@@ -117,13 +117,13 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
             {activeTab === 'builder' && (
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={onOpenAddItemModal}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold cursor-pointer shadow-xs"
+                className="flex min-w-0 items-center space-x-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Item</span>
@@ -135,7 +135,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={handleNext}
-                className="flex items-center space-x-1.5 px-4 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
+                className="flex min-w-0 items-center space-x-1.5 px-3 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
               >
                 <span>Generate Invoice</span>
                 <ChevronRight className="w-4 h-4" />
@@ -147,7 +147,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setActiveTab('preview')}
-                className="flex items-center space-x-1 px-4 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
+                className="flex min-w-0 items-center space-x-1 px-3 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
               >
                 <span>Preview</span>
                 <ChevronRight className="w-4 h-4" />
@@ -159,7 +159,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={onDownloadPdf}
-                className="flex items-center space-x-1.5 px-4 py-2 apple-btn-emerald text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
+                className="flex min-w-0 items-center space-x-1.5 px-3 py-2 apple-btn-emerald text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
               >
                 <Download className="w-4 h-4" />
                 <span>Download PDF</span>
@@ -171,7 +171,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setActiveTab('sheet')}
-                className="flex items-center space-x-1 px-4 py-2 apple-btn-primary text-white rounded-xl text-xs font-bold cursor-pointer shadow-md"
+                className="flex min-w-0 items-center space-x-1 px-3 py-2 apple-btn-primary text-white rounded-xl text-xs font-bold cursor-pointer shadow-md"
               >
                 <span>Go to Sheet</span>
                 <ChevronRight className="w-4 h-4" />
@@ -181,7 +181,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
         </div>
 
         {/* Bottom tab icons on mobile */}
-        <nav className="flex items-center justify-around relative pt-1 pb-1">
+        <nav className="grid grid-cols-4 items-stretch relative pt-1 pb-1">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -190,7 +190,7 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex flex-col items-center py-1.5 px-3 rounded-xl text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
+                className="relative flex min-w-0 flex-col items-center py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
               >
                 {isActive && (
                   <motion.div

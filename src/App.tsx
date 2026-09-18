@@ -159,6 +159,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onDownloadPdf={handleDownloadPdf}
+        onStartNewInvoice={() => setIsNewInvoiceDialogOpen(true)}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
         isLargeText={isLargeText}
@@ -167,12 +168,8 @@ export default function App() {
         }}
       />
 
-      <button type="button" onClick={() => setIsNewInvoiceDialogOpen(true)} className="fixed top-3 right-3 z-40 apple-glass-btn rounded-xl px-3 py-2 text-xs font-bold">
-        Start new invoice
-      </button>
-
       {/* Main Content Area */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12">
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12 mobile-content-safe">
         <AnimatePresence mode="wait">
           
           {/* Step 1: Upload Excel / CSV & Working Sheet */}

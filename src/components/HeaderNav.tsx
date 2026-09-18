@@ -12,7 +12,8 @@ import {
   Check,
   Info,
   Building2,
-  Sparkles
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { BillrLogo } from './BillrLogo';
 import { InstallModal } from './InstallModal';
@@ -25,6 +26,7 @@ interface HeaderNavProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   onDownloadPdf?: () => void;
+  onStartNewInvoice?: () => void;
   itemsCount: number;
   grandTotal: number;
   isLargeText?: boolean;
@@ -35,6 +37,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   activeTab,
   setActiveTab,
   onDownloadPdf,
+  onStartNewInvoice,
   itemsCount,
   isLargeText = false,
   onToggleLargeText,
@@ -269,6 +272,20 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                         <Building2 className="w-4 h-4 text-slate-500" />
                         <span className="font-semibold">Profile</span>
                       </button>
+
+                      {onStartNewInvoice && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onStartNewInvoice();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-slate-700 text-left transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4 text-slate-500" />
+                          <span className="font-semibold">Start new invoice</span>
+                        </button>
+                      )}
 
                       <div className="my-1 border-t border-slate-200/80" />
 
