@@ -23,6 +23,13 @@ import {
 import { InvoiceData, InvoiceItem } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
 import { generateInvoicePDF, shareInvoicePDF } from '../utils/pdfGenerator';
+import {
+  formatInvoiceAmount,
+  formatInvoiceQuantity,
+  formatInvoiceRate,
+  getInvoiceItemMeta,
+  getInvoiceProductName,
+} from '../utils/invoiceFormatting';
 import { SignatureModal } from './SignatureModal';
 import confetti from 'canvas-confetti';
 
@@ -413,8 +420,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-[#c0c0c0] text-slate-900 font-bold border-b border-slate-900 text-[11px]">
-                      <th className="py-2 px-2.5 border-r border-slate-900 w-[65%]">Description of Services</th>
-                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[15%]">HSN/SAC CODE</th>
+                      <th className="py-2 px-2.5 border-r border-slate-900 w-[54%]">Description of Services</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%]">HSN/SAC</th>
+                      <th className="py-2 px-2 text-right border-r border-slate-900 w-[12%]">Qty</th>
                       <th className="py-2 px-2.5 text-right w-[20%]">Amount</th>
                     </tr>
                   </thead>
@@ -435,7 +443,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                       if (invoiceData.items.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={3} className="py-8 text-center text-slate-400 italic">
+                            <td colSpan={4} className="py-8 text-center text-slate-400 italic">
                               No line items added.
                             </td>
                           </tr>
@@ -447,32 +455,30 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {/* Customer Group Header Row */}
                           {group.customer && group.customer !== 'General Items' && (
                             <tr className="bg-slate-100 border-t border-b border-slate-400 font-bold">
-                              <td colSpan={3} className="py-1 px-2.5 text-slate-900 font-bold text-xs tracking-wide">
-                                Customer : {group.customer}
+                              <td colSpan={4} className="py-1 px-2.5 text-slate-900 font-bold text-xs tracking-wide">
+                                Customer: {group.customer}
                               </td>
                             </tr>
                           )}
 
                           {/* Line items for this customer */}
                           {group.items.map(item => {
-                            let desc = '';
-                            if (item.invNo) desc += `Inv. No. ${item.invNo}`;
-                            if (item.date) desc += `${desc ? ', ' : ''}dt. ${item.date}`;
-                            const prodName = item.description.replace(/\s*\([^)]*\)\s*$/, '').trim();
-                            if (prodName) desc += `${desc ? ', ' : ''}${prodName}`;
-                            if (item.qty) desc += `, ${item.qty.toLocaleString()}${item.unit || 'kg'}`;
-                            if (item.commissionRate) desc += `, Commission @ ${item.commissionRate.toFixed(2)}`;
-
                             return (
                               <tr key={item.id} className="hover:bg-slate-50">
-                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-relaxed">
-                                  {desc || item.description}
+                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-snug">
+                                  <span className="block font-semibold">{getInvoiceProductName(item)}</span>
+                                  <span className="block text-[10px] text-slate-600 mt-0.5">
+                                    {[getInvoiceItemMeta(item), `Rate: ${formatInvoiceRate(item)}`].filter(Boolean).join(' | ')}
+                                  </span>
                                 </td>
                                 <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px]">
                                   {item.hsnSacCode || '998311'}
                                 </td>
+                                <td className="py-1.5 px-2 text-right border-r border-slate-900 text-slate-900 text-[11px]">
+                                  {formatInvoiceQuantity(item)}
+                                </td>
                                 <td className="py-1.5 px-2.5 text-right font-medium text-slate-900 text-[11px]">
-                                  {item.commissionAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  {formatInvoiceAmount(item.commissionAmount)}
                                 </td>
                               </tr>
                             );
@@ -483,40 +489,36 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
                     {/* Summary Calculation Rows inside Table */}
                     <tr className="border-t-2 border-slate-900 font-bold bg-white">
-                      <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
                         Taxable Value
                       </td>
-                      <td className="border-r border-slate-900"></td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
-                        {taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatInvoiceAmount(taxableValue)}
                       </td>
                     </tr>
 
                     <tr className="border-t border-slate-900 font-bold bg-white">
-                      <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
                         ADD: {gstLabel(invoiceData.gstType, gstRate)}
                       </td>
-                      <td className="border-r border-slate-900"></td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
-                        {gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatInvoiceAmount(gstAmount)}
                       </td>
                     </tr>
 
                     {roundOff !== 0 && (
                       <tr className="border-t border-slate-900 font-bold bg-white">
-                        <td className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">Round Off</td>
-                        <td className="border-r border-slate-900"></td>
-                        <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">{roundOff.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">Round Off</td>
+                        <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">{formatInvoiceAmount(roundOff)}</td>
                       </tr>
                     )}
 
                     <tr className="border-t-2 border-slate-900 font-bold bg-[#f2f2f2]">
-                      <td className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
+                      <td colSpan={3} className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
                         Total
                       </td>
-                      <td className="border-r border-slate-900 bg-[#f2f2f2]"></td>
                       <td className="py-2 px-2.5 text-right font-black text-slate-900 text-xs">
-                        {grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatInvoiceAmount(grandTotal)}
                       </td>
                     </tr>
                   </tbody>

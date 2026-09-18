@@ -3,6 +3,13 @@ import autoTable, { RowInput } from 'jspdf-autotable';
 import { InvoiceData, InvoiceItem } from '../types';
 import { numberToIndianRupees } from './numberToWords';
 import { calculateInvoiceTotals } from './invoiceCalculations';
+import {
+  formatInvoiceAmount,
+  formatInvoiceQuantity,
+  formatInvoiceRate,
+  getInvoiceItemMeta,
+  getInvoiceProductName,
+} from './invoiceFormatting';
 
 export function getInvoicePdfFileName(invoiceNumber: string): string {
   const normalized = (invoiceNumber || '')
@@ -167,16 +174,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     if (custName && custName !== 'General Items') {
       tableBody.push([
         {
-          content: `Customer : ${custName}`,
-          styles: { fontStyle: 'bold', fillColor: [245, 245, 245], textColor: [0, 0, 0] },
-        },
-        {
-          content: '',
-          styles: { fillColor: [245, 245, 245] },
-        },
-        {
-          content: '',
-          styles: { fillColor: [245, 245, 245] },
+          content: `Customer: ${custName}`,
+          colSpan: 4,
+          styles: { fontStyle: 'bold', fillColor: [241, 245, 249], textColor: [15, 23, 42] },
         },
       ]);
     }
@@ -184,26 +184,17 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     groupItems.forEach(item => {
       // Build standard description string matching reference:
       // "Inv.No. 800086408, dt. 28.01.26, SPIRIZYME ADV ULTI, 360kg, Commission @ 16.5"
-      let desc = '';
-      if (item.invNo) desc += `Inv. No. ${item.invNo}`;
-      if (item.date) desc += `${desc ? ', ' : ''}dt. ${item.date}`;
-      
-      // Clean product description (remove redundant customer suffix if embedded)
-      let prodName = item.description.replace(/\s*\([^)]*\)\s*$/, '').trim();
-      if (prodName) desc += `${desc ? ', ' : ''}${prodName}`;
-      
-      if (item.qty) desc += `, ${item.qty.toLocaleString()}${item.unit || 'kg'}`;
-      if (item.commissionRate) desc += `, Commission @ ${item.commissionRate.toFixed(2)}`;
-
-      const amountFormatted = item.commissionAmount.toLocaleString('en-IN', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-
       tableBody.push([
-        desc || item.description,
+        {
+          content: [
+            getInvoiceProductName(item),
+            [getInvoiceItemMeta(item), `Rate: ${formatInvoiceRate(item)}`].filter(Boolean).join(' | '),
+          ].filter(Boolean).join('\n'),
+          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 3 } },
+        },
         item.hsnSacCode || '998311',
-        amountFormatted,
+        formatInvoiceQuantity(item),
+        formatInvoiceAmount(item.commissionAmount),
       ]);
     });
   });
@@ -215,54 +206,47 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   tableBody.push([
     {
       content: 'Taxable Value',
+      colSpan: 3,
       styles: { fontStyle: 'bold', halign: 'right' },
     },
-    '',
     {
-      content: taxableValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      content: formatInvoiceAmount(taxableValue),
       styles: { fontStyle: 'bold', halign: 'right' },
     },
   ]);
 
   if (invoiceData.gstType === 'IGST') {
     tableBody.push([
-      { content: `ADD: IGST ${gstRate}%`, styles: { fontStyle: 'bold', halign: 'right' } },
-      '',
-      { content: igstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: `ADD: IGST ${gstRate}%`, colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: formatInvoiceAmount(igstAmount), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
   } else {
     tableBody.push([
-      { content: `ADD: CGST ${(gstRate / 2).toFixed(2)}%`, styles: { fontStyle: 'bold', halign: 'right' } },
-      '',
-      { content: cgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: `ADD: CGST ${(gstRate / 2).toFixed(2)}%`, colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: formatInvoiceAmount(cgstAmount), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
     tableBody.push([
-      { content: `ADD: SGST ${(gstRate / 2).toFixed(2)}%`, styles: { fontStyle: 'bold', halign: 'right' } },
-      '',
-      { content: sgstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: `ADD: SGST ${(gstRate / 2).toFixed(2)}%`, colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: formatInvoiceAmount(sgstAmount), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
   }
 
   const { roundOff } = calculateInvoiceTotals(invoiceData);
   if (roundOff !== 0) {
     tableBody.push([
-      { content: 'Round Off', styles: { fontStyle: 'bold', halign: 'right' } },
-      '',
-      { content: roundOff.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: 'Round Off', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
+      { content: formatInvoiceAmount(roundOff), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
   }
 
   tableBody.push([
     {
       content: 'Total',
+      colSpan: 3,
       styles: { fontStyle: 'bold', halign: 'right', fillColor: [240, 240, 240] },
     },
     {
-      content: '',
-      styles: { fillColor: [240, 240, 240] },
-    },
-    {
-      content: grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      content: formatInvoiceAmount(grandTotal),
       styles: { fontStyle: 'bold', halign: 'right', fillColor: [240, 240, 240] },
     },
   ]);
@@ -272,16 +256,17 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     head: [[
       'Description of Services',
       'HSN/SAC CODE',
+      'Qty',
       'Amount',
     ]],
     body: tableBody,
     theme: 'grid',
     headStyles: {
-      fillColor: [192, 192, 192],
+      fillColor: [226, 232, 240],
       textColor: [0, 0, 0],
-      fontSize: 8,
+      fontSize: 7.5,
       fontStyle: 'bold',
-      halign: 'left',
+      halign: 'center',
       lineColor: [0, 0, 0],
       lineWidth: 0.8,
     },
@@ -294,9 +279,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       valign: 'middle',
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.65 },
-      1: { halign: 'center', cellWidth: contentWidth * 0.15 },
-      2: { halign: 'right', cellWidth: contentWidth * 0.20 },
+      0: { halign: 'left', cellWidth: contentWidth * 0.54 },
+      1: { halign: 'center', cellWidth: contentWidth * 0.14 },
+      2: { halign: 'right', cellWidth: contentWidth * 0.12 },
+      3: { halign: 'right', cellWidth: contentWidth * 0.20 },
     },
     margin: { left: marginX, right: marginX },
   });
