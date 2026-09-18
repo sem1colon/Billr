@@ -379,6 +379,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     pageBreak: 'auto',
     rowPageBreak: 'avoid',
     showHead: 'everyPage',
+    tableLineColor: [148, 163, 184],
+    tableLineWidth: 0.35,
     margin: { top: marginX, right: marginX, bottom: 120, left: marginX },
   });
 
