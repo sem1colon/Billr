@@ -47,6 +47,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
   const [selectedCustomer, setSelectedCustomer] = useState<string>(savedWorkbook?.selectedCustomer || 'ALL');
   const [searchQuery, setSearchQuery] = useState<string>(savedWorkbook?.searchQuery || '');
+  const [customerSearchQuery, setCustomerSearchQuery] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ExcelParsedRecord | null>(null);
@@ -73,6 +74,9 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
   // Extract unique customer list
   const customers = Array.from(new Set(parsedRecords.map(r => r.customer).filter(Boolean)));
+  const visibleCustomers = customers.filter(customer =>
+    customer.toLowerCase().includes(customerSearchQuery.toLowerCase().trim())
+  );
 
   const handleFileProcess = (file: File) => {
     setErrorMsg('');
@@ -457,25 +461,54 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
       {/* 3. Customer Filter Segmented Pills */}
       <div className={`apple-glass-card rounded-2xl p-3 sm:p-4 ${parsedRecords.length === 0 ? 'hidden' : ''}`}>
-        <div className="flex items-center justify-between mb-2 px-1">
-          <div className="flex items-center space-x-2">
-            <Building2 className="w-4 h-4 text-slate-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Filter by Client / Party
+        <div className="flex flex-col gap-2 px-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <Building2 className="h-4 w-4" aria-hidden="true" />
             </span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold tracking-wide text-slate-900">Filter by client / party</p>
+              <p className="truncate text-[11px] text-slate-500" aria-live="polite">
+                {selectedCustomer === 'ALL' ? 'Showing every client' : `Showing ${selectedCustomer}`}
+              </p>
+            </div>
           </div>
-          <span className="text-[11px] text-slate-500 font-medium">
-            {customers.length} client{customers.length !== 1 ? 's' : ''} found in statement
+          <span className="self-start rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 sm:self-auto">
+            {customers.length} client{customers.length !== 1 ? 's' : ''} found
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
+        <div className="relative mt-3">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <input
+            type="text"
+            value={customerSearchQuery}
+            onChange={(e) => setCustomerSearchQuery(e.target.value)}
+            placeholder="Find a client or party..."
+            aria-label="Find a client or party"
+            className="apple-glass-input h-10 w-full rounded-xl py-2 pl-9 pr-9 text-sm sm:max-w-sm"
+          />
+          {customerSearchQuery && (
+            <button
+              type="button"
+              onClick={() => setCustomerSearchQuery('')}
+              aria-label="Clear client search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="customer-filter-scroll mt-3" aria-label="Filter records by client or party">
+          <div className="flex min-w-max items-center gap-1.5 pb-1 pt-1 sm:gap-2">
 
           {/* ALL Customers Pill */}
           <button
             type="button"
             onClick={() => setSelectedCustomer('ALL')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${selectedCustomer === 'ALL'
+            aria-pressed={selectedCustomer === 'ALL'}
+            className={`flex min-h-10 flex-shrink-0 cursor-pointer items-center space-x-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${selectedCustomer === 'ALL'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
               }`}
@@ -487,7 +520,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           </button>
 
           {/* Individual Customers Pills */}
-          {customers.map(c => {
+          {visibleCustomers.map(c => {
             const customerRecords = parsedRecords.filter(r => r.customer === c);
             const customerAmt = customerRecords.reduce((sum, r) => sum + (r.commAmt || 0), 0);
             const isCurrent = selectedCustomer === c;
@@ -497,7 +530,9 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                 key={c}
                 type="button"
                 onClick={() => setSelectedCustomer(c)}
-                className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0 transition-all cursor-pointer ${isCurrent
+                aria-pressed={isCurrent}
+                aria-label={`${c}, ${customerRecords.length} records, ${formatIndianCurrency(customerAmt)}`}
+                className={`flex min-h-10 flex-shrink-0 cursor-pointer items-center space-x-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isCurrent
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
                   }`}
@@ -513,6 +548,11 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             );
           })}
 
+          {visibleCustomers.length === 0 && (
+            <p className="py-2 text-xs font-medium text-slate-500">No matching clients found.</p>
+          )}
+
+          </div>
         </div>
       </div>
 

@@ -122,6 +122,34 @@
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
+.customer-filter-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent 100%);
+}
+
+.customer-filter-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+.customer-filter-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customer-filter-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+@media (min-width: 640px) {
+  .customer-filter-scroll {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
 /* Sub-panels & Nested Containers */
 .apple-glass-subtle {
   position: relative;
