@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   FileSpreadsheet,
@@ -10,7 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Share2,
-  Sparkles
+  Home,
 } from 'lucide-react';
 import { ActiveTab } from '../types';
 
@@ -33,17 +33,24 @@ interface StepTabConfig {
 }
 
 const TABS: StepTabConfig[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    shortLabel: 'Home',
+    step: 0,
+    icon: Home,
+  },
   { 
     id: 'sheet', 
-    label: '1. Upload Sheet', 
-    shortLabel: 'Sheet', 
+    label: '1. Create Invoice',
+    shortLabel: 'Create',
     step: 1, 
     icon: FileSpreadsheet 
   },
   { 
     id: 'builder', 
-    label: '2. Invoice Editor', 
-    shortLabel: 'Invoice', 
+    label: '2. Invoice Details',
+    shortLabel: 'Details',
     step: 2, 
     icon: FileText 
   },
@@ -72,10 +79,19 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
   itemsCount,
   grandTotal,
 }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
   const currentStepIndex = TABS.findIndex(t => t.id === activeTab);
+  const hasContextAction = activeTab === 'builder' || activeTab === 'settings' || activeTab === 'preview' || (activeTab === 'sheet' && itemsCount > 0);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 48);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleNext = () => {
-    if (activeTab === 'sheet' && onGenerateFromSheet) {
+    if (activeTab === 'sheet' && onGenerateFromSheet && itemsCount > 0) {
       onGenerateFromSheet();
     } else if (currentStepIndex < 2) {
       setActiveTab(TABS[currentStepIndex + 1].id);
@@ -96,10 +112,10 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
       
       {/* Mobile Solid iOS / Fluent Dock Bar */}
-      <div className="pointer-events-auto apple-glass-dock rounded-t-[32px] rounded-b-none border-t border-slate-200/90 shadow-[0_-10px_32px_rgba(15,23,42,0.12)] pb-safe pt-2.5 px-3.5 transition-all bg-white/95 backdrop-blur-2xl">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1.5 border-b border-slate-200/80">
+      <div className={`pointer-events-auto apple-glass-dock border-t border-slate-200/90 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] pb-safe pt-1.5 px-3 transition-all bg-white/95 backdrop-blur-2xl ${isScrolled ? 'dock-compact' : ''}`}>
+        {hasContextAction && <div className="dock-context-actions flex flex-wrap items-center justify-between gap-2 pb-1.5 mb-1 border-b border-slate-200/80">
           <div className="flex items-center">
-            {currentStepIndex > 0 ? (
+            {currentStepIndex > 0 && activeTab !== 'preview' ? (
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.94 }}
@@ -111,8 +127,8 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 <span>Back</span>
               </motion.button>
             ) : (
-              <span className="text-xs font-bold text-slate-500 px-3 py-1.5 bg-slate-100/90 rounded-xl">
-                Step 1: Upload
+                <span className="text-[11px] font-semibold text-slate-500 px-2.5 py-1 bg-slate-100/90 rounded-lg">
+                Add source data
               </span>
             )}
           </div>
@@ -130,14 +146,14 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
               </motion.button>
             )}
 
-            {activeTab === 'sheet' && (
+            {activeTab === 'sheet' && itemsCount > 0 && (
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={handleNext}
                 className="flex min-w-0 items-center space-x-1.5 px-3 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
               >
-                <span>Generate Invoice</span>
+                <span>Review invoice</span>
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
             )}
@@ -147,9 +163,10 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 type="button"
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setActiveTab('preview')}
+                disabled={itemsCount === 0}
                 className="flex min-w-0 items-center space-x-1 px-3 py-2 apple-btn-primary text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
               >
-                <span>Preview</span>
+                <span>Review</span>
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
             )}
@@ -178,10 +195,10 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
               </motion.button>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Bottom tab icons on mobile */}
-        <nav className="grid grid-cols-4 items-stretch relative pt-1 pb-1">
+        <nav className="grid grid-cols-5 items-stretch relative pt-1 pb-1">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -190,12 +207,13 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex min-w-0 flex-col items-center py-1.5 px-1 rounded-xl text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
+                className="relative flex min-w-0 flex-col items-center py-1 px-1 rounded-lg text-[11px] font-bold cursor-pointer z-10 select-none transition-colors duration-200"
+                aria-current={isActive ? 'page' : undefined}
               >
                 {isActive && (
                   <motion.div
                     layoutId="mobile-dock-pill"
-                    className="absolute inset-0 bg-blue-50/90 border border-blue-200 rounded-xl -z-10 shadow-2xs"
+                    className="absolute inset-0 bg-blue-50/90 border border-blue-200 rounded-lg -z-10 shadow-2xs"
                     transition={{
                       type: 'spring',
                       stiffness: 450,

@@ -14,7 +14,6 @@ import {
   ReceiptIndianRupee,
   Copy,
   CheckCircle2,
-  Sparkles,
   Share2,
   Calendar,
   Layers,
@@ -22,7 +21,7 @@ import {
 } from 'lucide-react';
 import { InvoiceData, InvoiceItem } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
-import { generateInvoicePDF, shareInvoicePDF } from '../utils/pdfGenerator';
+import { validateInvoiceForExport } from '../utils/invoiceValidation';
 import {
   formatInvoiceAmount,
   formatInvoiceQuantity,
@@ -60,6 +59,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const { taxableValue, gstAmount, grandTotal, roundOff } = calculateInvoiceTotals(invoiceData);
   const totalQty = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
@@ -68,13 +68,25 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
   const isSigned = Boolean(invoiceData.showSignature !== false && invoiceData.seller?.signatureUrl);
 
-  const handlePrint = () => {
-    generateInvoicePDF(invoiceData, true);
+  const handlePrint = async () => {
+    const validation = validateInvoiceForExport(invoiceData);
+    if (!validation.isValid) {
+      setExportError(validation.errors[0]);
+      return;
+    }
+    const { generateInvoicePDF } = await import('../utils/pdfGenerator');
+    await generateInvoicePDF(invoiceData, true);
   };
 
   const handleNativeShare = async () => {
+    const validation = validateInvoiceForExport(invoiceData);
+    if (!validation.isValid) {
+      setExportError(validation.errors[0]);
+      return;
+    }
     setIsSharing(true);
     try {
+      const { shareInvoicePDF } = await import('../utils/pdfGenerator');
       await shareInvoicePDF(invoiceData);
       confetti({
         particleCount: 50,
@@ -90,6 +102,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   };
 
   const handleCelebrationDownload = () => {
+    setExportError(null);
     confetti({
       particleCount: 75,
       spread: 55,
@@ -147,8 +160,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
             
             {/* Live Render State Glow Dot */}
             <span 
-              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center shadow-xs" 
-              title="GST Validated Live Document"
+              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-xs"
+              title="Live invoice preview"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             </span>
@@ -158,7 +171,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <span className="text-sm font-black text-slate-900 tracking-tight">
-                Tax Invoice Preview
+                Review & share invoice
               </span>
               
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold apple-glass-badge text-blue-700 shadow-2xs">
@@ -275,11 +288,12 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               type="button"
               onClick={handleNativeShare}
               disabled={isSharing}
-              className="flex items-center space-x-1.5 px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer"
+              className="flex items-center space-x-1.5 px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer"
               title="Share PDF via WhatsApp / AirDrop / Mail"
             >
-              <Share2 className="w-4 h-4 text-emerald-600" />
-              <span>Share PDF</span>
+              <Share2 className="w-4 h-4 text-blue-600" />
+                <span className="hidden sm:inline">Share PDF</span>
+                <span className="sm:hidden">Share</span>
             </button>
 
             <button
@@ -315,7 +329,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
             <button
               type="button"
               onClick={handleCelebrationDownload}
-              className="flex items-center space-x-2 px-4 sm:px-5 py-2.5 apple-btn-primary text-white rounded-2xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md"
+              className="hidden sm:flex items-center space-x-2 px-4 sm:px-5 py-2.5 apple-btn-primary text-white rounded-2xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md"
               title="Download Tax Invoice PDF"
             >
               <Download className="w-4 h-4" />
@@ -325,6 +339,13 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
         </div>
       </div>
 
+      {exportError && (
+        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs font-semibold text-amber-900" role="alert">
+          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
+          <span>{exportError} Update the invoice details, then try again.</span>
+        </div>
+      )}
+
       {/* A4 Sheet Container with Liquid Glass Frame */}
       <div className="w-full max-w-full overflow-x-auto pb-8 flex justify-center apple-glass-subtle p-2 sm:p-6 md:p-8 rounded-[32px]">
         <div 
@@ -332,28 +353,31 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           className="transition-transform duration-200"
         >
           {/* Authentic High-Precision Tax Invoice Document Matching Reference Exactly */}
-          <div className="w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl p-6 font-sans border-2 border-slate-900 rounded-none relative flex flex-col justify-between">
+          <div className="invoice-document w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl p-6 border-2 border-slate-900 rounded-none relative flex flex-col justify-between [font-family:Arial,Helvetica,sans-serif] [font-variant-numeric:tabular-nums]">
             
             <div>
               {/* 1. Top Shaded Header Banner */}
-              <div className="bg-[#c0c0c0] border border-slate-900 py-1.5 text-center">
-                <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
+              <div className="bg-[#0f172a] border border-slate-900 py-2 text-center">
+                <h1 className="text-sm font-black tracking-widest text-white uppercase">
                   TAX INVOICE
                 </h1>
               </div>
 
               {/* 2. Seller Agency Banner */}
-              <div className="text-center py-4 px-2 border-x border-b border-slate-900 bg-white">
-                <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
+              <div className="border-x border-b border-slate-900 bg-white px-3 py-3 text-left">
+                <span className="border-l-2 border-blue-600 pl-2 font-bold text-[11px] uppercase tracking-wide text-slate-900">
+                  Billed From:
+                </span>
+                <h2 className="mt-1 text-xl font-black uppercase leading-tight tracking-tight text-slate-900">
                   {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                 </h2>
-                <p className="text-xs text-slate-800 mt-1">
-                  {invoiceData.seller.address || '104 Rukmini Apartment Yousufguda Check Post'}
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-800">
+                  {invoiceData.seller.address || 'Flat No. 104, Rukmini Apartment, Yousufguda Check Post'}
                 </p>
-                <p className="text-xs text-slate-800 mt-0.5">
-                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'} Partner:- {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} Ph: {invoiceData.seller.phone || '9849187125'}
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-800">
+                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'} Partner: {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} Ph: {invoiceData.seller.phone || '9849187125'}
                 </p>
-                <p className="text-xs font-bold text-slate-900 mt-1.5 tracking-wide">
+                <p className="mt-1.5 text-xs font-bold leading-relaxed tracking-wide text-slate-900">
                   GSTIN No : {invoiceData.seller.gstin || '36ABXFM3174B1Z1'} &nbsp;&nbsp; PAN Number : {invoiceData.seller.pan || 'ABXFM3174B'}
                 </p>
               </div>
@@ -362,54 +386,56 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               <div className="grid grid-cols-12 border-x border-b border-slate-900 text-xs bg-white">
                 
                 {/* Column 1: Billed To */}
-                <div className="col-span-5 p-2.5 border-r border-slate-900 flex flex-col justify-between">
-                  <div>
-                    <span className="font-bold text-slate-900 text-[11px] block">
+                <div className="col-span-5 p-2.5 border-r border-slate-900 flex flex-col justify-between items-start text-left">
+                  <div className="w-full">
+                    <span className="block border-l-2 border-blue-600 pl-2 font-bold text-[11px] uppercase tracking-wide text-slate-900">
                       Billed To:
                     </span>
-                    <h3 className="font-bold text-slate-900 text-xs mt-0.5 uppercase">
+                    <h3 className="font-bold text-slate-900 text-xs mt-1 uppercase leading-tight">
                       {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
                     </h3>
-                    <p className="text-slate-800 text-[11px] mt-0.5 leading-snug">
+                    <p className="text-slate-800 text-[11px] mt-1 leading-relaxed">
                       {invoiceData.buyer.address}, {invoiceData.buyer.cityStateZip}
                     </p>
                   </div>
-                  <p className="font-bold text-slate-900 text-[11px] mt-2">
-                    GSTIN No:- {invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}
+                  <p className="font-bold text-slate-900 text-[11px] mt-2 leading-relaxed">
+                    GSTIN: {invoiceData.buyer.gstin || '27AAACP6090Q1ZS'}
                   </p>
                 </div>
 
                 {/* Column 2: Place of Supply / Service */}
-                <div className="col-span-4 p-2.5 border-r border-slate-900">
-                  <span className="font-bold text-slate-900 text-[11px] block">
+                <div className="col-span-4 p-2.5 border-r border-slate-900 text-left">
+                  <span className="font-bold text-slate-900 text-[11px] block tracking-wide uppercase">
                     Place of Supply / Service:
                   </span>
-                  <h4 className="font-bold text-slate-900 text-xs mt-0.5 uppercase">
-                    PRAJ INDUSTRIES LTD
+                  <h4 className="font-bold text-slate-900 text-xs mt-1 uppercase leading-tight">
+                    {invoiceData.buyer.name || 'Buyer'}
                   </h4>
-                  <p className="text-slate-800 text-[11px] mt-0.5 whitespace-pre-line leading-snug">
+                  <p className="text-slate-800 text-[11px] mt-1 whitespace-pre-line leading-relaxed">
                     {invoiceData.buyer.placeOfSupply || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108."}
                   </p>
                 </div>
 
                 {/* Column 3: INVOICE No. & DATE Stacked Boxes */}
-                <div className="col-span-3 flex flex-col justify-between divide-y divide-slate-900">
-                  <div className="p-2">
-                    <span className="font-bold text-slate-900 text-[11px] block">
-                      INVOICE No.
-                    </span>
-                    <span className="font-bold text-slate-900 text-xs mt-0.5 block font-mono">
-                      {invoiceData.invoiceNumber || '004/26-27'}
-                    </span>
-                  </div>
+                <div className="col-span-3 h-full border-l border-slate-900 bg-white">
+                  <div className="grid h-full grid-rows-2">
+                    <div className="flex flex-col justify-center border-b border-slate-900 px-2 py-1.5 text-left">
+                      <span className="font-bold text-slate-900 text-[11px] tracking-wide uppercase leading-none">
+                        INVOICE No.
+                      </span>
+                      <span className="font-bold text-slate-900 text-xs mt-1 font-mono leading-none break-all">
+                        {invoiceData.invoiceNumber || 'Invoice number'}
+                      </span>
+                    </div>
 
-                  <div className="p-2">
-                    <span className="font-bold text-slate-900 text-[11px] block">
-                      DATE
-                    </span>
-                    <span className="font-bold text-slate-900 text-xs mt-0.5 block">
-                      {invoiceData.invoiceDate || '10-Aug-26'}
-                    </span>
+                    <div className="flex flex-col justify-center px-2 py-1.5 text-left">
+                      <span className="font-bold text-slate-900 text-[11px] tracking-wide uppercase leading-none">
+                        DATE
+                      </span>
+                      <span className="font-bold text-slate-900 text-xs mt-1 leading-none">
+                        {invoiceData.invoiceDate || '10-Aug-26'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -417,16 +443,16 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
               {/* 4. Line Items Table with Customer Groupings matching reference */}
               <div className="border-x border-b border-slate-900 overflow-hidden">
-                <table className="w-full text-left text-xs border-collapse">
+                  <table className="w-full table-fixed text-left text-xs border-collapse align-middle">
                   <thead>
-                    <tr className="bg-[#c0c0c0] text-slate-900 font-bold border-b border-slate-900 text-[11px]">
-                      <th className="py-2 px-2.5 border-r border-slate-900 w-[54%]">Description of Services</th>
-                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%]">HSN/SAC</th>
-                      <th className="py-2 px-2 text-right border-r border-slate-900 w-[12%]">Qty</th>
-                      <th className="py-2 px-2.5 text-right w-[20%]">Amount</th>
+                    <tr className="bg-[#0f172a] text-white font-bold border-b border-slate-900 text-[11px] align-middle">
+                      <th className="py-2 px-2.5 border-r border-slate-900 w-[48%] text-left align-middle">Description of Services</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">HSN/SAC</th>
+                      <th className="py-2 px-2 text-right border-r border-slate-900 w-[14%] align-middle">Qty</th>
+                      <th className="py-2 px-2.5 text-right w-[24%] align-middle">Amount</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-300 text-slate-900">
+                  <tbody className="divide-y divide-slate-300 text-slate-900 align-middle">
                     {(() => {
                       // Group items by Customer
                       const groups: { customer: string; items: InvoiceItem[] }[] = [];
@@ -454,7 +480,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                         <React.Fragment key={group.customer}>
                           {/* Customer Group Header Row */}
                           {group.customer && group.customer !== 'General Items' && (
-                            <tr className="bg-slate-100 border-t border-b border-slate-400 font-bold">
+                            <tr className="bg-blue-50 border-t border-b border-blue-200 font-bold">
                               <td colSpan={4} className="py-1 px-2.5 text-slate-900 font-bold text-xs tracking-wide">
                                 Customer: {group.customer}
                               </td>
@@ -464,20 +490,20 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {/* Line items for this customer */}
                           {group.items.map(item => {
                             return (
-                              <tr key={item.id} className="hover:bg-slate-50">
-                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-snug">
-                                  <span className="block font-semibold">{getInvoiceProductName(item)}</span>
-                                  <span className="block text-[10px] text-slate-600 mt-0.5">
+                              <tr key={item.id} className="hover:bg-slate-50 align-middle">
+                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-relaxed text-left align-top">
+                                  <span className="block font-semibold text-left">{getInvoiceProductName(item)}</span>
+                                  <span className="block text-[10px] text-slate-600 mt-0.5 text-left">
                                     {[getInvoiceItemMeta(item), `Rate: ${formatInvoiceRate(item)}`].filter(Boolean).join(' | ')}
                                   </span>
                                 </td>
-                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px]">
+                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px] align-middle">
                                   {item.hsnSacCode || '998311'}
                                 </td>
-                                <td className="py-1.5 px-2 text-right border-r border-slate-900 text-slate-900 text-[11px]">
+                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 text-[11px] align-middle">
                                   {formatInvoiceQuantity(item)}
                                 </td>
-                                <td className="py-1.5 px-2.5 text-right font-medium text-slate-900 text-[11px]">
+                                <td className="py-1.5 px-2.5 text-right font-medium text-slate-900 text-[11px] align-middle">
                                   {formatInvoiceAmount(item.commissionAmount)}
                                 </td>
                               </tr>
@@ -497,7 +523,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                       </td>
                     </tr>
 
-                    <tr className="border-t border-slate-900 font-bold bg-white">
+                    <tr className="border-t border-slate-900 font-bold bg-slate-50">
                       <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
                         ADD: {gstLabel(invoiceData.gstType, gstRate)}
                       </td>
@@ -513,11 +539,11 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                       </tr>
                     )}
 
-                    <tr className="border-t-2 border-slate-900 font-bold bg-[#f2f2f2]">
+                    <tr className="border-t-2 border-slate-900 font-bold bg-blue-50">
                       <td colSpan={3} className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
                         Total
                       </td>
-                      <td className="py-2 px-2.5 text-right font-black text-slate-900 text-xs">
+                      <td className="py-2 px-2.5 text-right font-black text-blue-950 text-xs">
                         {formatInvoiceAmount(grandTotal)}
                       </td>
                     </tr>
@@ -526,9 +552,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               </div>
 
               {/* 5. Amount in Words Box */}
-              <div className="border-x border-b border-slate-900 p-2.5 text-xs bg-white">
-                <span className="text-slate-800 text-[11px] block">Amount Chargeable (in words):</span>
-                <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+              <div className="border-x border-b border-slate-900 p-2.5 text-left bg-slate-50">
+                <span className="text-slate-800 text-[11px] block tracking-wide uppercase">Amount Chargeable (in words):</span>
+                <span className="font-bold text-slate-900 text-xs mt-1 block leading-relaxed">
                   {amountInWords}
                 </span>
               </div>
@@ -537,27 +563,30 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               <div className="grid grid-cols-12 border-x border-b border-slate-900 text-xs bg-white">
                 
                 {/* Left: Bank Details and PAN */}
-                <div className="col-span-8 p-3 border-r border-slate-900 space-y-1">
-                  <p className="font-bold text-slate-900 text-[11px]">
+                <div className="col-span-8 p-3 border-r border-slate-900 space-y-1 text-left">
+                  <p className="font-bold text-slate-900 text-[10px] uppercase tracking-wide pb-0.5">
+                    Bank Details
+                  </p>
+                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
                     Company's PAN : {invoiceData.seller.pan || 'ABXFM3174B'}
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px] pt-1">
+                  <p className="font-bold text-slate-900 text-[11px] pt-1 leading-relaxed">
                     Note:- Please make cheques in favor of "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
                   </p>
-                  <p className="text-slate-900 text-[11px] pt-0.5">
+                  <p className="text-slate-900 text-[11px] pt-0.5 leading-relaxed">
                     {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SANJEVAREDDYNAGAR, HYDERABAD-500038.'}
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px]">
+                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
                     A/C NO. {invoiceData.seller.accountNo || '50200084425696'}
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px]">
-                    ISFC CODE: {invoiceData.seller.ifscCode || 'HDFC0000642'}
+                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
+                    IFSC CODE: {invoiceData.seller.ifscCode || 'HDFC0000642'}
                   </p>
                 </div>
 
                 {/* Right: Authorized Signatory */}
-                <div className="col-span-4 p-3 flex flex-col justify-between text-right">
-                  <span className="font-bold text-slate-900 text-[11px] block uppercase">
+                <div className="col-span-4 p-3 flex flex-col justify-between text-right items-end bg-slate-50">
+                  <span className="font-bold text-slate-900 text-[11px] block uppercase leading-relaxed text-right">
                     For {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                   </span>
 
@@ -604,9 +633,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           <button
             type="button"
             onClick={handleNativeShare}
-            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-5 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-sm font-bold rounded-2xl transition-all cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-sm font-bold rounded-2xl transition-all cursor-pointer"
           >
-            <Share2 className="w-4 h-4 text-emerald-600" />
+            <Share2 className="w-4 h-4 text-blue-600" />
             <span>Share</span>
           </button>
 

@@ -42,19 +42,11 @@ export function parseExcelFile(
     throw new Error('The uploaded file does not contain any readable sheets or data.');
   }
 
-  // Determine active sheet
-  let activeSheetName = targetSheetName && sheetNames.includes(targetSheetName)
+  // Default imports always use the first worksheet. Other sheets remain available
+  // through the explicit sheet selector in the import view.
+  const activeSheetName = targetSheetName && sheetNames.includes(targetSheetName)
     ? targetSheetName
     : sheetNames[0];
-
-  if (!targetSheetName) {
-    const recommendedSheet = sheetNames.find(s => s.toLowerCase() === 'sheet1');
-    const preferredSheet = recommendedSheet || sheetNames.find(s => {
-      const lower = s.toLowerCase();
-      return lower.includes('working') || lower.includes('commission') || lower.includes('statement') || lower.includes('mca');
-    });
-    if (preferredSheet) activeSheetName = preferredSheet;
-  }
 
   const worksheet = workbook.Sheets[activeSheetName];
   if (!worksheet) {
@@ -74,6 +66,7 @@ export function parseExcelFile(
 
   // Search for the header row
   let headerRowIndex = -1;
+  let summaryMode = false;
   const colIndices = {
     customer: -1,
     invNo: -1,
@@ -84,6 +77,7 @@ export function parseExcelFile(
     commRate: -1,
     commAmt: -1,
   };
+  const unitPriceCandidates: number[] = [];
 
   // Inspect first 15 rows for header row keywords
   for (let r = 0; r < Math.min(rawRows.length, 15); r++) {
@@ -105,9 +99,14 @@ export function parseExcelFile(
       c.includes('consignee') || c.includes('distributor') || c.includes('purchaser') || c === 'name' || 
       c.includes('party name') || c.includes('customer name') || c.includes('m/s')
     );
+    const hasSummaryWorkbookSignals = !hasProductOrItem && !hasQty && hasCustomer && (
+      row.some(c => c.includes('dealer margin') || c.includes('total') || c.includes('amount')) ||
+      row.some(c => c.includes('margin'))
+    );
 
-    if ((hasProductOrItem && (hasQty || hasComm)) || (hasCustomer && (row.some(c => c.includes('inv') || c.includes('bill')) || hasQty))) {
+    if ((hasProductOrItem && (hasQty || hasComm)) || (hasCustomer && (row.some(c => c.includes('inv') || c.includes('bill')) || hasQty)) || hasSummaryWorkbookSignals) {
       headerRowIndex = r;
+      const commAmtCandidates: number[] = [];
       
       row.forEach((colName, idx) => {
         if (
@@ -138,15 +137,80 @@ export function parseExcelFile(
         } else if (colName === 'qty' || colName.includes('quantity') || colName.includes('weight') || colName.includes('kgs') || colName.includes('volume')) {
           if (colIndices.qty === -1) colIndices.qty = idx;
         } else if (colName.includes('sales price') || colName.includes('sale price') || colName.includes('unit price') || colName.includes('product rate') || colName.includes('basic price') || colName.includes('selling price') || colName.includes('rate/unit') || colName.includes('sales rate')) {
+          unitPriceCandidates.push(idx);
           if (colIndices.unitPrice === -1) colIndices.unitPrice = idx;
         } else if (colName.includes('comm/kg') || colName.includes('comm rate') || colName.includes('rate/kg') || colName.includes('comm/unit') || colName.includes('comm %') || (colName.includes('comm') && !colName.includes('amt') && !colName.includes('amount')) || colName.includes('brokerage rate')) {
           if (colIndices.commRate === -1) colIndices.commRate = idx;
-        } else if (colName.includes('comm amt') || colName.includes('comm amount') || colName.includes('commission amt') || colName.includes('commission amount') || colName.includes('taxable') || (colName.includes('amt') && !colName.includes('sales')) || colName.includes('brokerage amt') || colName.includes('brokerage amount')) {
-          if (colIndices.commAmt === -1) colIndices.commAmt = idx;
+        } else if (
+          colName.includes('dealer margin') ||
+          colName.includes('margin') ||
+          colName.includes('comm amt') ||
+          colName.includes('comm amount') ||
+          colName.includes('commission amt') ||
+          colName.includes('commission amount') ||
+          colName.includes('taxable') ||
+          colName.includes('brokerage amt') ||
+          colName.includes('brokerage amount')
+        ) {
+          commAmtCandidates.push(idx);
+        } else if (
+          colName.includes('amount') ||
+          colName.includes('total') ||
+          (colName.includes('amt') && !colName.includes('sales'))
+        ) {
+          commAmtCandidates.push(idx);
         }
       });
+
+      if (commAmtCandidates.length > 0) {
+        const rankedCommAmtIndex = commAmtCandidates
+          .slice()
+          .sort((leftIndex, rightIndex) => {
+            const leftName = row[leftIndex] ?? '';
+            const rightName = row[rightIndex] ?? '';
+            const score = (name: string) => {
+              if (name.includes('dealer margin') || name.includes('margin')) return 5;
+              if (name.includes('comm amt') || name.includes('comm amount') || name.includes('commission amt') || name.includes('commission amount') || name.includes('brokerage amt')) return 4;
+              if (name.includes('taxable')) return 3;
+              if (name.includes('amount') || name.includes('total')) return 2;
+              if (name.includes('amt')) return 1;
+              return 0;
+            };
+            return score(rightName) - score(leftName);
+          })[0];
+        colIndices.commAmt = rankedCommAmtIndex;
+      }
+
+      const rawHeaderText = row.join(' ').toLowerCase();
+      if (
+        colIndices.customer !== -1 &&
+        colIndices.commAmt !== -1 &&
+        !rawHeaderText.includes('product') &&
+        !rawHeaderText.includes('qty') &&
+        !rawHeaderText.includes('quantity') &&
+        (rawHeaderText.includes('dealer margin') || rawHeaderText.includes('total') || rawHeaderText.includes('amount') || rawHeaderText.includes('margin'))
+      ) {
+        summaryMode = true;
+      }
       break;
     }
+  }
+
+  if (unitPriceCandidates.length > 1) {
+    const numericValueCount = (columnIndex: number) => rawRows
+      .slice(headerRowIndex + 1)
+      .filter(row => {
+        const value = row[columnIndex];
+        if (value === null || value === undefined || value === '') return false;
+        const parsed = typeof value === 'number'
+          ? value
+          : Number(String(value).replace(/[@₹$,%\s]/g, ''));
+        return Number.isFinite(parsed);
+      }).length;
+
+    colIndices.unitPrice = unitPriceCandidates
+      .slice()
+      .sort((left, right) => numericValueCount(right) - numericValueCount(left))[0];
   }
 
   // Fallback if header wasn't found by strict keywords: assume first non-empty row
@@ -177,14 +241,26 @@ export function parseExcelFile(
   }
 
   const rawHeaders = rawRows[headerRowIndex]?.map(c => String(c ?? '').trim()) || [];
-  if (colIndices.product === -1) {
+  const summaryHeaderLooksValid = colIndices.customer !== -1 && colIndices.commAmt !== -1 && colIndices.product === -1 && colIndices.qty === -1 && rawHeaders.some(header => /dealer margin|margin|amount|total/i.test(String(header)));
+
+  if (summaryMode && rawHeaders.length > 0) {
+    const dealerMarginIndex = rawHeaders.findIndex(header => /dealer margin|margin/i.test(String(header)));
+    const summaryAmountIndex = rawHeaders.findIndex(header => /amount|total/i.test(String(header)));
+    if (dealerMarginIndex !== -1) {
+      colIndices.commAmt = dealerMarginIndex;
+    } else if (summaryAmountIndex !== -1 && colIndices.commAmt === -1) {
+      colIndices.commAmt = summaryAmountIndex;
+    }
+  }
+
+  if (colIndices.product === -1 && !summaryMode && !summaryHeaderLooksValid) {
     throw new Error('Missing product column. Add a Product, Item, Description, or Service column and upload the file again.');
   }
-  if (colIndices.qty === -1) {
+  if (colIndices.qty === -1 && !summaryMode && !summaryHeaderLooksValid) {
     throw new Error('Missing quantity column. Add a Qty, Quantity, Weight, or Volume column and upload the file again.');
   }
-  if (colIndices.commAmt === -1) {
-    throw new Error('Missing commission amount column. Add a Commission Amount, Taxable, or Brokerage Amount column and upload the file again.');
+  if (colIndices.commAmt === -1 && !summaryHeaderLooksValid) {
+    throw new Error('Missing commission amount column. Add a Commission Amount, Taxable, Dealer Margin, or Brokerage Amount column and upload the file again.');
   }
   const records: ExcelParsedRecord[] = [];
   const customersSet = new Set<string>();
@@ -218,7 +294,8 @@ export function parseExcelFile(
     }
 
     const product = colIndices.product !== -1 ? String(row[colIndices.product] ?? '').trim() : '';
-    
+    const isSummaryRow = summaryMode && !product && colIndices.customer !== -1;
+
     // Clean numeric inputs
     const cleanNumber = (val: any): number => {
       if (val === null || val === undefined || val === '') return 0;
@@ -232,6 +309,26 @@ export function parseExcelFile(
     const unitPrice = colIndices.unitPrice !== -1 ? cleanNumber(row[colIndices.unitPrice]) : 0;
     let commPerKg = colIndices.commRate !== -1 ? cleanNumber(row[colIndices.commRate]) : 0;
     let commAmt = colIndices.commAmt !== -1 ? cleanNumber(row[colIndices.commAmt]) : 0;
+
+    if (isSummaryRow) {
+      const resolvedProduct = `MCA Commission (${customer || lastCustomer || 'Customer'})`;
+      const resolvedQty = qty > 0 ? qty : 1;
+      const resolvedCommAmt = commAmt || 0;
+
+      records.push({
+        id: stableRecordId(customer || lastCustomer || 'General Customer', invNo, dateVal, resolvedProduct, r),
+        customer: customer || lastCustomer || 'General Customer',
+        invNo,
+        date: dateVal,
+        product: resolvedProduct,
+        qty: resolvedQty,
+        unitPrice,
+        commPerKg: commPerKg || 0,
+        commAmt: resolvedCommAmt,
+        selected: true,
+      });
+      continue;
+    }
 
     // Skip empty lines
     if (!product && !customer && !invNo && qty === 0 && commAmt === 0) {

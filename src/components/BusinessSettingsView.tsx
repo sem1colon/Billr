@@ -15,6 +15,36 @@ import { defaultSeller, defaultBuyer } from '../data/sampleData';
 import { SignatureModal } from './SignatureModal';
 import { getDefaultOrSavedSignature } from '../utils/storageUtils';
 
+interface LocationParts {
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+function splitLocation(value: string): LocationParts {
+  const normalized = value.trim();
+  const pincodeMatch = normalized.match(/\b\d{6}\b/);
+  const pincode = pincodeMatch?.[0] || '';
+  const beforePincode = (pincode ? normalized.slice(0, pincodeMatch!.index) : normalized)
+    .replace(/[\s,-]+$/, '')
+    .trim();
+  const afterPincode = pincode
+    ? normalized.slice((pincodeMatch!.index || 0) + pincode.length).replace(/^[\s,.-]+|[.,]+$/g, '').trim()
+    : '';
+  const locationParts = beforePincode.split(',').map(part => part.trim()).filter(Boolean);
+
+  return {
+    city: locationParts[0] || beforePincode,
+    state: locationParts.slice(1).join(', ') || afterPincode,
+    pincode,
+  };
+}
+
+function joinLocation({ city, state, pincode }: LocationParts): string {
+  const locality = [city.trim(), state.trim()].filter(Boolean).join(', ');
+  return [locality, pincode.trim()].filter(Boolean).join(' - ');
+}
+
 interface BusinessSettingsViewProps {
   invoiceData: InvoiceData;
   setInvoiceData: React.Dispatch<React.SetStateAction<InvoiceData>>;
@@ -30,6 +60,8 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 }) => {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const sellerLocation = splitLocation(invoiceData.seller.cityStateZip);
+  const buyerLocation = splitLocation(invoiceData.buyer.cityStateZip);
 
   const handleSellerChange = (field: string, value: string) => {
     if (field === 'name') return;
@@ -175,16 +207,26 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              City, State & Pincode
-            </label>
-            <input
-              type="text"
-              value={invoiceData.seller.cityStateZip}
-              onChange={(e) => handleSellerChange('cityStateZip', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
-            />
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">City, State & Pincode</label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.2fr_1fr_0.75fr]">
+              {([
+                ['city', 'City', sellerLocation.city],
+                ['state', 'State', sellerLocation.state],
+                ['pincode', 'Pincode', sellerLocation.pincode],
+              ] as const).map(([field, label, value]) => (
+                <input
+                  key={field}
+                  type="text"
+                  inputMode={field === 'pincode' ? 'numeric' : 'text'}
+                  aria-label={`Seller ${label}`}
+                  placeholder={label}
+                  value={value}
+                  onChange={(e) => handleSellerChange('cityStateZip', joinLocation({ ...sellerLocation, [field]: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+                />
+              ))}
+            </div>
           </div>
 
           <div>
@@ -333,16 +375,26 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              City, State & Pincode
-            </label>
-            <input
-              type="text"
-              value={invoiceData.buyer.cityStateZip}
-              onChange={(e) => handleBuyerChange('cityStateZip', e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
-            />
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">City, State & Pincode</label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.2fr_1fr_0.75fr]">
+              {([
+                ['city', 'City', buyerLocation.city],
+                ['state', 'State', buyerLocation.state],
+                ['pincode', 'Pincode', buyerLocation.pincode],
+              ] as const).map(([field, label, value]) => (
+                <input
+                  key={field}
+                  type="text"
+                  inputMode={field === 'pincode' ? 'numeric' : 'text'}
+                  aria-label={`Client ${label}`}
+                  placeholder={label}
+                  value={value}
+                  onChange={(e) => handleBuyerChange('cityStateZip', joinLocation({ ...buyerLocation, [field]: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 text-sm text-slate-900 apple-glass-input rounded-2xl focus:outline-none"
+                />
+              ))}
+            </div>
           </div>
 
           <div>

@@ -11,7 +11,17 @@ const STORAGE_KEYS = {
   SHEET_CUSTOMER: 'billr_sheet_customer_v2',
   SAVED_SIGNATURE: 'billr_saved_signature_v1',
   WORKBOOK_STATE: 'billr_workbook_state_v1',
+  INVOICE_HISTORY: 'billr_invoice_history_v1',
 };
+
+export interface InvoiceHistoryEntry {
+  id: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  total: number;
+  itemCount: number;
+  savedAt: string;
+}
 
 export interface SavedWorkbookState {
   version: 1;
@@ -227,7 +237,7 @@ export function clearSavedInvoiceData(): void {
  * Loads the active navigation tab. Always starts at 'sheet' (Step 1: Upload Sheet) on launch.
  */
 export function loadSavedActiveTab(): ActiveTab {
-  return 'sheet';
+  return 'home';
 }
 
 /**
@@ -320,4 +330,44 @@ export function getLastSavedTimestamp(): string | null {
   } catch (e) {
     return null;
   }
+}
+
+export function loadInvoiceHistory(): InvoiceHistoryEntry[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVOICE_HISTORY) || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry): entry is InvoiceHistoryEntry => (
+      entry && typeof entry.id === 'string' && typeof entry.invoiceNumber === 'string' &&
+      typeof entry.invoiceDate === 'string' && typeof entry.total === 'number' &&
+      typeof entry.itemCount === 'number' && typeof entry.savedAt === 'string'
+    )).slice(0, 12);
+  } catch (err) {
+    return [];
+  }
+}
+
+export function saveInvoiceHistoryEntry(entry: InvoiceHistoryEntry): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const next = [entry, ...loadInvoiceHistory().filter(existing => existing.id !== entry.id)].slice(0, 12);
+    localStorage.setItem(STORAGE_KEYS.INVOICE_HISTORY, JSON.stringify(next));
+  } catch (err) {
+    console.warn('Failed to save invoice history:', err);
+  }
+}
+
+export function createLocalBackup(): string {
+  if (typeof window === 'undefined') return '{}';
+  const snapshot: Record<string, string> = {};
+  Object.keys(localStorage).filter(key => key.startsWith('billr_')).forEach(key => {
+    const value = localStorage.getItem(key);
+    if (value !== null) snapshot[key] = value;
+  });
+  return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), data: snapshot }, null, 2);
+}
+
+export function clearAllBillrData(): void {
+  if (typeof window === 'undefined') return;
+  Object.keys(localStorage).filter(key => key.startsWith('billr_')).forEach(key => localStorage.removeItem(key));
 }

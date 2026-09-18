@@ -6,7 +6,7 @@
   ### Excel to Tax Invoice Generator
 
   <p align="center">
-    <b>Upload a commission sheet, select the rows you need, edit the invoice, and export a GST-ready PDF in minutes.</b>
+    <b>Import commission data, select the rows you need, edit the invoice, and export a GST-ready PDF in minutes.</b>
   </p>
 
   <p align="center">
@@ -33,13 +33,13 @@
 
 ## Overview
 
-Billr is a mobile-first invoice workflow for business users who receive commission or sales sheets in Excel or CSV format and need to turn them into a clean tax invoice quickly.
+Billr is a mobile-first invoice workflow for business users who receive commission or sales data in spreadsheet or text files and need to turn it into a clean tax invoice quickly. Drafts, workbook selections, profiles, signatures, and invoice history are stored locally in the browser.
 
 The app is designed for a practical flow:
 
-1. Upload an Excel or CSV statement
-2. Review and filter parsed rows
-3. Edit the invoice details and line items if needed
+1. Import an `.xlsx`, `.xls`, `.csv`, `.tsv`, or `.txt` statement
+2. Select a worksheet, customer, and rows to include
+3. Edit invoice details, line items, profiles, and signature if needed
 4. Preview the invoice and export a PDF
 
 This makes it especially useful for distributors, commission agents, agencies, and small businesses that work with spreadsheets instead of full accounting systems.
@@ -50,7 +50,7 @@ This makes it especially useful for distributors, commission agents, agencies, a
 
 ```mermaid
 flowchart LR
-    A[Upload Excel / CSV Sheet] --> B[Review Parsed Records]
+    A[Import Workbook or Text File] --> B[Review and Filter Records]
     B --> C[Filter by Customer / Invoice]
     C --> D[Edit Invoice Details]
     D --> E[Preview & Export PDF]
@@ -60,17 +60,30 @@ flowchart LR
 
 ## Features
 
-### Smart spreadsheet import
-- Upload `.xlsx`, `.xls`, and `.csv` files directly in the browser
+### Smart data import
+- Upload `.xlsx`, `.xls`, `.csv`, `.tsv`, and `.txt` files directly in the browser
 - Parse raw commission or sales rows into structured invoice data
-- Filter records by customer or business context
+- Switch between workbook sheets and filter records by customer or search text
+- Add, edit, delete, and select individual source rows before applying them
 - Review imported data before generating a final invoice
+
+### Home dashboard and local drafts
+- Resume the current draft from the Home dashboard
+- Start a blank invoice or open a reference sample
+- See recently exported invoices and the last local save
+- Export a JSON backup or clear Billr data stored on the device
 
 ### Editable invoice builder
 - Update buyer and seller details
 - Adjust invoice number, date, terms, and line items
 - Add or remove entries before final export
+- Draw or apply a saved signature and choose whether it appears on the invoice
 - Keep the process flexible for real-world corrections
+
+### Agency and client profiles
+- Maintain seller agency, partner, contact, tax, banking, and address details
+- Edit buyer/client details and reset the profile to the bundled defaults
+- Reuse the saved profile across invoices on the same device
 
 ### GST-ready calculations
 - Calculate totals, taxes, and payable value from invoice data
@@ -78,14 +91,15 @@ flowchart LR
 - Keep the logic readable and user-controlled for quick edits
 
 ### PDF export and preview
-- Generate a clean invoice preview in the app
+- Generate a clean, print-ready invoice preview in the app
 - Export a PDF for sharing, printing, or record keeping
+- Validate required invoice data before export and show live totals, GST, and round-off
 - Built for a quick business workflow without requiring a backend service
 
 ### Mobile-first, installable app
-- Designed primarily for iPhone users and responsive web/mobile browsing
+- Designed for iPhone, tablet, desktop, and responsive web/mobile browsing
 - Works well as an installable PWA on supported devices
-- GitHub Pages friendly and usable without a backend server
+- Works without a backend server; imported files and saved drafts remain in the browser
 
 ---
 
@@ -170,7 +184,7 @@ Billr/
 ├── tsconfig.json
 ├── vite.config.ts
 ├── LICENSE
-└── public/manifest.json
+└── walkthrough.md
 ```
 
 ---

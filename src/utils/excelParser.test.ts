@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import * as XLSX from 'xlsx';
 import { convertParsedRecordsToInvoiceItems, parseExcelFile } from './excelParser';
 
 const csv = `Customer,Invoice Number,Date,Product,Quantity,Commission Rate,Commission Amount\nAlpha,001,2026-01-01,Same Product,2,5,10\nBeta,001,2026-01-02,Same Product,3,4,12\nAlpha,002,2026-01-03,Other Product,1,7,7`;
+
+const summaryWorkbookCsv = `Customer,Person,Amount,Dealer Margin,Total
+RAVINDRA AND COMPANY,,45000,13500,58500
+BIO AGRO ENERGY LTD,,70000,14000,84000`;
 
 describe('workbook parsing and invoice transfer', () => {
   it('parses valid workbook-shaped CSV data and groups source customers', () => {
@@ -28,6 +33,31 @@ describe('workbook parsing and invoice transfer', () => {
     const ids = new Set(first.map(item => item.id));
     const newItems = second.filter(item => !ids.has(item.id));
     expect(newItems).toHaveLength(0);
+  });
+
+  it('handles MCA summary-style workbooks that use dealer margin instead of product/quantity columns', () => {
+    const result = parseExcelFile(summaryWorkbookCsv);
+    expect(result.records).toHaveLength(2);
+    expect(result.records[0]).toMatchObject({ customer: 'RAVINDRA AND COMPANY', qty: 1, commAmt: 13500 });
+    const items = convertParsedRecordsToInvoiceItems(result.records, 'ALL');
+    expect(items).toHaveLength(2);
+    expect(items[0].commissionAmount).toBe(13500);
+    expect(items[0].description).toContain('MCA Commission');
+  });
+
+  it('selects the populated column when a workbook repeats the Sales Price header', () => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ['SALES COMMISSION STATEMENT'],
+      ['Customer', 'Inv.No', 'Date', 'Product', 'Qty', 'Comm/kg', 'Comm Amt', 'Sales Price', 'Sales Price'],
+      ['Alpha', '1001', 46050, 'Product A', 2, 5, 10, '', 250],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    const result = parseExcelFile(XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }));
+    const items = convertParsedRecordsToInvoiceItems(result.records);
+
+    expect(items[0]).toMatchObject({ unitPrice: 250, productAmount: 500 });
   });
 
   it.each([

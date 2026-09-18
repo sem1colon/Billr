@@ -1,4 +1,4 @@
-export type ActiveTab = 'sheet' | 'builder' | 'preview' | 'settings';
+export type ActiveTab = 'home' | 'sheet' | 'builder' | 'preview' | 'settings';
 
 export interface BusinessProfile {
   name: string;

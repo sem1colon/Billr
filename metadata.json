@@ -1,6 +1,6 @@
 {
   "name": "Billr",
-  "description": "Upload Excel or CSV commission sheets and turn them into editable GST-ready invoices with live totals and PDF export.",
+  "description": "Import Excel, CSV, TSV, or text commission data, edit GST-ready invoices, save drafts locally, and export PDFs.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

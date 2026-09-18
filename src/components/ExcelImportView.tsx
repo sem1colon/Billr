@@ -17,13 +17,12 @@ import {
   Layers,
   Scale,
   ReceiptIndianRupee,
-  Sparkles,
+  HandCoins,
   FileText,
   X,
   ChevronRight
 } from 'lucide-react';
 import { ExcelParsedRecord, InvoiceItem } from '../types';
-import { parseExcelFile, convertParsedRecordsToInvoiceItems, exportSampleExcelWorkbook, exportSampleCsv } from '../utils/excelParser';
 import { formatIndianCurrency } from '../utils/numberToWords';
 import { loadWorkbookState, saveWorkbookState } from '../utils/storageUtils';
 import { useModalAccessibility } from '../utils/useModalAccessibility';
@@ -90,8 +89,9 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     const isTextFile = ['csv', 'tsv', 'txt'].includes(extension);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
+      const { parseExcelFile } = await import('../utils/excelParser');
         if (isTextFile) {
           const text = e.target?.result as string;
           const result = parseExcelFile(text);
@@ -138,9 +138,10 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     }
   };
 
-  const handleSheetChange = (sheet: string) => {
+  const handleSheetChange = async (sheet: string) => {
     if (!rawFileBufferRef.current) return;
     try {
+      const { parseExcelFile } = await import('../utils/excelParser');
       setIsProcessing(true);
       const result = parseExcelFile(rawFileBufferRef.current, sheet);
       setParsedRecords(result.records);
@@ -223,11 +224,12 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const estimatedGrandTotal = Number((totalTaxable + estimatedGst).toFixed(2));
 
   // Handler: Generate Invoice
-  const handleGenerateInvoice = (directToPreview = false) => {
+  const handleGenerateInvoice = async (directToPreview = false) => {
     if (selectedVisibleRecords.length === 0) {
       setErrorMsg('Select at least one transaction row before creating an invoice.');
       return;
     }
+    const { convertParsedRecordsToInvoiceItems } = await import('../utils/excelParser');
     const items = convertParsedRecordsToInvoiceItems(parsedRecords, selectedCustomer);
     onApplyItemsToInvoice(items);
 
@@ -247,22 +249,22 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-700 tracking-wide">
-                STEP 1 &bull; DATA INGESTION
+                CREATE INVOICE &bull; STEP 1
               </span>
-              <span className="text-xs text-slate-400 font-medium">Auto-Parsing Engine</span>
+              <span className="text-xs text-slate-400 font-medium">Import source data</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1.5">
-              MCA Commission Working Sheet
+              Create a tax invoice from your data
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Upload your MCA workbook, review commission transactions, and prepare the Praj Industries tax invoice.
+              Upload a spreadsheet, select the rows to bill, and review the finished invoice before sharing it.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={exportSampleExcelWorkbook}
+              onClick={async () => (await import('../utils/excelParser')).exportSampleExcelWorkbook()}
               className="flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
               title="Download Excel template (.xlsx)"
             >
@@ -272,7 +274,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
             <button
               type="button"
-              onClick={exportSampleCsv}
+              onClick={async () => (await import('../utils/excelParser')).exportSampleCsv()}
               className="flex items-center space-x-1.5 px-3 py-2 apple-glass-btn text-slate-700 rounded-xl text-xs font-semibold active:scale-95 cursor-pointer"
               title="Download CSV template (.csv)"
             >
@@ -290,6 +292,15 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            aria-label="Choose an Excel or CSV workbook"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
             className={`rounded-2xl border-2 border-dashed p-6 sm:p-7 text-center cursor-pointer transition-all duration-200 ${isDragging
                 ? 'border-blue-500 bg-blue-50/80 shadow-md scale-[1.005]'
                 : 'border-slate-300/90 bg-slate-50/50 hover:bg-blue-50/40 hover:border-blue-400'
@@ -302,6 +313,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               name="workbook"
               onChange={(e) => e.target.files && e.target.files[0] && handleFileProcess(e.target.files[0])}
               accept=".xlsx,.xls,.csv,.tsv,.txt"
+              aria-describedby={errorMsg ? 'workbook-upload-error' : undefined}
               className="hidden"
             />
 
@@ -317,13 +329,20 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                       <span>{fileName}</span>
                     </span>
                   ) : (
-                    'Tap to choose file or drag & drop spreadsheet here'
+                    'Choose your workbook'
                   )}
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Compatible with <strong>Excel (.xlsx, .xls)</strong> and <strong>CSV (.csv)</strong> files
+                  Tap to browse or drag and drop an Excel or CSV file
                 </p>
               </div>
+
+              {!fileName && !isProcessing && (
+                <span className="inline-flex items-center gap-1.5 rounded-xl apple-btn-primary px-4 py-2 text-xs font-bold text-white shadow-md">
+                  <UploadCloud className="h-3.5 w-3.5" />
+                  Choose file
+                </span>
+              )}
 
               {isProcessing && (
                 <div className="flex items-center justify-center space-x-2 text-xs text-blue-600 font-semibold pt-1">
@@ -364,7 +383,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
 
         {/* Error Notice */}
         {errorMsg && (
-          <div className="mt-4 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center space-x-2 text-xs font-semibold" role="alert" aria-live="assertive">
+          <div id="workbook-upload-error" className="mt-4 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center space-x-2 text-xs font-semibold" role="alert" aria-live="assertive">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -372,7 +391,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
       </div>
 
       {/* 2. Executive KPI Cards (Taxable, Qty, GST, Total) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 ${parsedRecords.length === 0 ? 'hidden' : ''}`}>
 
         <div className="apple-glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500">
@@ -392,7 +411,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         <div className="apple-glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">Total Quantity</span>
-            <Scale className="w-4 h-4 text-emerald-600" />
+            <Scale className="w-4 h-4 text-blue-600" />
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -422,13 +441,13 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         <div className="apple-glass-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between border-blue-200 bg-gradient-to-br from-white to-blue-50/50">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">Payable (Inc. Tax)</span>
-            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <HandCoins className="w-4 h-4 text-blue-600" />
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {formatIndianCurrency(estimatedGrandTotal)}
             </div>
-            <div className="text-[11px] text-emerald-700 font-bold mt-0.5">
+            <div className="text-[11px] text-blue-700 font-bold mt-0.5">
               Ready for Tax Invoice
             </div>
           </div>
@@ -437,7 +456,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
       </div>
 
       {/* 3. Customer Filter Segmented Pills */}
-      <div className="apple-glass-card rounded-2xl p-3 sm:p-4">
+      <div className={`apple-glass-card rounded-2xl p-3 sm:p-4 ${parsedRecords.length === 0 ? 'hidden' : ''}`}>
         <div className="flex items-center justify-between mb-2 px-1">
           <div className="flex items-center space-x-2">
             <Building2 className="w-4 h-4 text-slate-600" />
@@ -498,7 +517,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
       </div>
 
       {/* 4. Interactive Working Table & Card Grid */}
-      <div className="apple-glass-card rounded-[28px] p-4 sm:p-6 space-y-4 shadow-xs">
+      <div className={`apple-glass-card rounded-[28px] p-4 sm:p-6 space-y-4 shadow-xs ${parsedRecords.length === 0 ? 'hidden' : ''}`}>
 
         {/* Table Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
@@ -518,19 +537,20 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           <div className="flex items-center gap-2">
             {/* Search Input */}
             <div className="relative flex-1 sm:flex-initial">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search items, invoices..."
-                className="pl-8 pr-3 py-2 apple-glass-input text-xs rounded-xl outline-none w-full sm:w-56"
+                className="search-field-input py-2 apple-glass-input text-xs rounded-xl outline-none w-full sm:w-56"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -565,9 +585,9 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         </div>
 
         {/* Desktop / Tablet Table View */}
-        <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200/80">
+        <div className="hidden md:block max-h-[min(62vh,680px)] overflow-auto rounded-xl border border-slate-200/80">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
+            <thead className="sticky top-0 z-10 bg-slate-100/95 text-slate-700 font-bold border-b border-slate-200 backdrop-blur-md">
               <tr>
                 <th className="py-3 px-3 w-8 text-center">
                   <span className="sr-only">Select</span>
@@ -707,12 +727,12 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-xs font-black text-slate-900">
+                      <div className="text-right flex-shrink-0">
+                      <div className="text-sm font-black text-slate-900">
                         {formatIndianCurrency(rec.commAmt)}
                       </div>
                       <div className="text-[10px] font-bold text-blue-700 mt-0.5">
-                        @ ₹{rec.commPerKg}/kg
+                        Commission
                       </div>
                     </div>
                   </div>
@@ -720,7 +740,6 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                   <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
                     <span className="text-slate-500">
                       Qty: <strong className="text-slate-800">{rec.qty.toLocaleString()} kg</strong>
-                      {rec.unitPrice ? ` • Basic: ₹${rec.unitPrice}` : ''}
                     </span>
 
                     <div className="flex items-center space-x-1">
@@ -743,6 +762,16 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
                       </button>
                     </div>
                   </div>
+
+                  <details className="mt-2 text-[10px] text-slate-500">
+                    <summary className="cursor-pointer select-none font-semibold text-slate-500">View row details</summary>
+                    <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 px-2.5 py-2">
+                      <span>Commission rate <strong className="text-slate-700">₹{rec.commPerKg.toFixed(2)}/kg</strong></span>
+                      <span>Unit rate <strong className="text-slate-700">{rec.unitPrice ? `₹${rec.unitPrice}` : '-'}</strong></span>
+                      <span>Date <strong className="text-slate-700">{rec.date || '-'}</strong></span>
+                      <span>Invoice <strong className="text-slate-700">{rec.invNo ? `#${rec.invNo}` : '-'}</strong></span>
+                    </div>
+                  </details>
                 </div>
               );
             })

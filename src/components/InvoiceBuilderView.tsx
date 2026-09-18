@@ -19,9 +19,9 @@ import {
   BadgeCheck, 
   Eye, 
   ChevronRight, 
-  Sparkles, 
   RotateCcw,
-  UserCheck
+  UserCheck,
+  ChevronDown
 } from 'lucide-react';
 import { InvoiceData, InvoiceItem, GstType } from '../types';
 import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWords';
@@ -48,12 +48,14 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
 }) => {
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isClearItemsDialogOpen, setIsClearItemsDialogOpen] = useState(false);
+  const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
 
   const { taxableValue, cgstAmount, sgstAmount, igstAmount, grandTotal, roundOff } = calculateInvoiceTotals(invoiceData);
   const gstRate = invoiceData.gstRate || 0;
   const totalQtyHandled = invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0);
 
   const amountInWords = numberToIndianRupees(grandTotal);
+  const hasInvoiceNumber = invoiceData.invoiceNumber.trim().length > 0;
 
   const handleDeleteItem = (id: string) => {
     setInvoiceData(prev => ({
@@ -145,9 +147,13 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               type="text"
               value={invoiceData.invoiceNumber}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
+              aria-required="true"
+              aria-invalid={!hasInvoiceNumber}
+              aria-describedby={!hasInvoiceNumber ? 'invoice-number-error' : undefined}
               placeholder="e.g. MCA/2026-27/001"
               className="w-full px-3.5 py-2.5 apple-glass-input text-xs sm:text-sm font-bold text-slate-900 rounded-xl outline-none"
             />
+            {!hasInvoiceNumber && <p id="invoice-number-error" className="mt-1 text-[11px] font-semibold text-rose-700">Add an invoice number before exporting.</p>}
           </div>
 
           {/* Invoice Date */}
@@ -239,7 +245,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
         <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <UserCheck className="w-3.5 h-3.5 text-blue-600" />
               <span>Billed To (Buyer / Recipient)</span>
             </span>
             <button
@@ -446,37 +452,48 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
         {/* Bank & Signature Settings */}
         <div className="apple-glass-card rounded-[24px] p-4 sm:p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Bank Details & Signature
-            </span>
+            <div>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                Payment & signature
+              </span>
+              <span className="text-xs text-slate-500">Bank details and signing preferences</span>
+            </div>
             <button
               type="button"
-              onClick={() => setIsSignatureModalOpen(true)}
-              className="text-xs text-blue-600 font-bold hover:underline flex items-center space-x-1 cursor-pointer"
+              onClick={() => setIsPaymentDetailsOpen(prev => !prev)}
+              className="inline-flex items-center gap-1 text-xs text-blue-600 font-bold cursor-pointer"
+              aria-expanded={isPaymentDetailsOpen}
             >
-              <PenTool className="w-3.5 h-3.5" />
-              <span>Digital Sign</span>
+              <span>{isPaymentDetailsOpen ? 'Hide' : 'Show'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isPaymentDetailsOpen ? 'rotate-180' : ''}`} />
             </button>
           </div>
 
-          <div className="text-xs text-slate-600 space-y-1 bg-slate-50/70 p-3 rounded-xl">
-            <div><strong>Bank:</strong> {invoiceData.seller.bankName} &bull; {invoiceData.seller.bankBranch}</div>
-            <div><strong>Account No:</strong> {invoiceData.seller.accountNo}</div>
-            <div><strong>IFSC Code:</strong> {invoiceData.seller.ifscCode}</div>
-          </div>
+          {isPaymentDetailsOpen && <div className="space-y-3">
+            <div className="text-xs text-slate-600 space-y-1 bg-slate-50/70 p-3 rounded-xl">
+              <div><strong>Bank:</strong> {invoiceData.seller.bankName} &bull; {invoiceData.seller.bankBranch}</div>
+              <div><strong>Account No:</strong> {invoiceData.seller.accountNo}</div>
+              <div><strong>IFSC Code:</strong> {invoiceData.seller.ifscCode}</div>
+            </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-bold text-slate-700">Include Signature on Invoice</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={invoiceData.showSignature !== false}
-                onChange={(e) => setInvoiceData(prev => ({ ...prev, showSignature: e.target.checked }))}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs font-bold text-slate-700">Include Signature on Invoice</span>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setIsSignatureModalOpen(true)} className="text-xs font-bold text-blue-600 cursor-pointer">
+                  Configure
+                </button>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={invoiceData.showSignature !== false}
+                    onChange={(e) => setInvoiceData(prev => ({ ...prev, showSignature: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>}
         </div>
 
         {/* Calculation Summary Card */}
@@ -543,7 +560,8 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
           <button
             type="button"
             onClick={onNavigateToPreview}
-            className="px-6 py-2.5 apple-btn-primary text-white rounded-xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md flex items-center space-x-1.5"
+            disabled={invoiceData.items.length === 0}
+            className="px-6 py-2.5 apple-btn-primary text-white rounded-xl text-xs sm:text-sm font-black active:scale-95 cursor-pointer shadow-md flex items-center space-x-1.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             <span>Proceed to Preview & Export</span>
             <ArrowRight className="w-4 h-4" />

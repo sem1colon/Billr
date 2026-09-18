@@ -8,7 +8,6 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  Sparkles
 } from 'lucide-react';
 import { getDefaultSignatureDataUrl } from '../utils/signatureUtils';
 import { saveSavedSignature, getDefaultOrSavedSignature, loadSavedSignature } from '../utils/storageUtils';
@@ -374,7 +373,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
           {/* Persistent Default Notice */}
           <div className="flex items-start space-x-2.5 p-3 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900">
-            <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
             <span>
               <strong>Auto-Remembered:</strong> Your saved signature is kept by default for all invoices until you edit it again.
             </span>

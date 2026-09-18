@@ -6,14 +6,14 @@ import { ExcelImportView } from './components/ExcelImportView';
 import { InvoiceBuilderView } from './components/InvoiceBuilderView';
 import { InvoiceLivePreview } from './components/InvoiceLivePreview';
 import { BusinessSettingsView } from './components/BusinessSettingsView';
+import { HomeDashboardView } from './components/HomeDashboardView';
 import { ItemFormModal } from './components/ItemFormModal';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { InvoiceData, InvoiceItem, ActiveTab, ExcelParsedRecord } from './types';
 import { initialInvoiceData, defaultBuyer, sampleInvoiceItems } from './data/sampleData';
-import { generateInvoicePDF } from './utils/pdfGenerator';
 import { getDefaultSignatureDataUrl } from './utils/signatureUtils';
-import { convertParsedRecordsToInvoiceItems } from './utils/excelParser';
 import { calculateInvoiceTotals } from './utils/invoiceCalculations';
+import { validateInvoiceForExport } from './utils/invoiceValidation';
 import { 
   loadSavedInvoiceData, 
   saveInvoiceData, 
@@ -22,6 +22,11 @@ import {
   loadSavedUiPreferences, 
   saveUiPreferences,
   loadSavedSheetRecords,
+  loadInvoiceHistory,
+  saveInvoiceHistoryEntry,
+  createLocalBackup,
+  clearAllBillrData,
+  getLastSavedTimestamp,
   getDefaultOrSavedSignature,
   clearSavedInvoiceData,
   clearSavedWorkbookState,
@@ -36,6 +41,10 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLargeText, setIsLargeText] = useState<boolean>(() => loadSavedUiPreferences().isLargeText);
   const [isNewInvoiceDialogOpen, setIsNewInvoiceDialogOpen] = useState(false);
+  const [isClearDataDialogOpen, setIsClearDataDialogOpen] = useState(false);
+  const [invoiceHistory, setInvoiceHistory] = useState(() => loadInvoiceHistory());
+  const [hasSavedDraft, setHasSavedDraft] = useState(() => hasSavedInvoiceData());
+  const [saveStatus, setSaveStatus] = useState<'ready' | 'saving' | 'saved'>('ready');
   const [hasShownRestoreNotice, setHasShownRestoreNotice] = useState(false);
   const isInitialMount = useRef(true);
 
@@ -45,9 +54,14 @@ export default function App() {
       isInitialMount.current = false;
       return;
     }
+    setSaveStatus('saving');
     if (!saveInvoiceData(invoiceData)) {
+      setSaveStatus('ready');
       showToast('Draft save failed. Keep this tab open and check device storage before leaving.');
+      return;
     }
+    setHasSavedDraft(true);
+    setSaveStatus('saved');
   }, [invoiceData]);
 
   useEffect(() => {
@@ -94,15 +108,13 @@ export default function App() {
   };
 
   const handleApplyItemsFromSheet = (items: InvoiceItem[]) => {
-    const existingIds = new Set(invoiceData.items.map(item => item.id));
-    const newItems = items.filter(item => !existingIds.has(item.id));
     setInvoiceData(prev => {
       return {
         ...prev,
-        items: [...prev.items, ...newItems],
+        items,
       };
     });
-    showToast(newItems.length > 0 ? `Added ${newItems.length} new item${newItems.length === 1 ? '' : 's'}; existing edits were preserved` : 'No new rows added; duplicate source rows were skipped');
+    showToast(`Loaded ${items.length} invoice item${items.length === 1 ? '' : 's'} from the selected worksheet`);
   };
 
   const handleStartNewInvoice = () => {
@@ -115,12 +127,30 @@ export default function App() {
     clearSavedInvoiceData();
     clearSavedWorkbookState();
     setInvoiceData(freshInvoice);
+    setActiveTab('builder');
     setIsNewInvoiceDialogOpen(false);
     showToast('Started a new invoice');
   };
 
-  const handleDownloadPdf = () => {
-    generateInvoicePDF(invoiceData, false);
+  const handleDownloadPdf = async () => {
+    const validation = validateInvoiceForExport(invoiceData);
+    if (!validation.isValid) {
+      showToast(validation.errors[0]);
+      setActiveTab('builder');
+      return;
+    }
+    const { generateInvoicePDF } = await import('./utils/pdfGenerator');
+    await generateInvoicePDF(invoiceData, false);
+    const historyEntry = {
+      id: invoiceData.id,
+      invoiceNumber: invoiceData.invoiceNumber,
+      invoiceDate: invoiceData.invoiceDate,
+      total: grandTotal,
+      itemCount: invoiceData.items.length,
+      savedAt: new Date().toISOString(),
+    };
+    saveInvoiceHistoryEntry(historyEntry);
+    setInvoiceHistory(loadInvoiceHistory());
     showToast('Tax Invoice PDF downloaded');
   };
 
@@ -128,6 +158,7 @@ export default function App() {
     const defaultSig = getDefaultOrSavedSignature();
     const freshSample: InvoiceData = {
       ...initialInvoiceData,
+      invoiceNumber: 'SAMPLE/2026-27/001',
       items: sampleInvoiceItems,
       showSignature: true,
       seller: {
@@ -137,12 +168,41 @@ export default function App() {
     };
     setInvoiceData(freshSample);
     saveInvoiceData(freshSample);
+    setHasSavedDraft(true);
+    setActiveTab('builder');
     showToast('Loaded reference sample invoice');
   };
 
-  const handleGenerateFromSheet = () => {
+  const handleExportBackup = () => {
+    const blob = new Blob([createLocalBackup()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `billr-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('Backup downloaded');
+  };
+
+  const handleClearData = () => {
+    clearAllBillrData();
+    setInvoiceData({
+      ...initialInvoiceData,
+      seller: { ...initialInvoiceData.seller, signatureUrl: getDefaultOrSavedSignature() },
+      buyer: { ...defaultBuyer },
+      items: [],
+    });
+    setInvoiceHistory([]);
+    setHasSavedDraft(false);
+    setIsClearDataDialogOpen(false);
+    setActiveTab('home');
+    showToast('Local Billr data cleared');
+  };
+
+  const handleGenerateFromSheet = async () => {
     const cached = loadSavedSheetRecords();
     if (cached && cached.records && cached.records.length > 0) {
+      const { convertParsedRecordsToInvoiceItems } = await import('./utils/excelParser');
       const items = convertParsedRecordsToInvoiceItems(cached.records, cached.customer);
       handleApplyItemsFromSheet(items);
     }
@@ -152,7 +212,7 @@ export default function App() {
   const { grandTotal } = calculateInvoiceTotals(invoiceData);
 
   return (
-    <div className={`relative min-h-screen max-w-[100vw] overflow-x-hidden bg-slate-100/70 text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
+    <div className={`app-shell relative min-h-screen max-w-[100vw] overflow-x-hidden text-slate-900 flex flex-col font-sans selection:bg-blue-500 selection:text-white ${isLargeText ? 'text-base sm:text-lg' : ''}`}>
       
       {/* Top Header Navigation */}
       <HeaderNav
@@ -160,6 +220,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onDownloadPdf={handleDownloadPdf}
         onStartNewInvoice={() => setIsNewInvoiceDialogOpen(true)}
+        saveStatus={saveStatus}
         itemsCount={invoiceData.items.length}
         grandTotal={grandTotal}
         isLargeText={isLargeText}
@@ -168,9 +229,60 @@ export default function App() {
         }}
       />
 
+      <div className="hidden sm:flex max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3">
+        <ol className="flex items-center gap-2 text-[11px] font-bold text-slate-500" aria-label="Invoice workflow progress">
+          {[
+            { label: 'Create', complete: activeTab !== 'sheet' || invoiceData.items.length > 0 },
+            { label: 'Details', complete: activeTab === 'preview' || activeTab === 'settings' },
+            { label: 'Review', complete: activeTab === 'preview' },
+          ].map((step, index) => (
+            <React.Fragment key={step.label}>
+              {index > 0 && <span className="text-slate-300" aria-hidden="true">/</span>}
+              <li
+                className={`inline-flex items-center gap-1 ${step.complete ? 'text-blue-700' : ''}`}
+                aria-current={
+                  (index === 0 && activeTab === 'sheet') ||
+                  (index === 1 && activeTab === 'builder') ||
+                  (index === 2 && activeTab === 'preview')
+                    ? 'step'
+                    : undefined
+                }
+              >
+                <span className={`flex h-4 w-4 items-center justify-center rounded-full border text-[9px] ${step.complete ? 'border-blue-200 bg-blue-50' : 'border-slate-300 bg-white/60'}`}>
+                  {step.complete ? '✓' : index + 1}
+                </span>
+                {step.label}
+              </li>
+            </React.Fragment>
+          ))}
+        </ol>
+      </div>
+
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12 mobile-content-safe">
         <AnimatePresence mode="wait">
+          {activeTab === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <HomeDashboardView
+                invoiceData={invoiceData}
+                hasSavedDraft={hasSavedDraft}
+                history={invoiceHistory}
+                lastSavedTimestamp={getLastSavedTimestamp()}
+                onResumeDraft={() => setActiveTab(invoiceData.items.length > 0 ? 'builder' : 'sheet')}
+                onStartNewInvoice={() => setIsNewInvoiceDialogOpen(true)}
+                onImport={() => setActiveTab('sheet')}
+                onLoadSample={handleLoadSample}
+                onExportBackup={handleExportBackup}
+                onClearData={() => setIsClearDataDialogOpen(true)}
+              />
+            </motion.div>
+          )}
           
           {/* Step 1: Upload Excel / CSV & Working Sheet */}
           {activeTab === 'sheet' && (
@@ -277,6 +389,15 @@ export default function App() {
         confirmLabel="Start new invoice"
         onConfirm={handleStartNewInvoice}
         onCancel={() => setIsNewInvoiceDialogOpen(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={isClearDataDialogOpen}
+        title="Clear local Billr data?"
+        description="This removes drafts, invoice history, uploaded workbook data, signatures, and preferences from this browser. Download a backup first if you may need them later."
+        confirmLabel="Clear local data"
+        onConfirm={handleClearData}
+        onCancel={() => setIsClearDataDialogOpen(false)}
       />
 
       {/* Floating Toast Notification (Apple Liquid Glass Pill) */}

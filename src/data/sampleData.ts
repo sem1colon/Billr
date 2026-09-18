@@ -2,7 +2,7 @@ import { BusinessProfile, ClientProfile, InvoiceData, InvoiceItem } from '../typ
 
 export const defaultSeller: BusinessProfile = {
   name: 'MURTHY CHEMICAL AGENCIES',
-  address: '104 Rukmini Apartment Yousufguda Check Post',
+  address: 'Flat No. 104, Rukmini Apartment, Yousufguda Check Post',
   cityStateZip: 'Hyderabad-500045.',
   partnerName: 'R.S.N.MURTHY',
   phone: '9849187125',
@@ -281,7 +281,7 @@ export function getTodayDateIso(): string {
 
 export const initialInvoiceData: InvoiceData = {
   id: 'inv-initial-01',
-  invoiceNumber: '004/26-27',
+  invoiceNumber: '',
   invoiceDate: '10-Aug-26',
   seller: defaultSeller,
   buyer: defaultBuyer,

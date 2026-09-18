@@ -12,8 +12,8 @@ import {
   Check,
   Info,
   Building2,
-  Sparkles,
-  Plus
+  Plus,
+  Home
 } from 'lucide-react';
 import { BillrLogo } from './BillrLogo';
 import { InstallModal } from './InstallModal';
@@ -27,6 +27,7 @@ interface HeaderNavProps {
   setActiveTab: (tab: ActiveTab) => void;
   onDownloadPdf?: () => void;
   onStartNewInvoice?: () => void;
+  saveStatus?: 'ready' | 'saving' | 'saved';
   itemsCount: number;
   grandTotal: number;
   isLargeText?: boolean;
@@ -38,6 +39,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   setActiveTab,
   onDownloadPdf,
   onStartNewInvoice,
+  saveStatus = 'ready',
   itemsCount,
   isLargeText = false,
   onToggleLargeText,
@@ -105,16 +107,22 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   };
 
   const navTabs = [
+    {
+      id: 'home' as ActiveTab,
+      label: 'Home',
+      shortLabel: 'Home',
+      icon: Home
+    },
     { 
       id: 'sheet' as ActiveTab, 
-      label: 'Upload', 
-      shortLabel: 'Upload',
+      label: 'Create',
+      shortLabel: 'Create',
       icon: FileSpreadsheet
     },
     { 
       id: 'builder' as ActiveTab, 
-      label: 'Invoice', 
-      shortLabel: 'Invoice',
+      label: 'Details',
+      shortLabel: 'Details',
       icon: FileText
     },
     { 
@@ -187,6 +195,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
             {/* Right: Controls & Actions */}
             <div className="flex items-center space-x-2 flex-shrink-0">
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500" role="status" aria-live="polite">
+                <span className={`h-1.5 w-1.5 rounded-full ${saveStatus === 'saving' ? 'bg-amber-400 animate-pulse' : saveStatus === 'saved' ? 'bg-blue-500' : 'bg-slate-300'}`} />
+                {saveStatus === 'saving' ? 'Saving' : saveStatus === 'saved' ? 'Saved locally' : 'Draft ready'}
+              </span>
               
               {/* PWA Install Button (Hidden when already installed) */}
               {!isInstalled && (
