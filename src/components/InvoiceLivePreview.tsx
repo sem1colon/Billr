@@ -361,7 +361,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
           className="transition-transform duration-200"
         >
           {/* Authentic High-Precision Tax Invoice Document Matching Reference Exactly */}
-          <div className="invoice-document w-[794px] min-h-[1123px] bg-white text-slate-900 shadow-2xl p-6 border-2 border-slate-900 rounded-none relative flex flex-col justify-between [font-family:Arial,Helvetica,sans-serif] [font-variant-numeric:tabular-nums]">
+          <div className="invoice-document w-[794px] bg-white text-slate-900 shadow-2xl p-6 border-2 border-slate-900 rounded-none relative [font-family:Arial,Helvetica,sans-serif] [font-variant-numeric:tabular-nums]">
             
             <div>
               {/* 1. Top Shaded Header Banner */}

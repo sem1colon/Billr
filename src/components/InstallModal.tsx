@@ -248,13 +248,13 @@ export const InstallModal: React.FC<InstallModalProps> = ({
                         </div>
                         <div className="flex-1 text-xs">
                           <div className="text-slate-900 font-semibold mb-0.5 flex items-center gap-1.5">
-                            Tap the <span className="font-bold text-blue-700">Share</span> icon
+                            Open Safari's <span className="font-bold text-blue-700">Share</span> menu
                             <span className="inline-flex items-center justify-center p-1 bg-white/90 border border-slate-200 rounded-md shadow-xs">
                               <Share className="w-3.5 h-3.5 text-blue-600" />
                             </span>
                           </div>
                           <p className="text-slate-500 text-[11px]">
-                            Located in the Safari bottom toolbar on iPhone (or top bar on iPad).
+                            If the Share icon is not visible in the address bar, tap the Page Menu (...) first, then tap Share.
                           </p>
                         </div>
                       </div>
@@ -272,7 +272,7 @@ export const InstallModal: React.FC<InstallModalProps> = ({
                             </span>
                           </div>
                           <p className="text-slate-500 text-[11px]">
-                            Scroll down the iOS share sheet list and select "Add to Home Screen".
+                            Scroll down the share sheet. If it is missing, scroll to the bottom, tap Edit Actions, then add "Add to Home Screen".
                           </p>
                         </div>
                       </div>
