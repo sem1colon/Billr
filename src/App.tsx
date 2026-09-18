@@ -139,19 +139,24 @@ export default function App() {
       setActiveTab('builder');
       return;
     }
-    const { generateInvoicePDF } = await import('./utils/pdfGenerator');
-    await generateInvoicePDF(invoiceData, false);
-    const historyEntry = {
-      id: invoiceData.id,
-      invoiceNumber: invoiceData.invoiceNumber,
-      invoiceDate: invoiceData.invoiceDate,
-      total: grandTotal,
-      itemCount: invoiceData.items.length,
-      savedAt: new Date().toISOString(),
-    };
-    saveInvoiceHistoryEntry(historyEntry);
-    setInvoiceHistory(loadInvoiceHistory());
-    showToast('Tax Invoice PDF downloaded');
+    try {
+      const { generateInvoicePDF } = await import('./utils/pdfGenerator');
+      await generateInvoicePDF(invoiceData, false);
+      const historyEntry = {
+        id: invoiceData.id,
+        invoiceNumber: invoiceData.invoiceNumber,
+        invoiceDate: invoiceData.invoiceDate,
+        total: grandTotal,
+        itemCount: invoiceData.items.length,
+        savedAt: new Date().toISOString(),
+      };
+      saveInvoiceHistoryEntry(historyEntry);
+      setInvoiceHistory(loadInvoiceHistory());
+      showToast('Tax Invoice PDF downloaded');
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      showToast('PDF export failed. Please try again.');
+    }
   };
 
   const handleLoadSample = () => {

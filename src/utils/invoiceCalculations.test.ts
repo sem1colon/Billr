@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calculateInvoiceTotals } from './invoiceCalculations';
-import { getInvoicePdfFileName } from './pdfGenerator';
+import { getInvoicePdfExportData, getInvoicePdfFileName } from './pdfGenerator';
 import { InvoiceData } from '../types';
 
 const invoice = (overrides: Partial<InvoiceData> = {}): InvoiceData => ({
@@ -57,5 +57,27 @@ describe('getInvoicePdfFileName', () => {
     ['发票/2026-27/abc?.pdf', 'Invoice_MCA_2026-27_001.pdf'],
   ])('normalizes %s', (input, expected) => {
     expect(getInvoicePdfFileName(input)).toBe(expected);
+  });
+});
+
+describe('getInvoicePdfExportData', () => {
+  it('maps the current invoice rows and totals into the PDF export snapshot', () => {
+    const data = getInvoicePdfExportData(invoice({
+      invoiceNumber: 'MCA/2026-27/017',
+      invoiceDate: '2026-08-10',
+      items: [
+        { id: '1', description: 'A', hsnSacCode: '998311', qty: 5, unit: 'kg', commissionRate: 10, commissionAmount: 100 },
+        { id: '2', description: 'B', hsnSacCode: '998311', qty: 7, unit: 'kg', commissionRate: 10, commissionAmount: 145 },
+        { id: '3', description: 'C', hsnSacCode: '998311', qty: 5, unit: 'kg', commissionRate: 10, commissionAmount: 100 },
+      ],
+    }));
+
+    expect(data.invoiceNumber).toBe('MCA/2026-27/017');
+    expect(data.invoiceDate).toBe('2026-08-10');
+    expect(data.items).toHaveLength(3);
+    expect(data.totalQuantity).toBe(17);
+    expect(data.taxableValue).toBe(345);
+    expect(data.gstAmount).toBe(62.1);
+    expect(data.grandTotal).toBe(407.1);
   });
 });

@@ -24,8 +24,9 @@ import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWor
 import { validateInvoiceForExport } from '../utils/invoiceValidation';
 import {
   formatInvoiceAmount,
+  formatInvoiceDate,
   formatInvoiceQuantity,
-  formatInvoiceRate,
+  getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
 } from '../utils/invoiceFormatting';
@@ -74,8 +75,13 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
       setExportError(validation.errors[0]);
       return;
     }
-    const { generateInvoicePDF } = await import('../utils/pdfGenerator');
-    await generateInvoicePDF(invoiceData, true);
+    try {
+      const { generateInvoicePDF } = await import('../utils/pdfGenerator');
+      await generateInvoicePDF(invoiceData, true);
+    } catch (error) {
+      console.error('Print export failed:', error);
+      setExportError('PDF export failed. Please try again.');
+    }
   };
 
   const handleNativeShare = async () => {
@@ -96,6 +102,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
       });
     } catch (err) {
       console.error('Share failed:', err);
+      setExportError('PDF sharing failed. The download button is still available.');
     } finally {
       setIsSharing(false);
     }
@@ -125,7 +132,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
   const handleCopySummary = async () => {
     try {
       const summaryText = `📄 TAX INVOICE: ${invoiceData.invoiceNumber}
-📅 Date: ${invoiceData.invoiceDate}
+📅 Date: ${formatInvoiceDate(invoiceData.invoiceDate)}
 🏢 Supplier: ${invoiceData.seller.name} (GSTIN: ${invoiceData.seller.gstin})
 🏢 Recipient: ${invoiceData.buyer.name} (GSTIN: ${invoiceData.buyer.gstin})
 📦 Items: ${invoiceData.items.length} lines (${totalQty.toLocaleString()} kg)
@@ -221,7 +228,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
               <span className="inline-flex items-center gap-1 text-slate-600">
                 <Calendar className="w-3 h-3 text-slate-400" />
-                <span>Date: <strong className="text-slate-800">{invoiceData.invoiceDate}</strong></span>
+                <span>Date: <strong className="text-slate-800">{formatInvoiceDate(invoiceData.invoiceDate)}</strong></span>
               </span>
 
               <span className="hidden sm:inline-block text-slate-400">&bull;</span>
@@ -364,20 +371,23 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               </div>
 
               {/* 2. Seller Agency Banner */}
-              <div className="border-x border-b border-slate-900 bg-white px-3 py-3 text-left">
-                <span className="border-l-2 border-blue-600 pl-2 font-bold text-[11px] uppercase tracking-wide text-slate-900">
-                  Billed From:
+              <div className="border-x border-b border-slate-900 bg-slate-50 px-3 py-3 text-center">
+                <span className="inline-block border-b-2 border-blue-600 pb-0.5 font-bold text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                  BILLED FROM
                 </span>
-                <h2 className="mt-1 text-xl font-black uppercase leading-tight tracking-tight text-slate-900">
+                <h2 className="mt-1 text-xl font-black uppercase leading-tight tracking-tight text-slate-950">
                   {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                 </h2>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-800">
                   {invoiceData.seller.address || 'Flat No. 104, Rukmini Apartment, Yousufguda Check Post'}
                 </p>
                 <p className="mt-0.5 text-xs leading-relaxed text-slate-800">
-                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'} Partner: {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} Ph: {invoiceData.seller.phone || '9849187125'}
+                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'}
                 </p>
-                <p className="mt-1.5 text-xs font-bold leading-relaxed tracking-wide text-slate-900">
+                <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-800">
+                  Partner: {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} <span className="text-slate-400">|</span> Ph: {invoiceData.seller.phone || '9849187125'}
+                </p>
+                <p className="mt-1.5 text-xs font-black leading-relaxed tracking-wide text-slate-950">
                   GSTIN No : {invoiceData.seller.gstin || '36ABXFM3174B1Z1'} &nbsp;&nbsp; PAN Number : {invoiceData.seller.pan || 'ABXFM3174B'}
                 </p>
               </div>
@@ -389,7 +399,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                 <div className="col-span-5 p-2.5 border-r border-slate-900 flex flex-col justify-between items-start text-left">
                   <div className="w-full">
                     <span className="block border-l-2 border-blue-600 pl-2 font-bold text-[11px] uppercase tracking-wide text-slate-900">
-                      Billed To:
+                      BILLED TO
                     </span>
                     <h3 className="font-bold text-slate-900 text-xs mt-1 uppercase leading-tight">
                       {invoiceData.buyer.name || 'PRAJ INDUSTRIES LIMITED'}
@@ -419,21 +429,21 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                 {/* Column 3: INVOICE No. & DATE Stacked Boxes */}
                 <div className="col-span-3 h-full border-l border-slate-900 bg-white">
                   <div className="grid h-full grid-rows-2">
-                    <div className="flex flex-col justify-center border-b border-slate-900 px-2 py-1.5 text-left">
-                      <span className="font-bold text-slate-900 text-[11px] tracking-wide uppercase leading-none">
+                    <div className="flex flex-col justify-center border-b border-slate-900 bg-slate-50 px-2 py-1.5 text-left">
+                      <span className="border-l-2 border-blue-600 pl-1.5 font-black text-slate-700 text-[10px] tracking-wide uppercase leading-none">
                         INVOICE No.
                       </span>
-                      <span className="font-bold text-slate-900 text-xs mt-1 font-mono leading-none break-all">
+                      <span className="font-black text-slate-950 text-xs mt-1 font-mono leading-none break-all">
                         {invoiceData.invoiceNumber || 'Invoice number'}
                       </span>
                     </div>
 
-                    <div className="flex flex-col justify-center px-2 py-1.5 text-left">
-                      <span className="font-bold text-slate-900 text-[11px] tracking-wide uppercase leading-none">
+                    <div className="flex flex-col justify-center bg-slate-50 px-2 py-1.5 text-left">
+                      <span className="border-l-2 border-blue-600 pl-1.5 font-black text-slate-700 text-[10px] tracking-wide uppercase leading-none">
                         DATE
                       </span>
-                      <span className="font-bold text-slate-900 text-xs mt-1 leading-none">
-                        {invoiceData.invoiceDate || '10-Aug-26'}
+                      <span className="font-black text-slate-950 text-xs mt-1 leading-none">
+                        {formatInvoiceDate(invoiceData.invoiceDate)}
                       </span>
                     </div>
                   </div>
@@ -448,7 +458,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     <tr className="bg-[#0f172a] text-white font-bold border-b border-slate-900 text-[11px] align-middle">
                       <th className="py-2 px-2.5 border-r border-slate-900 w-[48%] text-left align-middle">Description of Services</th>
                       <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">HSN/SAC</th>
-                      <th className="py-2 px-2 text-right border-r border-slate-900 w-[14%] align-middle">Qty</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">Qty</th>
                       <th className="py-2 px-2.5 text-right w-[24%] align-middle">Amount</th>
                     </tr>
                   </thead>
@@ -480,9 +490,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                         <React.Fragment key={group.customer}>
                           {/* Customer Group Header Row */}
                           {group.customer && group.customer !== 'General Items' && (
-                            <tr className="bg-blue-50 border-t border-b border-blue-200 font-bold">
-                              <td colSpan={4} className="py-1 px-2.5 text-slate-900 font-bold text-xs tracking-wide">
-                                Customer: {group.customer}
+                            <tr className="bg-slate-100 border-t border-b border-slate-300 font-bold">
+                              <td colSpan={4} className="py-1.5 px-2.5 text-slate-950 font-black text-[10px] uppercase tracking-[0.08em]">
+                                Customer <span className="text-blue-700">|</span> {group.customer}
                               </td>
                             </tr>
                           )}
@@ -494,7 +504,10 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                                 <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-relaxed text-left align-top">
                                   <span className="block font-semibold text-left">{getInvoiceProductName(item)}</span>
                                   <span className="block text-[10px] text-slate-600 mt-0.5 text-left">
-                                    {[getInvoiceItemMeta(item), `Rate: ${formatInvoiceRate(item)}`].filter(Boolean).join(' | ')}
+                                    {getInvoiceItemMeta(item)}
+                                  </span>
+                                  <span className="block text-[10px] font-semibold text-slate-700 mt-0.5 text-left">
+                                    {getInvoicePricingMeta(item)}
                                   </span>
                                 </td>
                                 <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px] align-middle">
@@ -552,26 +565,26 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               </div>
 
               {/* 5. Amount in Words Box */}
-              <div className="border-x border-b border-slate-900 p-2.5 text-left bg-slate-50">
-                <span className="text-slate-800 text-[11px] block tracking-wide uppercase">Amount Chargeable (in words):</span>
-                <span className="font-bold text-slate-900 text-xs mt-1 block leading-relaxed">
+              <div className="border-x border-b border-slate-900 p-2.5 text-left bg-blue-50">
+                <span className="text-slate-700 text-[10px] font-black block tracking-[0.12em] uppercase">Amount Chargeable (in words)</span>
+                <span className="font-black text-slate-950 text-xs mt-1 block leading-relaxed">
                   {amountInWords}
                 </span>
               </div>
 
               {/* 6. Bottom Split Box: Bank Details (Left) and Signatory (Right) */}
-              <div className="grid grid-cols-12 border-x border-b border-slate-900 text-xs bg-white">
+              <div className="grid border-x border-b border-slate-900 text-xs bg-white" style={{ gridTemplateColumns: '65% 35%' }}>
                 
                 {/* Left: Bank Details and PAN */}
-                <div className="col-span-8 p-3 border-r border-slate-900 space-y-1 text-left">
+                <div className="p-3 border-r border-slate-900 space-y-1 text-left" style={{ gridColumn: '1' }}>
                   <p className="font-bold text-slate-900 text-[10px] uppercase tracking-wide pb-0.5">
                     Bank Details
                   </p>
                   <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
-                    Company's PAN : {invoiceData.seller.pan || 'ABXFM3174B'}
+                    COMPANY PAN: {invoiceData.seller.pan || 'ABXFM3174B'}
                   </p>
                   <p className="font-bold text-slate-900 text-[11px] pt-1 leading-relaxed">
-                    Note:- Please make cheques in favor of "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
+                    Cheques payable to "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
                   </p>
                   <p className="text-slate-900 text-[11px] pt-0.5 leading-relaxed">
                     {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SANJEVAREDDYNAGAR, HYDERABAD-500038.'}
@@ -585,7 +598,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                 </div>
 
                 {/* Right: Authorized Signatory */}
-                <div className="col-span-4 p-3 flex flex-col justify-between text-right items-end bg-slate-50">
+                <div className="p-3 flex flex-col justify-between text-center items-center bg-slate-50" style={{ gridColumn: '2' }}>
                   <span className="font-bold text-slate-900 text-[11px] block uppercase leading-relaxed text-right">
                     For {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                   </span>
@@ -605,7 +618,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     )}
                   </div>
 
-                  <span className="font-bold text-slate-900 text-[11px] block">
+                  <span className="font-black text-slate-900 text-[11px] block uppercase tracking-wide">
                     Partner
                   </span>
                 </div>

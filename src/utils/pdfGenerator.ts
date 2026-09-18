@@ -5,23 +5,32 @@ import { numberToIndianRupees } from './numberToWords';
 import { calculateInvoiceTotals } from './invoiceCalculations';
 import {
   formatInvoiceAmount,
+  formatInvoiceDate,
   formatInvoiceQuantity,
-  formatInvoiceRate,
+  getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
 } from './invoiceFormatting';
+import { gstLabel } from './invoiceCalculations';
 
 function formatPdfAmount(amount: number): string {
   return formatInvoiceAmount(amount).replace(/^₹/, 'INR ');
 }
 
-function formatPdfRate(item: InvoiceItem): string {
-  return formatInvoiceRate(item).replace(/^₹/, 'INR ');
-}
-
-function formatPdfUnitPrice(item: InvoiceItem): string {
-  if (item.unitPrice === undefined || !Number.isFinite(item.unitPrice)) return '';
-  return `Unit price: ${formatPdfAmount(item.unitPrice)} / ${item.unit || 'unit'}`;
+export function getInvoicePdfExportData(invoiceData: InvoiceData) {
+  const totals = calculateInvoiceTotals(invoiceData);
+  return {
+    invoiceNumber: invoiceData.invoiceNumber,
+    invoiceDate: invoiceData.invoiceDate,
+    items: invoiceData.items.map(item => ({
+      description: getInvoiceProductName(item),
+      quantity: item.qty,
+      unit: item.unit,
+      commissionAmount: item.commissionAmount,
+    })),
+    totalQuantity: invoiceData.items.reduce((sum, item) => sum + (item.qty || 0), 0),
+    ...totals,
+  };
 }
 
 export function getInvoicePdfFileName(invoiceNumber: string): string {
@@ -39,7 +48,7 @@ export function getInvoicePdfFileName(invoiceNumber: string): string {
 }
 
 /**
- * Generates an exact match PDF document replicating reference format (Inv.004_121102.pdf)
+ * Generates a standards-based A4 invoice using the reference geometry as a guide.
  */
 export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const doc = new jsPDF({
@@ -74,28 +83,34 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   // 2. Seller Agency Details Block
   const sellerBlockStartY = currentY;
-  const sellerBlockHeight = 96;
+  const sellerBlockHeight = 100;
 
   doc.setFillColor(248, 250, 252);
   doc.rect(marginX, sellerBlockStartY, contentWidth, sellerBlockHeight, 'FD');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(19);
+  doc.setFontSize(7.5);
   doc.setTextColor(...slate);
-  doc.text(invoiceData.seller.name, pageWidth / 2, currentY + 24, { align: 'center' });
+  doc.text('BILLED FROM', pageWidth / 2, currentY + 12, { align: 'center' });
+
+  doc.setFontSize(19);
+  const sellerNameLines = doc.splitTextToSize(invoiceData.seller.name || 'Business name', contentWidth - 40);
+  doc.text(sellerNameLines.slice(0, 2), pageWidth / 2, currentY + 28, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(...slate);
-  doc.text(invoiceData.seller.address, pageWidth / 2, currentY + 40, { align: 'center' });
+  const sellerAddressLines = doc.splitTextToSize(invoiceData.seller.address || '', contentWidth - 40);
+  doc.text(sellerAddressLines.slice(0, 2), pageWidth / 2, currentY + 44, { align: 'center' });
 
-  doc.text(invoiceData.seller.cityStateZip, pageWidth / 2, currentY + 53, { align: 'center' });
+  doc.text(invoiceData.seller.cityStateZip || '', pageWidth / 2, currentY + 57, { align: 'center' });
   doc.setFont('helvetica', 'bold');
-  doc.text(`Partner: ${invoiceData.seller.partnerName}  |  Ph: ${invoiceData.seller.phone}`, pageWidth / 2, currentY + 65, { align: 'center' });
+  const partnerLine = `Partner: ${invoiceData.seller.partnerName || '-'}  |  Ph: ${invoiceData.seller.phone || '-'}`;
+  doc.text(doc.splitTextToSize(partnerLine, contentWidth - 40).slice(0, 1), pageWidth / 2, currentY + 69, { align: 'center' });
 
   doc.setFontSize(8.5);
   const gstinPanLine = `GSTIN No : ${invoiceData.seller.gstin}   PAN Number : ${invoiceData.seller.pan}`;
-  doc.text(gstinPanLine, pageWidth / 2, currentY + 79, { align: 'center' });
+  doc.text(doc.splitTextToSize(gstinPanLine, contentWidth - 40).slice(0, 1), pageWidth / 2, currentY + 84, { align: 'center' });
 
   // Border around seller block
   doc.setDrawColor(...slate);
@@ -125,10 +140,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   // Col 1 Content: Billed To
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.text('Billed To:', col1X + 6, partiesBlockStartY + 12);
+  doc.text('BILLED TO', col1X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8.8);
-  doc.text(invoiceData.buyer.name, col1X + 6, partiesBlockStartY + 23);
+  doc.text(doc.splitTextToSize(invoiceData.buyer.name || 'Buyer', col1Width - 12).slice(0, 1), col1X + 6, partiesBlockStartY + 23);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.2);
@@ -153,7 +168,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7);
   const posText = invoiceData.buyer.placeOfSupply;
   const splitPos = doc.splitTextToSize(posText, col2Width - 12);
-  doc.text(splitPos, col2X + 6, partiesBlockStartY + 34);
+  doc.text(splitPos.slice(0, 4), col2X + 6, partiesBlockStartY + 34);
 
   // Col 3 Content: INVOICE No. and DATE (split horizontally in middle)
   const metaHalfHeight = partiesBlockHeight / 2;
@@ -177,7 +192,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7.8);
   doc.text('DATE', col3X + 6, partiesBlockStartY + metaHalfHeight + 13);
   doc.setFontSize(8.8);
-  const invoiceDateLines = doc.splitTextToSize(invoiceData.invoiceDate, col3Width - 12);
+  const invoiceDateLines = doc.splitTextToSize(formatInvoiceDate(invoiceData.invoiceDate), col3Width - 12);
   doc.text(invoiceDateLines.slice(0, 2), col3X + 6, partiesBlockStartY + metaHalfHeight + 27);
 
   // Keep the metadata labels and values vertically aligned within both cells.
@@ -205,7 +220,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     if (custName && custName !== 'General Items') {
       tableBody.push([
         {
-          content: `CUSTOMER: ${custName}`,
+          content: `CUSTOMER | ${custName}`,
           colSpan: 4,
           styles: { fontStyle: 'bold', fillColor: [226, 232, 240], textColor: [15, 23, 42], cellPadding: { top: 5, right: 4, bottom: 5, left: 4 } },
         },
@@ -213,15 +228,15 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     }
 
     groupItems.forEach(item => {
-      // Build standard description string matching reference:
-      // "Inv.No. 800086408, dt. 28.01.26, SPIRIZYME ADV ULTI, 360kg, Commission @ 16.5"
+        const pricingLine = getInvoicePricingMeta(item).replace(/₹/g, 'INR ');
       tableBody.push([
         {
           content: [
             getInvoiceProductName(item),
-            [getInvoiceItemMeta(item), formatPdfUnitPrice(item), `Commission rate: ${formatPdfRate(item)}`].filter(Boolean).join(' | '),
+            getInvoiceItemMeta(item),
+            pricingLine,
           ].filter(Boolean).join('\n'),
-          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 3 } },
+          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 3 }, fontSize: 7.6 },
         },
         item.hsnSacCode || '998311',
         formatInvoiceQuantity(item),
@@ -230,7 +245,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     });
   });
 
-  const { taxableValue, gstAmount, cgstAmount, sgstAmount, grandTotal, igstAmount } = calculateInvoiceTotals(invoiceData);
+  const { taxableValue, gstAmount, cgstAmount, sgstAmount, grandTotal, igstAmount } = getInvoicePdfExportData(invoiceData);
   const gstRate = invoiceData.gstRate || 0;
 
   // Summary Rows inside the Table
@@ -248,7 +263,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   tableBody.push([
     {
-      content: `ADD: ${invoiceData.gstType === 'IGST' ? `IGST ${gstRate}%` : `CGST + SGST ${gstRate}%`}`,
+          content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
       colSpan: 3,
       styles: { fontStyle: 'bold', halign: 'right' },
     },
@@ -283,7 +298,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     head: [[
       { content: 'Description of Services', styles: { halign: 'left' } },
       { content: 'HSN/SAC CODE', styles: { halign: 'center' } },
-      { content: 'Qty', styles: { halign: 'right' } },
+      { content: 'Qty', styles: { halign: 'center' } },
       { content: 'Amount', styles: { halign: 'right' } },
     ]],
     body: tableBody,
@@ -325,7 +340,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   // 5. Amount in Words Box with stronger emphasis on payable value
   const amountWords = numberToIndianRupees(grandTotal);
-  const wordsBoxHeight = 30;
+  const wordsBoxHeight = 34;
 
   doc.setFillColor(239, 246, 255);
   doc.rect(marginX, currentY, contentWidth, wordsBoxHeight, 'FD');
@@ -334,11 +349,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.rect(marginX, currentY, contentWidth, wordsBoxHeight, 'S');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.8);
   doc.text('AMOUNT CHARGEABLE (IN WORDS)', marginX + 7, currentY + 10);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.6);
+  doc.setFontSize(8.8);
   const amountWordLines = doc.splitTextToSize(amountWords, contentWidth - 14);
   doc.text(amountWordLines.slice(0, 2), marginX + 7, currentY + 21);
 
@@ -388,13 +403,22 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   // Embedded Partner Signature
   if (invoiceData.showSignature !== false && invoiceData.seller.signatureUrl && invoiceData.seller.signatureUrl.startsWith('data:image')) {
     try {
+      const imageProperties = doc.getImageProperties(invoiceData.seller.signatureUrl);
+      const maxSignatureWidth = Math.min(104, rightBottomWidth - 16);
+      const maxSignatureHeight = 34;
+      const signatureScale = Math.min(
+        maxSignatureWidth / imageProperties.width,
+        maxSignatureHeight / imageProperties.height,
+      );
+      const signatureWidth = imageProperties.width * signatureScale;
+      const signatureHeight = imageProperties.height * signatureScale;
       doc.addImage(
         invoiceData.seller.signatureUrl,
-        'PNG',
-        rightBottomX + (rightBottomWidth - 92) / 2,
-        currentY + 19,
-        92,
-        32
+        imageProperties.fileType,
+        rightBottomX + (rightBottomWidth - signatureWidth) / 2,
+        currentY + 19 + (maxSignatureHeight - signatureHeight) / 2,
+        signatureWidth,
+        signatureHeight,
       );
     } catch (e) {
       console.warn('Could not render signature on PDF:', e);
@@ -403,7 +427,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text('AUTHORIZED PARTNER', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 9, { align: 'center' });
+  doc.text('PARTNER', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 9, { align: 'center' });
 
   return doc;
 }

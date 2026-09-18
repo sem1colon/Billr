@@ -15,6 +15,7 @@ import {
 import { InvoiceItem } from '../types';
 import { formatIndianCurrency } from '../utils/numberToWords';
 import { useModalAccessibility } from '../utils/useModalAccessibility';
+import { toIsoDateValue } from '../utils/invoiceFormatting';
 
 interface ItemFormModalProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
       
       setCommissionAmount(initialItem.commissionAmount);
       setInvNo(initialItem.invNo || '');
-      setDate(initialItem.date || '');
+      setDate(initialItem.date ? (toIsoDateValue(initialItem.date) || '') : '');
       setCustomer(initialItem.customer || '');
       setIsManualAmount(false);
     } else {
@@ -171,7 +172,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
       commissionRate: Number(commissionRate) || 0,
       commissionAmount: Number(commissionAmount) || 0,
       invNo: invNo.trim(),
-      date: date.trim(),
+      date: toIsoDateValue(date) || date.trim(),
       customer: customer.trim(),
     };
 

@@ -282,7 +282,7 @@ export function getTodayDateIso(): string {
 export const initialInvoiceData: InvoiceData = {
   id: 'inv-initial-01',
   invoiceNumber: '',
-  invoiceDate: '10-Aug-26',
+  invoiceDate: '2026-08-10',
   seller: defaultSeller,
   buyer: defaultBuyer,
   items: [],

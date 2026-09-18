@@ -1,6 +1,7 @@
 // Service Worker registration for Progressive Web App (PWA) capabilities
 
 export function registerServiceWorker() {
+  if (import.meta.env.DEV) return;
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swUrl = `${import.meta.env.BASE_URL || './'}sw.js`.replace(/\/{2,}/g, '/');
