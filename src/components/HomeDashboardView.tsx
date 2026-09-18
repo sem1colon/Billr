@@ -14,6 +14,7 @@ import {
 import { InvoiceData } from '../types';
 import { formatIndianCurrency } from '../utils/numberToWords';
 import { InvoiceHistoryEntry } from '../utils/storageUtils';
+import { BillrLogo } from './BillrLogo';
 
 interface HomeDashboardViewProps {
   invoiceData: InvoiceData;
@@ -53,7 +54,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
       <section className="home-start apple-glass-card relative overflow-hidden p-5 sm:p-8">
         <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">Billr</p>
+            <BillrLogo size="lg" />
             <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] text-slate-950 sm:text-5xl">Make an invoice.</h1>
             <p className="mt-3 max-w-sm text-sm leading-6 text-slate-600">Bring in your existing invoice data or create a new one from scratch.</p>
             <div className="mt-6 grid max-w-md gap-3 sm:grid-cols-2">
