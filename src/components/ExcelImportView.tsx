@@ -50,6 +50,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const [customerSearchQuery, setCustomerSearchQuery] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState<'reading' | 'parsing' | 'switching'>('reading');
+  const [readProgress, setReadProgress] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<ExcelParsedRecord | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const closeRowModal = () => {
@@ -81,6 +83,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
   const handleFileProcess = (file: File) => {
     setErrorMsg('');
     setIsProcessing(true);
+    setProcessingStage('reading');
+    setReadProgress(0);
     setFileName(file.name);
 
     const extension = file.name.toLowerCase().split('.').pop() || '';
@@ -88,13 +92,22 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     if (!supportedExtensions.has(extension)) {
       setErrorMsg(`Unsupported file type .${extension || 'unknown'}. Upload an .xlsx, .xls, .csv, .tsv, or .txt workbook instead.`);
       setIsProcessing(false);
+      setReadProgress(null);
       return;
     }
     const isTextFile = ['csv', 'tsv', 'txt'].includes(extension);
 
     const reader = new FileReader();
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        setReadProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
     reader.onload = async (e) => {
       try {
+      setProcessingStage('parsing');
+      setReadProgress(null);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       const { parseExcelFile } = await import('../utils/excelParser');
         if (isTextFile) {
           const text = e.target?.result as string;
@@ -102,6 +115,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           if (result.records.length === 0) {
             setErrorMsg('No valid commission rows found. Add data rows below the header and upload the corrected file again.');
             setIsProcessing(false);
+            setReadProgress(null);
             return;
           }
           setParsedRecords(result.records);
@@ -115,6 +129,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
           if (result.records.length === 0) {
             setErrorMsg('No valid commission rows found. Add Product, Qty, and Commission Amount columns, then upload the corrected workbook again.');
             setIsProcessing(false);
+            setReadProgress(null);
             return;
           }
           setParsedRecords(result.records);
@@ -127,12 +142,14 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
         setErrorMsg(err.message || 'The file could not be read. Verify the workbook is not corrupted, then upload it again.');
       } finally {
         setIsProcessing(false);
+        setReadProgress(null);
       }
     };
 
     reader.onerror = () => {
       setErrorMsg('The file could not be read. Check that it is available locally and upload it again.');
       setIsProcessing(false);
+      setReadProgress(null);
     };
 
     if (isTextFile) {
@@ -147,6 +164,8 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
     try {
       const { parseExcelFile } = await import('../utils/excelParser');
       setIsProcessing(true);
+      setProcessingStage('switching');
+      setReadProgress(null);
       const result = parseExcelFile(rawFileBufferRef.current, sheet);
       setParsedRecords(result.records);
       setActiveSheetName(sheet);
@@ -155,6 +174,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
       setErrorMsg(`Error loading sheet "${sheet}": ${err.message}`);
     } finally {
       setIsProcessing(false);
+      setReadProgress(null);
     }
   };
 
@@ -296,6 +316,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
+            aria-busy={isProcessing}
             role="button"
             tabIndex={0}
             aria-label="Choose an Excel or CSV workbook"
@@ -349,9 +370,33 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
               )}
 
               {isProcessing && (
-                <div className="flex items-center justify-center space-x-2 text-xs text-blue-600 font-semibold pt-1">
-                  <div className="w-3 h-3 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
-                  <span>Parsing records...</span>
+                <div className="mt-3 overflow-hidden rounded-2xl border border-blue-200 bg-white/80 p-3 text-left shadow-sm" role="status" aria-live="polite">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold text-slate-800">
+                          {processingStage === 'reading' && 'Reading your file'}
+                          {processingStage === 'parsing' && 'Parsing workbook records'}
+                          {processingStage === 'switching' && 'Loading worksheet'}
+                        </span>
+                        {readProgress !== null && <span className="text-[11px] font-bold text-blue-700">{readProgress}%</span>}
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-slate-500">
+                        {processingStage === 'reading' && 'Preparing the uploaded data...'}
+                        {processingStage === 'parsing' && 'Finding products, quantities, and commission amounts...'}
+                        {processingStage === 'switching' && 'Refreshing rows from the selected worksheet...'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-blue-100" aria-hidden="true">
+                    <div
+                      className={`h-full rounded-full bg-blue-600 transition-all duration-300 ${readProgress === null ? 'w-2/3 animate-pulse' : ''}`}
+                      style={readProgress === null ? undefined : { width: `${readProgress}%` }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
