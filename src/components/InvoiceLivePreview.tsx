@@ -29,6 +29,7 @@ import {
   getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
+  getInvoicePlaceOfSupply,
 } from '../utils/invoiceFormatting';
 import { SignatureModal } from './SignatureModal';
 import confetti from 'canvas-confetti';
@@ -372,9 +373,6 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
               {/* 2. Seller Agency Banner */}
               <div className="border-x border-b border-slate-900 bg-slate-50 px-3 py-3 text-center">
-                <span className="inline-block border-b-2 border-blue-600 pb-0.5 font-bold text-[10px] uppercase tracking-[0.16em] text-slate-600">
-                  BILLED FROM
-                </span>
                 <h2 className="mt-1 text-xl font-black uppercase leading-tight tracking-tight text-slate-950">
                   {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                 </h2>
@@ -422,7 +420,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     {invoiceData.buyer.name || 'Buyer'}
                   </h4>
                   <p className="text-slate-800 text-[11px] mt-1 whitespace-pre-line leading-relaxed">
-                    {invoiceData.buyer.placeOfSupply || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108."}
+                    {getInvoicePlaceOfSupply(invoiceData.buyer.name, invoiceData.buyer.placeOfSupply) || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108."}
                   </p>
                 </div>
 

@@ -22,7 +22,7 @@ export const defaultBuyer: ClientProfile = {
   cityStateZip: 'Pune-411057, Maharashtra.',
   gstin: '27AAACP6090Q1ZS',
   pan: 'AAACP6090Q',
-  placeOfSupply: "PRAJ INDUSTRIES LTD\nPE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune - 412108.",
+  placeOfSupply: "PE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune - 412108.",
 };
 
 export const sampleInvoiceItems: InvoiceItem[] = [
@@ -281,7 +281,7 @@ export function getTodayDateIso(): string {
 
 export const initialInvoiceData: InvoiceData = {
   id: 'inv-initial-01',
-  invoiceNumber: '',
+  invoiceNumber: 'MCA/2026-27/001',
   invoiceDate: '2026-08-10',
   seller: defaultSeller,
   buyer: defaultBuyer,

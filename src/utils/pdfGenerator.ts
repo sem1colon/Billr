@@ -10,6 +10,7 @@ import {
   getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
+  getInvoicePlaceOfSupply,
 } from './invoiceFormatting';
 import { gstLabel } from './invoiceCalculations';
 
@@ -91,8 +92,6 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
   doc.setTextColor(...slate);
-  doc.text('BILLED FROM', pageWidth / 2, currentY + 12, { align: 'center' });
-
   doc.setFontSize(19);
   const sellerNameLines = doc.splitTextToSize(invoiceData.seller.name || 'Business name', contentWidth - 40);
   doc.text(sellerNameLines.slice(0, 2), pageWidth / 2, currentY + 28, { align: 'center' });
@@ -166,7 +165,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  const posText = invoiceData.buyer.placeOfSupply;
+  const posText = getInvoicePlaceOfSupply(invoiceData.buyer.name, invoiceData.buyer.placeOfSupply);
   const splitPos = doc.splitTextToSize(posText, col2Width - 12);
   doc.text(splitPos.slice(0, 4), col2X + 6, partiesBlockStartY + 34);
 
@@ -310,14 +309,14 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       fontStyle: 'bold',
       halign: 'center',
       lineColor: [15, 23, 42],
-      lineWidth: 0.8,
+      lineWidth: 1,
     },
     styles: {
       fontSize: 7.8,
       textColor: [15, 23, 42],
       cellPadding: 4,
-      lineColor: [51, 65, 85],
-      lineWidth: 0.5,
+      lineColor: [148, 163, 184],
+      lineWidth: 0.35,
       valign: 'middle',
     },
     bodyStyles: {
@@ -327,7 +326,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.48 },
+      0: { halign: 'left', cellWidth: contentWidth * 0.48, lineWidth: { right: 0.8 } },
       1: { halign: 'center', cellWidth: contentWidth * 0.14 },
       2: { halign: 'center', cellWidth: contentWidth * 0.14 },
       3: { halign: 'right', cellWidth: contentWidth * 0.24 },
@@ -336,6 +335,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   });
 
   const finalTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
+  doc.setDrawColor(...navy);
+  doc.setLineWidth(1);
+  doc.rect(marginX, currentY, contentWidth, finalTableY - currentY, 'S');
   currentY = finalTableY;
 
   // 5. Amount in Words Box with stronger emphasis on payable value

@@ -46,6 +46,18 @@ export function getInvoiceProductName(item: InvoiceItem): string {
   return item.description || 'Commission service';
 }
 
+export function getInvoicePlaceOfSupply(buyerName: string, placeOfSupply: string): string {
+  const buyerIdentity = buyerName.trim().toUpperCase().replace(/\bLIMITED\b/g, 'LTD').replace(/\s+/g, ' ');
+  const lines = placeOfSupply.split(/\r?\n/);
+  const firstLine = lines.find(line => line.trim().length > 0)?.trim().toUpperCase().replace(/\bLIMITED\b/g, 'LTD').replace(/\s+/g, ' ');
+
+  if (firstLine && firstLine === buyerIdentity) {
+    return lines.slice(lines.findIndex(line => line.trim().length > 0) + 1).join('\n').trim();
+  }
+
+  return placeOfSupply.trim();
+}
+
 export function getInvoiceItemMeta(item: InvoiceItem): string {
   return [
     item.invNo ? `Inv. No. ${item.invNo}` : '',
