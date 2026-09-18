@@ -73,13 +73,13 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   let currentY = marginX;
 
   // 1. Premium top banner with strong contrast and value hierarchy
-  const bannerHeight = 24;
+  const bannerHeight = 20;
   const navy: [number, number, number] = [15, 23, 42];
   const slate: [number, number, number] = [51, 65, 85];
   doc.setFillColor(...navy);
   doc.rect(marginX, currentY, contentWidth, bannerHeight, 'FD');
   doc.setDrawColor(...navy);
-  doc.setLineWidth(1);
+  doc.setLineWidth(0.5);
   doc.rect(marginX, currentY, contentWidth, bannerHeight, 'S');
 
   doc.setFont('helvetica', 'bold');
@@ -110,7 +110,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     invoiceData.seller.pan ? `PAN Number : ${invoiceData.seller.pan}` : '',
   ].filter(Boolean).join('   ');
   const sellerBlockHeight = Math.max(
-    70,
+    64,
     12 + lineCount(sellerNameLines) * 15 + lineCount(sellerAddressLines) * 8 + 8 + lineCount(sellerPartnerLines) * 8 + (sellerGstinPanLine ? 9 : 0) + 7,
   );
 
@@ -150,7 +150,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   // Border around seller block
   doc.setDrawColor(...slate);
-  doc.setLineWidth(1);
+  doc.setLineWidth(0.5);
   doc.rect(marginX, sellerBlockStartY, contentWidth, sellerBlockHeight, 'S');
 
   currentY += sellerBlockHeight;
@@ -173,7 +173,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(10.5);
   const invoiceDateLines = doc.splitTextToSize(formatInvoiceDate(invoiceData.invoiceDate), col3Width - 12);
   const partiesBlockHeight = Math.max(
-    78,
+    70,
     42 + Math.max(splitBuyerAddr.length * 8.5, splitPos.length * 8.5, invoiceNumberLines.length * 12, invoiceDateLines.length * 12) + 20,
   );
 
@@ -237,7 +237,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   // Draw the grid after filling the cells so no border is covered by a background fill.
   doc.setDrawColor(...slate);
-  doc.setLineWidth(0.8);
+  doc.setLineWidth(0.5);
   doc.rect(col1X, partiesBlockStartY, contentWidth, partiesBlockHeight, 'S');
   doc.line(col2X, partiesBlockStartY, col2X, partiesBlockStartY + partiesBlockHeight);
   doc.line(col3X, partiesBlockStartY, col3X, partiesBlockStartY + partiesBlockHeight);
@@ -265,21 +265,21 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
         {
           content: `CUSTOMER  |  ${custName}`,
           colSpan: 4,
-          styles: { fontStyle: 'bold', fontSize: 7.6, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 4, right: 4, bottom: 4, left: 7 } },
+          styles: { fontStyle: 'bold', fontSize: 6.8, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 5 } },
         },
       ]);
     }
 
     groupItems.forEach(item => {
+        const itemMeta = getInvoiceItemMeta(item);
         const pricingLine = getInvoicePricingMeta(item).replace(/₹/g, 'INR ');
       tableBody.push([
         {
           content: [
             getInvoiceProductName(item),
-            getInvoiceItemMeta(item),
-            pricingLine,
+            [itemMeta, pricingLine].filter(Boolean).join(' | '),
           ].filter(Boolean).join('\n'),
-            styles: { cellPadding: { top: 3, right: 3, bottom: 3, left: 9 }, fontSize: 7.2, lineColor: [203, 203, 203] },
+            styles: { cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 6 }, fontSize: 6.5, lineColor: [203, 203, 203] },
         },
         item.hsnSacCode || '',
         formatInvoiceQuantity(item),
@@ -350,16 +350,16 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     headStyles: {
       fillColor: [15, 23, 42],
       textColor: [255, 255, 255],
-      fontSize: 8,
+      fontSize: 7.2,
       fontStyle: 'bold',
       halign: 'center',
       lineColor: [15, 23, 42],
-      lineWidth: 1,
+      lineWidth: 0.5,
     },
     styles: {
-      fontSize: 7.8,
+      fontSize: 6.9,
       textColor: [15, 23, 42],
-      cellPadding: 3,
+      cellPadding: 1.5,
       lineColor: [148, 163, 184],
       lineWidth: 0.35,
       valign: 'middle',
@@ -381,7 +381,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     showHead: 'everyPage',
     tableLineColor: [148, 163, 184],
     tableLineWidth: 0.35,
-    margin: { top: marginX, right: marginX, bottom: 120, left: marginX },
+    margin: { top: marginX, right: marginX, bottom: marginX, left: marginX },
   });
 
   // 5. Amount in Words Box with stronger emphasis on payable value
@@ -389,10 +389,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.8);
   const amountWordLines = doc.splitTextToSize(amountWords, contentWidth - 14);
-  const wordsBoxHeight = Math.max(34, 22 + amountWordLines.length * 10);
+  const wordsBoxHeight = Math.max(28, 16 + amountWordLines.length * 8);
 
   const pageHeight = doc.internal.pageSize.getHeight();
-  const bottomBoxHeight = 76;
+  const bottomBoxHeight = 58;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
   const summaryHeightEstimate = summaryRows.length * 18;
@@ -408,9 +408,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     body: summaryRows,
     theme: 'grid',
     styles: {
-      fontSize: 7.4,
+      fontSize: 6.9,
       textColor: [15, 23, 42],
-      cellPadding: 3,
+      cellPadding: 1.5,
       lineColor: [148, 163, 184],
       lineWidth: 0.35,
       valign: 'middle',
@@ -435,7 +435,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFillColor(239, 246, 255);
   doc.rect(marginX, currentY, contentWidth, wordsBoxHeight, 'FD');
   doc.setDrawColor(...slate);
-  doc.setLineWidth(0.8);
+  doc.setLineWidth(0.5);
   doc.rect(marginX, currentY, contentWidth, wordsBoxHeight, 'S');
 
   doc.setFont('helvetica', 'bold');
@@ -456,7 +456,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFillColor(249, 250, 251);
   doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'F');
   doc.setDrawColor(...slate);
-  doc.setLineWidth(0.8);
+  doc.setLineWidth(0.5);
   doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'S');
   doc.line(rightBottomX, currentY, rightBottomX, currentY + bottomBoxHeight);
 

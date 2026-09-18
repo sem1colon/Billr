@@ -19,6 +19,17 @@ function createTestItem(index: number): InvoiceItem {
 }
 
 describe('PDF generation', () => {
+  it('keeps 20 standard items on one page', () => {
+    const invoice = {
+      ...initialInvoiceData,
+      items: Array.from({ length: 20 }, (_, index) => createTestItem(index + 1)),
+    };
+
+    const doc = createInvoicePdfDoc(invoice);
+
+    expect(doc.getNumberOfPages()).toBe(1);
+  });
+
   it('wraps long content and paginates large item tables', () => {
     const invoice = {
       ...initialInvoiceData,
