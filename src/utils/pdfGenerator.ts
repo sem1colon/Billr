@@ -272,7 +272,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
     groupItems.forEach(item => {
         const itemMeta = getInvoiceItemMeta(item);
-        const pricingLine = getInvoicePricingMeta(item).replace(/₹/g, 'INR ');
+        const pricingLine = getInvoicePricingMeta(item)
+          .replace('Commission rate:', 'Commission Rate:')
+          .replace(/₹/g, 'INR ');
       tableBody.push([
         {
           content: [
