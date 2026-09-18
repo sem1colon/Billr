@@ -173,8 +173,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(10.5);
   const invoiceDateLines = doc.splitTextToSize(formatInvoiceDate(invoiceData.invoiceDate), col3Width - 12);
   const partiesBlockHeight = Math.max(
-    70,
-    42 + Math.max(splitBuyerAddr.length * 8.5, splitPos.length * 8.5, invoiceNumberLines.length * 12, invoiceDateLines.length * 12) + 20,
+    64,
+    34 + Math.max(splitBuyerAddr.length * 8, splitPos.length * 8, invoiceNumberLines.length * 11, invoiceDateLines.length * 11) + 10,
   );
 
   const col1X = marginX;
