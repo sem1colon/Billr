@@ -263,7 +263,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     if (custName && custName !== 'General Items') {
       tableBody.push([
         {
-          content: `CUSTOMER  |  ${custName}`,
+          content: `CUSTOMER: ${custName}`,
           colSpan: 4,
           styles: { fontStyle: 'bold', fontSize: 6.8, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 5 } },
         },
