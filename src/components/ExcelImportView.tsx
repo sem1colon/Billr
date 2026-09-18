@@ -531,7 +531,7 @@ export const ExcelImportView: React.FC<ExcelImportViewProps> = ({
             onChange={(e) => setCustomerSearchQuery(e.target.value)}
             placeholder="Find a client or party..."
             aria-label="Find a client or party"
-            className="apple-glass-input h-10 w-full rounded-xl py-2 pl-9 pr-9 text-sm sm:max-w-sm"
+            className="apple-glass-input search-field-input h-10 w-full rounded-xl py-2 text-sm sm:max-w-sm"
           />
           {customerSearchQuery && (
             <button
