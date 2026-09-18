@@ -489,7 +489,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {/* Customer Group Header Row */}
                           {group.customer && group.customer !== 'General Items' && (
                             <tr className="bg-slate-200 border-t border-b border-slate-500 font-bold">
-                              <td colSpan={4} className="py-1.5 px-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-rose-800">
+                              <td colSpan={4} className="py-1.5 px-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-slate-950">
                                 <span className="mr-2 text-slate-600">CUSTOMER</span>
                                 <span className="text-slate-500">|</span>
                                 <span className="ml-2">{group.customer}</span>
