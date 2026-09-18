@@ -59,4 +59,18 @@ describe('PDF generation', () => {
     expect(pdf).not.toContain('50200084425696');
     expect(pdf).not.toContain('HDFC0000642');
   });
+
+  it('does not print a fabricated seller name when the seller name is empty', () => {
+    const invoice = {
+      ...initialInvoiceData,
+      seller: {
+        ...initialInvoiceData.seller,
+        name: '',
+      },
+    };
+
+    const pdf = createInvoicePdfDoc(invoice).output();
+
+    expect(pdf).not.toContain('MURTHY CHEMICAL AGENCIES');
+  });
 });

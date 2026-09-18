@@ -68,13 +68,12 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   const pageWidth = doc.internal.pageSize.getWidth(); // 595.28 pt
   
-  // Exact margins matching reference PDF
-  const marginX = 18.72;
+  const marginX = 28;
   const contentWidth = pageWidth - marginX * 2; // ~557.84 pt
-  let currentY = 18.72;
+  let currentY = marginX;
 
   // 1. Premium top banner with strong contrast and value hierarchy
-  const bannerHeight = 28;
+  const bannerHeight = 24;
   const navy: [number, number, number] = [15, 23, 42];
   const slate: [number, number, number] = [51, 65, 85];
   doc.setFillColor(...navy);
@@ -86,7 +85,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(255, 255, 255);
-  doc.text('TAX INVOICE', pageWidth / 2, currentY + 18, { align: 'center' });
+  doc.text('TAX INVOICE', pageWidth / 2, currentY + 16, { align: 'center' });
 
   currentY += bannerHeight;
 
@@ -94,20 +93,25 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const sellerBlockStartY = currentY;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
-  const sellerNameLines = doc.splitTextToSize(nonEmpty(invoiceData.seller.name) || 'Business name', contentWidth - 40);
+  const sellerName = nonEmpty(invoiceData.seller.name);
+  const sellerNameLines = sellerName ? doc.splitTextToSize(sellerName, contentWidth - 40) : [];
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   const sellerAddressLines = invoiceData.seller.address
     ? doc.splitTextToSize(invoiceData.seller.address, contentWidth - 40)
     : [];
-  const sellerPartnerLine = `Partner: ${nonEmpty(invoiceData.seller.partnerName) || '-'}  |  Ph: ${nonEmpty(invoiceData.seller.phone) || '-'}`;
+  const sellerPartnerLine = [
+    nonEmpty(invoiceData.seller.partnerName) ? `Partner: ${nonEmpty(invoiceData.seller.partnerName)}` : '',
+    nonEmpty(invoiceData.seller.phone) ? `Ph: ${nonEmpty(invoiceData.seller.phone)}` : '',
+  ].filter(Boolean).join('  |  ');
+  const sellerPartnerLines = sellerPartnerLine ? doc.splitTextToSize(sellerPartnerLine, contentWidth - 40) : [];
   const sellerGstinPanLine = [
     invoiceData.seller.gstin ? `GSTIN No : ${invoiceData.seller.gstin}` : '',
     invoiceData.seller.pan ? `PAN Number : ${invoiceData.seller.pan}` : '',
   ].filter(Boolean).join('   ');
   const sellerBlockHeight = Math.max(
-    78,
-    12 + lineCount(sellerNameLines) * 17 + lineCount(sellerAddressLines) * 9 + 10 + 10 + (sellerGstinPanLine ? 10 : 0) + 8,
+    70,
+    12 + lineCount(sellerNameLines) * 15 + lineCount(sellerAddressLines) * 8 + 8 + lineCount(sellerPartnerLines) * 8 + (sellerGstinPanLine ? 9 : 0) + 7,
   );
 
   doc.setFillColor(248, 250, 252);
@@ -117,25 +121,27 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7.5);
   doc.setTextColor(...slate);
   doc.setFontSize(16);
-  let sellerY = currentY + 22;
+  let sellerY = currentY + 19;
   doc.text(sellerNameLines, pageWidth / 2, sellerY, { align: 'center' });
-  sellerY += lineCount(sellerNameLines) * 17;
+  sellerY += lineCount(sellerNameLines) * 15;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...slate);
   if (sellerAddressLines.length) {
     doc.text(sellerAddressLines, pageWidth / 2, sellerY, { align: 'center' });
-    sellerY += sellerAddressLines.length * 9;
+    sellerY += sellerAddressLines.length * 8;
   }
 
   if (invoiceData.seller.cityStateZip) {
     doc.text(invoiceData.seller.cityStateZip, pageWidth / 2, sellerY, { align: 'center' });
-    sellerY += 10;
+    sellerY += 9;
   }
-  doc.setFont('helvetica', 'bold');
-  doc.text(sellerPartnerLine, pageWidth / 2, sellerY, { align: 'center' });
-  sellerY += 10;
+  if (sellerPartnerLines.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.text(sellerPartnerLines, pageWidth / 2, sellerY, { align: 'center' });
+    sellerY += sellerPartnerLines.length * 8 + 2;
+  }
 
   doc.setFontSize(8.5);
   if (sellerGstinPanLine) {
@@ -163,11 +169,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const splitPos = posText ? doc.splitTextToSize(posText, col2Width - 12) : [];
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  const invoiceNumberLines = doc.splitTextToSize(invoiceData.invoiceNumber || 'Not provided', col3Width - 12);
+  const invoiceNumberLines = invoiceData.invoiceNumber ? doc.splitTextToSize(invoiceData.invoiceNumber, col3Width - 12) : [];
   doc.setFontSize(10.5);
   const invoiceDateLines = doc.splitTextToSize(formatInvoiceDate(invoiceData.invoiceDate), col3Width - 12);
   const partiesBlockHeight = Math.max(
-    84,
+    78,
     42 + Math.max(splitBuyerAddr.length * 8.5, splitPos.length * 8.5, invoiceNumberLines.length * 12, invoiceDateLines.length * 12) + 20,
   );
 
@@ -187,7 +193,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.text('BILLED TO', col1X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8.8);
-  doc.text(doc.splitTextToSize(invoiceData.buyer.name || 'Buyer', col1Width - 12).slice(0, 1), col1X + 6, partiesBlockStartY + 23);
+  doc.text(doc.splitTextToSize(invoiceData.buyer.name || '', col1Width - 12).slice(0, 1), col1X + 6, partiesBlockStartY + 23);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.2);
@@ -196,7 +202,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const buyerAddrEndY = partiesBlockStartY + 34 + splitBuyerAddr.length * 8.5;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.6);
-  doc.text(`GSTIN: ${invoiceData.buyer.gstin}`, col1X + 6, Math.min(buyerAddrEndY + 4, partiesBlockStartY + 68));
+  if (invoiceData.buyer.gstin) {
+    doc.text(`GSTIN: ${invoiceData.buyer.gstin}`, col1X + 6, Math.min(buyerAddrEndY + 4, partiesBlockStartY + 68));
+  }
 
   // Col 2 Content: Place of Supply
   doc.setFont('helvetica', 'bold');
@@ -204,7 +212,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.text('Place of Supply / Service:', col2X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8);
-  doc.text(invoiceData.buyer.name, col2X + 6, partiesBlockStartY + 23);
+  doc.text(invoiceData.buyer.name || '', col2X + 6, partiesBlockStartY + 23);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
@@ -274,9 +282,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
             getInvoiceItemMeta(item),
             pricingLine,
           ].filter(Boolean).join('\n'),
-          styles: { cellPadding: { top: 4, right: 3, bottom: 4, left: 11 }, fontSize: 7.6, lineColor: [203, 203, 203] },
+            styles: { cellPadding: { top: 3, right: 3, bottom: 3, left: 9 }, fontSize: 7.2, lineColor: [203, 203, 203] },
         },
-        item.hsnSacCode || '998311',
+        item.hsnSacCode || '',
         formatInvoiceQuantity(item),
         formatPdfAmount(item.commissionAmount),
       ]);
@@ -286,40 +294,41 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const { taxableValue, gstAmount, cgstAmount, sgstAmount, grandTotal, igstAmount } = getInvoicePdfExportData(invoiceData);
   const gstRate = invoiceData.gstRate || 0;
 
-  // Summary Rows inside the Table
-  tableBody.push([
-    {
-      content: 'Taxable Value',
-      colSpan: 3,
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-    {
-      content: formatPdfAmount(taxableValue),
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-  ]);
+  const summaryRows: RowInput[] = [
+    [
+      {
+        content: 'Taxable Value',
+        colSpan: 3,
+        styles: { fontStyle: 'bold', halign: 'right' },
+      },
+      {
+        content: formatPdfAmount(taxableValue),
+        styles: { fontStyle: 'bold', halign: 'right' },
+      },
+    ],
 
-  tableBody.push([
-    {
-          content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
-      colSpan: 3,
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-    {
-      content: formatPdfAmount(invoiceData.gstType === 'IGST' ? igstAmount : cgstAmount + sgstAmount),
-      styles: { fontStyle: 'bold', halign: 'right' },
-    },
-  ]);
+    [
+      {
+        content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
+        colSpan: 3,
+        styles: { fontStyle: 'bold', halign: 'right' },
+      },
+      {
+        content: formatPdfAmount(invoiceData.gstType === 'IGST' ? igstAmount : cgstAmount + sgstAmount),
+        styles: { fontStyle: 'bold', halign: 'right' },
+      },
+    ],
+  ];
 
   const { roundOff } = calculateInvoiceTotals(invoiceData);
   if (roundOff !== 0) {
-    tableBody.push([
+    summaryRows.push([
       { content: 'Round Off', colSpan: 3, styles: { fontStyle: 'bold', halign: 'right' } },
       { content: formatPdfAmount(roundOff), styles: { fontStyle: 'bold', halign: 'right' } },
     ]);
   }
 
-  tableBody.push([
+  summaryRows.push([
     {
       content: 'Total',
       colSpan: 3,
@@ -344,7 +353,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     headStyles: {
       fillColor: [15, 23, 42],
       textColor: [255, 255, 255],
-      fontSize: 8.4,
+      fontSize: 8,
       fontStyle: 'bold',
       halign: 'center',
       lineColor: [15, 23, 42],
@@ -353,7 +362,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     styles: {
       fontSize: 7.8,
       textColor: [15, 23, 42],
-      cellPadding: 4,
+      cellPadding: 3,
       lineColor: [148, 163, 184],
       lineWidth: 0.35,
       valign: 'middle',
@@ -370,17 +379,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       2: { halign: 'center', cellWidth: contentWidth * 0.14 },
       3: { halign: 'right', cellWidth: contentWidth * 0.24 },
     },
-    margin: { left: marginX, right: marginX },
     pageBreak: 'auto',
     rowPageBreak: 'avoid',
     showHead: 'everyPage',
+    margin: { top: marginX, right: marginX, bottom: 120, left: marginX },
   });
-
-  const finalTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
-  doc.setDrawColor(...navy);
-  doc.setLineWidth(1);
-  doc.rect(marginX, currentY, contentWidth, finalTableY - currentY, 'S');
-  currentY = finalTableY;
 
   // 5. Amount in Words Box with stronger emphasis on payable value
   const amountWords = numberToIndianRupees(grandTotal);
@@ -389,10 +392,42 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const amountWordLines = doc.splitTextToSize(amountWords, contentWidth - 14);
   const wordsBoxHeight = Math.max(34, 22 + amountWordLines.length * 10);
 
-  // Keep the amount and authorization blocks together after a multi-page table.
   const pageHeight = doc.internal.pageSize.getHeight();
   const bottomBoxHeight = 76;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
+  const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
+  const summaryHeightEstimate = summaryRows.length * 18;
+  if (itemTableY + summaryHeightEstimate + footerHeight > pageHeight - marginX) {
+    doc.addPage();
+    currentY = marginX;
+  } else {
+    currentY = itemTableY;
+  }
+
+  autoTable(doc, {
+    startY: currentY,
+    body: summaryRows,
+    theme: 'grid',
+    styles: {
+      fontSize: 7.4,
+      textColor: [15, 23, 42],
+      cellPadding: 3,
+      lineColor: [148, 163, 184],
+      lineWidth: 0.35,
+      valign: 'middle',
+    },
+    columnStyles: {
+      0: { halign: 'left', cellWidth: contentWidth * 0.48 },
+      1: { halign: 'center', cellWidth: contentWidth * 0.14 },
+      2: { halign: 'center', cellWidth: contentWidth * 0.14 },
+      3: { halign: 'right', cellWidth: contentWidth * 0.24 },
+    },
+    margin: { left: marginX, right: marginX, bottom: marginX },
+    pageBreak: 'avoid',
+    rowPageBreak: 'avoid',
+  });
+
+  currentY = (doc as any).lastAutoTable.finalY || currentY + summaryHeightEstimate;
   if (currentY + footerHeight > pageHeight - marginX) {
     doc.addPage();
     currentY = marginX;
@@ -437,9 +472,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.2);
-  if (invoiceData.seller.name) {
-    doc.text(`Cheques payable to "${invoiceData.seller.name}"`, marginX + 7, bY);
-    bY += 10;
+  if (sellerName) {
+    const chequePayeeLines = doc.splitTextToSize(`Cheques payable to "${sellerName}"`, leftBottomWidth - 14);
+    doc.text(chequePayeeLines, marginX + 7, bY);
+    bY += chequePayeeLines.length * 8 + 2;
   }
 
   bY += 10;
@@ -447,8 +483,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7);
   const bankLocation = [invoiceData.seller.bankName, invoiceData.seller.bankBranch].filter(value => value?.trim()).join(', ');
   if (bankLocation) {
-    doc.text(bankLocation, marginX + 7, bY);
-    bY += 9;
+    const bankLocationLines = doc.splitTextToSize(bankLocation, leftBottomWidth - 14);
+    doc.text(bankLocationLines, marginX + 7, bY);
+    bY += bankLocationLines.length * 8 + 1;
   }
 
   doc.setFont('helvetica', 'bold');
@@ -461,10 +498,13 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     doc.text(`IFSC CODE: ${invoiceData.seller.ifscCode}`, marginX + 7, bY);
   }
 
-  // Right Side Content: For MURTHY CHEMICAL AGENCIES & Signature
+  // Right Side Content: Seller name and signature
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text(`For ${invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}`, rightBottomX + rightBottomWidth / 2, currentY + 13, { align: 'center' });
+  if (sellerName) {
+    const signatoryLines = doc.splitTextToSize(`For ${sellerName}`, rightBottomWidth - 16);
+    doc.text(signatoryLines, rightBottomX + rightBottomWidth / 2, currentY + 13, { align: 'center' });
+  }
 
   // Embedded Partner Signature
   if (invoiceData.showSignature !== false && invoiceData.seller.signatureUrl && invoiceData.seller.signatureUrl.startsWith('data:image')) {
@@ -494,6 +534,17 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
   doc.text('PARTNER', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 9, { align: 'center' });
+
+  const pageCount = doc.getNumberOfPages();
+  if (pageCount > 1) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(...slate);
+    for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+      doc.setPage(pageNumber);
+      doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth - marginX, pageHeight - 12, { align: 'right' });
+    }
+  }
 
   return doc;
 }
