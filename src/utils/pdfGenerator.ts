@@ -181,16 +181,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const col2X = marginX + col1Width;
   const col3X = col2X + col2Width;
 
-  // Draw vertical column dividers with stronger visual separation
-  doc.setDrawColor(...slate);
-  doc.rect(col1X, partiesBlockStartY, col1Width, partiesBlockHeight, 'S');
-  doc.rect(col2X, partiesBlockStartY, col2Width, partiesBlockHeight, 'S');
-  doc.rect(col3X, partiesBlockStartY, col3Width, partiesBlockHeight, 'S');
-
   // Col 1 Content: Billed To
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.text('BILLED TO', col1X + 6, partiesBlockStartY + 12);
+  doc.text('BILLED TO:', col1X + 6, partiesBlockStartY + 12);
 
   doc.setFontSize(8.8);
   doc.text(doc.splitTextToSize(invoiceData.buyer.name || '', col1Width - 12).slice(0, 1), col1X + 6, partiesBlockStartY + 23);
@@ -241,9 +235,12 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(10.5);
   doc.text(invoiceDateLines, col3X + 6, partiesBlockStartY + metaHalfHeight + 28);
 
-  // Keep the metadata labels and values vertically aligned within both cells.
+  // Draw the grid after filling the cells so no border is covered by a background fill.
   doc.setDrawColor(...slate);
-  doc.setLineWidth(0.5);
+  doc.setLineWidth(0.8);
+  doc.rect(col1X, partiesBlockStartY, col1Width, partiesBlockHeight, 'S');
+  doc.rect(col2X, partiesBlockStartY, col2Width, partiesBlockHeight, 'S');
+  doc.rect(col3X, partiesBlockStartY, col3Width, partiesBlockHeight, 'S');
   doc.line(col3X, partiesBlockStartY + metaHalfHeight, col3X + col3Width, partiesBlockStartY + metaHalfHeight);
 
   currentY += partiesBlockHeight;
@@ -455,11 +452,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const rightBottomX = marginX + leftBottomWidth;
 
   doc.setFillColor(249, 250, 251);
-  doc.rect(marginX, currentY, leftBottomWidth, bottomBoxHeight, 'FD');
-  doc.rect(rightBottomX, currentY, rightBottomWidth, bottomBoxHeight, 'FD');
+  doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'F');
   doc.setDrawColor(...slate);
-  doc.rect(marginX, currentY, leftBottomWidth, bottomBoxHeight, 'S');
-  doc.rect(rightBottomX, currentY, rightBottomWidth, bottomBoxHeight, 'S');
+  doc.setLineWidth(0.8);
+  doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'S');
+  doc.line(rightBottomX, currentY, rightBottomX, currentY + bottomBoxHeight);
 
   // Left Side Content: PAN & Bank Details
   let bY = currentY + 10;
