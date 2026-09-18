@@ -369,9 +369,6 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     bodyStyles: {
       fillColor: [255, 255, 255],
     },
-    alternateRowStyles: {
-      fillColor: [248, 250, 252],
-    },
     columnStyles: {
       0: { halign: 'left', cellWidth: contentWidth * 0.48 },
       1: { halign: 'center', cellWidth: contentWidth * 0.14 },
