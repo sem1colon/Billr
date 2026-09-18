@@ -356,9 +356,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
       {/* A4 Sheet Container with Liquid Glass Frame */}
       <div className="w-full max-w-full overflow-x-auto pb-8 flex justify-center apple-glass-subtle p-2 sm:p-6 md:p-8 rounded-[32px]">
-        <div 
-          style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-          className="transition-transform duration-200"
+        <div
+          style={{ zoom: zoomLevel / 100 }}
+          className="transition-[zoom] duration-200"
         >
           {/* Authentic High-Precision Tax Invoice Document Matching Reference Exactly */}
           <div className="invoice-document w-[794px] bg-white text-slate-900 shadow-2xl p-6 border-2 border-slate-900 rounded-none relative [font-family:Arial,Helvetica,sans-serif] [font-variant-numeric:tabular-nums]">

@@ -127,9 +127,16 @@ export const BottomDockNav: React.FC<BottomDockNavProps> = ({
                 <span>Back</span>
               </motion.button>
             ) : (
-                <span className="text-[11px] font-semibold text-slate-500 px-2.5 py-1 bg-slate-100/90 rounded-lg">
-                Add source data
-              </span>
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.94 }}
+                onClick={() => setActiveTab('sheet')}
+                className="flex items-center space-x-1 px-2.5 py-1.5 apple-glass-btn text-slate-700 rounded-xl text-[11px] font-bold cursor-pointer"
+                aria-label="Add source data"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Add source data</span>
+              </motion.button>
             )}
           </div>
 

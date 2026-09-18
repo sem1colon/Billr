@@ -76,6 +76,10 @@ export default function App() {
     saveActiveTab(activeTab);
   }, [activeTab]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [activeTab]);
+
   // Auto-persist UI preferences
   useEffect(() => {
     saveUiPreferences({ isLargeText });
