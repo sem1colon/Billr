@@ -488,9 +488,11 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                         <React.Fragment key={group.customer}>
                           {/* Customer Group Header Row */}
                           {group.customer && group.customer !== 'General Items' && (
-                            <tr className="bg-slate-100 border-t border-b border-slate-300 font-bold">
-                              <td colSpan={4} className="py-1.5 px-2.5 text-slate-950 font-black text-[10px] uppercase tracking-[0.08em]">
-                                Customer <span className="text-blue-700">|</span> {group.customer}
+                            <tr className="bg-blue-800 border-t border-b border-blue-950 font-bold">
+                              <td colSpan={4} className="py-1.5 px-2.5 text-white font-black text-[10px] uppercase tracking-[0.08em]">
+                                <span className="mr-2 text-blue-200">CUSTOMER</span>
+                                <span className="text-blue-200">|</span>
+                                <span className="ml-2">{group.customer}</span>
                               </td>
                             </tr>
                           )}
@@ -499,7 +501,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {group.items.map(item => {
                             return (
                               <tr key={item.id} className="hover:bg-slate-50 align-middle">
-                                <td className="py-1.5 px-2.5 border-r border-slate-900 text-slate-900 text-[11px] leading-relaxed text-left align-top">
+                                <td className="py-1.5 pl-5 pr-2.5 border-r border-l-4 border-l-blue-200 border-slate-900 text-slate-900 text-[11px] leading-relaxed text-left align-top">
                                   <span className="block font-semibold text-left">{getInvoiceProductName(item)}</span>
                                   <span className="block text-[10px] text-slate-600 mt-0.5 text-left">
                                     {getInvoiceItemMeta(item)}
