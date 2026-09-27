@@ -292,11 +292,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       {
         content: 'Taxable Value',
         colSpan: 3,
-        styles: { fontStyle: 'bold', halign: 'right' },
+        styles: { fontStyle: 'bold', halign: 'left', fillColor: [241, 245, 249] },
       },
       {
         content: formatPdfAmount(taxableValue),
-        styles: { fontStyle: 'bold', halign: 'right' },
+        styles: { fontStyle: 'bold', halign: 'right', fillColor: [241, 245, 249] },
       },
     ],
 
@@ -304,11 +304,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       {
         content: `ADD: ${gstLabel(invoiceData.gstType, gstRate)}`,
         colSpan: 3,
-        styles: { fontStyle: 'bold', halign: 'right' },
+        styles: { fontStyle: 'bold', halign: 'left', fillColor: [248, 250, 252] },
       },
       {
         content: formatPdfAmount(invoiceData.gstType === 'IGST' ? igstAmount : cgstAmount + sgstAmount),
-        styles: { fontStyle: 'bold', halign: 'right' },
+        styles: { fontStyle: 'bold', halign: 'right', fillColor: [248, 250, 252] },
       },
     ],
   ];
@@ -325,11 +325,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     {
       content: 'Total',
       colSpan: 3,
-      styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] },
+      styles: { fontStyle: 'bold', halign: 'left', fillColor: [15, 23, 42], textColor: [255, 255, 255] },
     },
     {
       content: formatPdfAmount(grandTotal),
-      styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] },
+      styles: { fontStyle: 'bold', halign: 'right', fillColor: [15, 23, 42], textColor: [255, 255, 255] },
     },
   ]);
 
@@ -384,10 +384,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.8);
   const amountWordLines = doc.splitTextToSize(amountWords, contentWidth - 14);
-  const wordsBoxHeight = Math.max(20, 12 + amountWordLines.length * 8);
+  const wordsBoxHeight = Math.max(24, 14 + amountWordLines.length * 10);
 
   const pageHeight = doc.internal.pageSize.getHeight();
-  const bottomBoxHeight = 50;
+  const bottomBoxHeight = 46;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
   currentY = itemTableY;
@@ -408,7 +408,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.8);
-  doc.text(amountWordLines, marginX + 7, currentY + 16);
+  doc.text(amountWordLines, marginX + 7, currentY + 19);
 
   currentY += wordsBoxHeight;
 

@@ -524,8 +524,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     })()}
 
                     {/* Summary Calculation Rows inside Table */}
-                    <tr className="border-t-2 border-slate-900 font-bold bg-white">
-                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                    <tr className="border-t-2 border-slate-900 font-bold bg-slate-100">
+                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
                         Taxable Value
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
@@ -534,7 +534,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     </tr>
 
                     <tr className="border-t border-slate-900 font-bold bg-slate-50">
-                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">
+                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
                         ADD: {gstLabel(invoiceData.gstType, gstRate)}
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
@@ -549,11 +549,11 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                       </tr>
                     )}
 
-                    <tr className="border-t-2 border-slate-900 font-bold bg-white">
-                      <td colSpan={3} className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
+                    <tr className="border-t-2 border-slate-900 font-bold bg-slate-900">
+                      <td colSpan={3} className="py-2 px-2.5 border-r border-slate-700 text-left font-black text-white text-xs">
                         Total
                       </td>
-                      <td className="py-2 px-2.5 text-right font-black text-slate-950 text-xs">
+                      <td className="py-2 px-2.5 text-right font-black text-white text-xs">
                         {formatInvoiceAmount(grandTotal)}
                       </td>
                     </tr>
