@@ -9,7 +9,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { getDefaultSignatureDataUrl } from '../utils/signatureUtils';
+import { getDefaultSignatureDataUrl, normalizeSignatureImage } from '../utils/signatureUtils';
 import { saveSavedSignature, getDefaultOrSavedSignature, loadSavedSignature } from '../utils/storageUtils';
 import { useModalAccessibility } from '../utils/useModalAccessibility';
 
@@ -161,8 +161,12 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        setPreviewUrl(event.target.result as string);
-        setActiveMode('upload');
+        void normalizeSignatureImage(event.target.result as string)
+          .then((signature) => {
+            setPreviewUrl(signature);
+            setActiveMode('upload');
+          })
+          .catch((error: unknown) => console.error('Could not process uploaded signature:', error));
       }
     };
     reader.readAsDataURL(file);
