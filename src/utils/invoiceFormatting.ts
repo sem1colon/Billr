@@ -60,7 +60,7 @@ export function getInvoicePlaceOfSupply(buyerName: string, placeOfSupply: string
 
 export function getInvoiceItemMeta(item: InvoiceItem): string {
   return [
-    item.invNo ? `Inv. No. ${item.invNo}` : '',
+    item.invNo ? `Invoice No. ${item.invNo}` : '',
     item.date ? `Date: ${formatInvoiceDate(item.date)}` : '',
   ].filter(Boolean).join(' | ');
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatInvoiceAmount, formatInvoiceCommission, formatInvoiceDate, formatInvoiceQuantity, formatInvoiceUnitPrice, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
+import { formatInvoiceAmount, formatInvoiceCommission, formatInvoiceDate, formatInvoiceQuantity, formatInvoiceUnitPrice, getInvoiceItemMeta, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
 
 describe('invoice date values', () => {
   it('normalizes legacy dates for native date controls', () => {
@@ -11,6 +11,18 @@ describe('invoice date values', () => {
 
   it('keeps display formatting separate from the ISO control value', () => {
     expect(formatInvoiceDate('2026-08-10')).toBe('10 Aug 2026');
+  });
+
+  it('expands the invoice number label in item metadata', () => {
+    expect(getInvoiceItemMeta({
+      id: 'item-1',
+      description: 'Resin',
+      hsnSacCode: '998311',
+      qty: 2,
+      commissionRate: 0,
+      commissionAmount: 0,
+      invNo: 'INV-001',
+    })).toBe('Invoice No. INV-001');
   });
 
   it('keeps invoice pricing metadata consistent and safe', () => {
