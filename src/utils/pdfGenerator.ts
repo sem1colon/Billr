@@ -388,13 +388,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const bottomBoxHeight = 64;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
-  const summaryHeightEstimate = summaryRows.length * 18;
-  if (itemTableY + summaryHeightEstimate + footerHeight > pageHeight - marginX) {
-    doc.addPage();
-    currentY = marginX;
-  } else {
-    currentY = itemTableY;
-  }
+  currentY = itemTableY;
 
   autoTable(doc, {
     startY: currentY,

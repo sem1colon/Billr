@@ -31,6 +31,20 @@ describe('PDF generation', () => {
     expect(doc.getNumberOfPages()).toBe(1);
   });
 
+  it('keeps totals beside the item table when the signature footer needs another page', () => {
+    const invoice = {
+      ...initialInvoiceData,
+      items: Array.from({ length: 26 }, (_, index) => createTestItem(index + 1)),
+    };
+
+    const doc = createInvoicePdfDoc(invoice);
+    const pages = (doc as any).internal.pages as string[][];
+
+    expect(doc.getNumberOfPages()).toBeGreaterThan(1);
+    expect(pages[1].join(' ')).toContain('(Taxable Value)');
+    expect(pages[2].join(' ')).toContain('(RSN Murthy)');
+  });
+
   it('wraps long content and paginates large item tables', () => {
     const invoice = {
       ...initialInvoiceData,
