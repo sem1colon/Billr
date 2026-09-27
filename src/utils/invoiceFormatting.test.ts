@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatInvoiceAmount, formatInvoiceCommission, formatInvoiceDate, formatInvoiceQuantity, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
+import { formatInvoiceAmount, formatInvoiceCommission, formatInvoiceDate, formatInvoiceQuantity, formatInvoiceUnitPrice, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
 
 describe('invoice date values', () => {
   it('normalizes legacy dates for native date controls', () => {
@@ -32,5 +32,10 @@ describe('invoice date values', () => {
   it('formats commission values for the invoice table', () => {
     expect(formatInvoiceCommission({ id: 'item-1', description: '', hsnSacCode: '', qty: 1, unit: 'kg', commissionRate: 16.5, commissionAmount: 16.5 })).toBe('₹16.50/kg');
     expect(formatInvoiceCommission({ id: 'item-2', description: '', hsnSacCode: '', qty: 1, unit: 'kg', commissionType: 'PERCENTAGE', commissionRate: 3, commissionAmount: 16.5 })).toBe('3.00%');
+  });
+
+  it('formats unit prices for the invoice table', () => {
+    expect(formatInvoiceUnitPrice({ id: 'item-1', description: '', hsnSacCode: '', qty: 1, unit: 'kg', unitPrice: 550, commissionRate: 16.5, commissionAmount: 16.5 })).toBe('₹550.00 / kg');
+    expect(formatInvoiceUnitPrice({ id: 'item-2', description: '', hsnSacCode: '', qty: 1, unit: 'kg', commissionRate: 0, commissionAmount: 0 })).toBe('-');
   });
 });

@@ -8,7 +8,6 @@ import {
   formatInvoiceCommission,
   formatInvoiceDate,
   formatInvoiceQuantity,
-  getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
   getInvoicePlaceOfSupply,
@@ -273,16 +272,9 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
     groupItems.forEach(item => {
         const itemMeta = getInvoiceItemMeta(item);
-        const pricingLine = getInvoicePricingMeta(item)
-          .replace('Unit price:', 'Unit Price:')
-          .replace('Commission rate:', 'Comm Rate:')
-          .replace(/₹/g, 'INR ');
       tableBody.push([
         {
-          content: [
-            getInvoiceProductName(item),
-            [itemMeta, pricingLine].filter(Boolean).join(' | '),
-          ].filter(Boolean).join('\n'),
+          content: [getInvoiceProductName(item), itemMeta].filter(Boolean).join('\n'),
             styles: { cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 6 }, fontSize: 6.5, lineColor: [203, 203, 203] },
         },
         formatInvoiceCommission(item).replace(/₹/g, 'INR '),
@@ -372,10 +364,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       fillColor: [255, 255, 255],
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.48 },
-      1: { halign: 'center', cellWidth: contentWidth * 0.14 },
-      2: { halign: 'center', cellWidth: contentWidth * 0.14 },
-      3: { halign: 'right', cellWidth: contentWidth * 0.24 },
+      0: { halign: 'left', cellWidth: contentWidth * 0.58 },
+      1: { halign: 'center', cellWidth: contentWidth * 0.15 },
+      2: { halign: 'center', cellWidth: contentWidth * 0.10 },
+      3: { halign: 'right', cellWidth: contentWidth * 0.17 },
     },
     pageBreak: 'auto',
     rowPageBreak: 'avoid',
@@ -417,10 +409,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       valign: 'middle',
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.48 },
-      1: { halign: 'center', cellWidth: contentWidth * 0.14 },
-      2: { halign: 'center', cellWidth: contentWidth * 0.14 },
-      3: { halign: 'right', cellWidth: contentWidth * 0.24 },
+      0: { halign: 'left', cellWidth: contentWidth * 0.58 },
+      1: { halign: 'center', cellWidth: contentWidth * 0.15 },
+      2: { halign: 'center', cellWidth: contentWidth * 0.10 },
+      3: { halign: 'right', cellWidth: contentWidth * 0.17 },
     },
     margin: { left: marginX, right: marginX, bottom: marginX },
     pageBreak: 'avoid',
@@ -461,41 +453,81 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'S');
   doc.line(rightBottomX, currentY, rightBottomX, currentY + bottomBoxHeight);
 
-  // Left Side Content: PAN & Bank Details
-  let bY = currentY + 10;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.8);
-  if (invoiceData.seller.pan) {
-    doc.text(`COMPANY PAN: ${invoiceData.seller.pan}`, marginX + 7, bY);
-    bY += 10;
-  }
-
+  // Left Side Content: Bank Details, payment identifiers, payee, and PAN
+  let bY = currentY + 9;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.2);
-  if (sellerName) {
-    const chequePayeeLines = doc.splitTextToSize(`Cheques payable to "${sellerName}"`, leftBottomWidth - 14);
-    doc.text(chequePayeeLines, marginX + 7, bY);
-    bY += chequePayeeLines.length * 8 + 2;
-  }
+  doc.setTextColor(30, 64, 175);
+  doc.text('BANK DETAILS', marginX + 7, bY);
+  bY += 8;
 
-  bY += 10;
+  doc.setTextColor(...slate);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   const bankLocation = [invoiceData.seller.bankName, invoiceData.seller.bankBranch].filter(value => value?.trim()).join(', ');
   if (bankLocation) {
     const bankLocationLines = doc.splitTextToSize(bankLocation, leftBottomWidth - 14);
     doc.text(bankLocationLines, marginX + 7, bY);
-    bY += bankLocationLines.length * 8 + 1;
+    bY += bankLocationLines.length * 7 + 3;
   }
 
-  doc.setFont('helvetica', 'bold');
-  if (invoiceData.seller.accountNo) {
-    doc.text(`A/C NO. ${invoiceData.seller.accountNo}`, marginX + 7, bY);
+  let identifierX = marginX + 7;
+  if (invoiceData.seller.accountNo || invoiceData.seller.ifscCode) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(...slate);
+    if (invoiceData.seller.accountNo) {
+      const accountLabel = 'A/C No.';
+      doc.text(accountLabel, identifierX, bY);
+      identifierX += doc.getTextWidth(accountLabel) + 3;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.4);
+      doc.setTextColor(15, 23, 42);
+      doc.text(invoiceData.seller.accountNo, identifierX, bY);
+      identifierX += doc.getTextWidth(invoiceData.seller.accountNo) + 12;
+    }
+    if (invoiceData.seller.ifscCode) {
+      const ifscLabel = 'IFSC Code';
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...slate);
+      doc.text(ifscLabel, identifierX, bY);
+      identifierX += doc.getTextWidth(ifscLabel) + 3;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.4);
+      doc.setTextColor(15, 23, 42);
+      doc.text(invoiceData.seller.ifscCode, identifierX, bY);
+    }
     bY += 9;
   }
 
-  if (invoiceData.seller.ifscCode) {
-    doc.text(`IFSC CODE: ${invoiceData.seller.ifscCode}`, marginX + 7, bY);
+  doc.setTextColor(...slate);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.5);
+  if (sellerName) {
+    const payeeX = marginX + 7;
+    const payeePrefix = 'Cheques payable to "';
+    const payeeWidth = leftBottomWidth - 14;
+    const payeePrefixWidth = doc.getTextWidth(payeePrefix);
+    const payeeNameLines = doc.splitTextToSize(`${sellerName}"`, payeeWidth - payeePrefixWidth);
+    doc.text(payeePrefix, payeeX, bY);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    payeeNameLines.forEach((line: string, index: number) => {
+      doc.text(line, index === 0 ? payeeX + payeePrefixWidth : payeeX, bY + index * 7);
+    });
+    bY += payeeNameLines.length * 7;
+  }
+
+  if (invoiceData.seller.pan) {
+    const panX = marginX + 7;
+    const panLabel = 'COMPANY PAN: ';
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...slate);
+    doc.text(panLabel, panX, bY + 1);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(invoiceData.seller.pan, panX + doc.getTextWidth(panLabel), bY + 1);
   }
 
   // Right Side Content: Seller name and signature

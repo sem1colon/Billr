@@ -27,7 +27,6 @@ import {
   formatInvoiceCommission,
   formatInvoiceDate,
   formatInvoiceQuantity,
-  getInvoicePricingMeta,
   getInvoiceItemMeta,
   getInvoiceProductName,
   getInvoicePlaceOfSupply,
@@ -381,7 +380,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                   {invoiceData.seller.address || 'Flat No. 104, Rukmini Apartment, Yousufguda Check Post'}
                 </p>
                 <p className="mt-0.5 text-xs leading-relaxed text-slate-800">
-                  {invoiceData.seller.cityStateZip || 'Hyderabad-500045.'}
+                  {invoiceData.seller.cityStateZip || 'Hyderabad, Telangana - 500045.'}
                 </p>
                 <p className="mt-0.5 text-xs font-semibold leading-relaxed text-slate-800">
                   Partner: {invoiceData.seller.partnerName || 'R.S.N.MURTHY'} <span className="text-slate-400">|</span> Ph: {invoiceData.seller.phone || '9849187125'}
@@ -421,7 +420,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     {invoiceData.buyer.name || 'Buyer'}
                   </h4>
                   <p className="text-slate-800 text-[11px] mt-1 whitespace-pre-line leading-relaxed">
-                    {getInvoicePlaceOfSupply(invoiceData.buyer.name, invoiceData.buyer.placeOfSupply) || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune - 412108."}
+                    {getInvoicePlaceOfSupply(invoiceData.buyer.name, invoiceData.buyer.placeOfSupply) || "PE's Manufacturing, 402/403/1098\nAt Pirangut, Urawade, Tal: Mulshi, Dist: Pune, Maharashtra - 412108."}
                   </p>
                 </div>
 
@@ -455,10 +454,10 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                   <table className="w-full table-fixed text-left text-xs border-collapse align-middle">
                   <thead>
                     <tr className="bg-[#0f172a] text-white font-bold border-b border-slate-900 text-[11px] align-middle">
-                      <th className="py-2 px-2.5 border-r border-slate-900 w-[48%] text-left align-middle">Description of Services</th>
-                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">Commission</th>
-                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">Qty</th>
-                      <th className="py-2 px-2.5 text-right w-[24%] align-middle">Amount</th>
+                      <th className="py-2 px-2.5 border-r border-slate-900 w-[58%] text-left align-middle">Description of Services</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[15%] align-middle">Commission</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[10%] align-middle">Qty</th>
+                      <th className="py-2 px-2.5 text-right w-[17%] align-middle">Amount</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-300 text-slate-900 align-middle">
@@ -506,9 +505,6 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                                   <span className="block font-semibold text-left">{getInvoiceProductName(item)}</span>
                                   <span className="block text-[10px] text-slate-600 mt-0.5 text-left">
                                     {getInvoiceItemMeta(item)}
-                                  </span>
-                                  <span className="block text-[10px] font-semibold text-slate-700 mt-0.5 text-left">
-                                    {getInvoicePricingMeta(item)}
                                   </span>
                                 </td>
                                 <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 text-[11px] align-middle">
@@ -582,19 +578,23 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     Bank Details
                   </p>
                   <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
-                    COMPANY PAN: {invoiceData.seller.pan || 'ABXFM3174B'}
-                  </p>
-                  <p className="font-bold text-slate-900 text-[11px] pt-1 leading-relaxed">
-                    Cheques payable to "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
-                  </p>
-                  <p className="text-slate-900 text-[11px] pt-0.5 leading-relaxed">
                     {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SR NAGAR, HYDERABAD-500038.'}
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
-                    A/C NO. {invoiceData.seller.accountNo || '50200084425696'}
+                  <p className="flex flex-nowrap items-baseline gap-4 text-[11px] leading-relaxed">
+                    <span className="whitespace-nowrap">
+                      <span className="font-semibold text-slate-600">A/C No.</span>{' '}
+                      <span className="font-black text-slate-950">{invoiceData.seller.accountNo || '50200084425696'}</span>
+                    </span>
+                    <span className="whitespace-nowrap">
+                      <span className="font-semibold text-slate-600">IFSC Code</span>{' '}
+                      <span className="font-black text-slate-950">{invoiceData.seller.ifscCode || 'HDFC0000642'}</span>
+                    </span>
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
-                    IFSC CODE: {invoiceData.seller.ifscCode || 'HDFC0000642'}
+                  <p className="text-slate-700 text-[10px] leading-relaxed">
+                    Cheques payable to "<strong className="font-black text-slate-950">{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}</strong>"
+                  </p>
+                  <p className="text-slate-700 text-[10px] leading-relaxed">
+                    COMPANY PAN: <strong className="font-black text-slate-950">{invoiceData.seller.pan || 'ABXFM3174B'}</strong>
                   </p>
                 </div>
 

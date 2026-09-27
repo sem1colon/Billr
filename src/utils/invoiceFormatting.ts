@@ -87,6 +87,12 @@ export function formatInvoiceCommission(item: InvoiceItem): string {
     : `${rate}/${item.unit || 'unit'}`;
 }
 
+export function formatInvoiceUnitPrice(item: InvoiceItem): string {
+  return Number.isFinite(item.unitPrice)
+    ? `${formatInvoiceAmount(item.unitPrice as number)} / ${item.unit || 'unit'}`
+    : '-';
+}
+
 export function formatInvoiceAmount(amount: number): string {
   const safeAmount = Number.isFinite(amount) ? amount : 0;
   return `₹${safeAmount.toLocaleString('en-IN', {

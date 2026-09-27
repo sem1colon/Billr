@@ -10,6 +10,7 @@ function createTestItem(index: number): InvoiceItem {
     hsnSacCode: '998311',
     qty: 10,
     unit: 'kg',
+    unitPrice: 550,
     commissionRate: 16.5,
     commissionAmount: 165,
     invNo: `80008${index}`,
@@ -92,6 +93,9 @@ describe('PDF generation', () => {
     }).output();
 
     expect(pdf).toContain('Commission');
+    expect(pdf).not.toContain('Unit Price');
+    expect(pdf).not.toContain('INR 550.00 / kg');
+    expect(pdf).not.toContain('Commission rate:');
     expect(pdf).not.toContain('HSN/SAC CODE');
   });
 });

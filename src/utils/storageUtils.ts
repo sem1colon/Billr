@@ -13,7 +13,10 @@ const STORAGE_KEYS = {
   SAVED_SIGNATURE: 'billr_saved_signature_v1',
   WORKBOOK_STATE: 'billr_workbook_state_v1',
   INVOICE_HISTORY: 'billr_invoice_history_v1',
+  DEFAULT_SIGNATURE_VERSION: 'billr_default_signature_version',
 };
+
+const DEFAULT_SIGNATURE_VERSION = '3';
 
 export interface InvoiceHistoryEntry {
   id: string;
@@ -91,7 +94,16 @@ export function loadSavedInvoiceData(): InvoiceData {
     return initialInvoiceData;
   }
 
-  const defaultSig = getDefaultOrSavedSignature();
+  const defaultSignatureVersion = localStorage.getItem(STORAGE_KEYS.DEFAULT_SIGNATURE_VERSION);
+  const shouldRefreshFactorySignature = defaultSignatureVersion !== DEFAULT_SIGNATURE_VERSION;
+  const defaultSig = shouldRefreshFactorySignature
+    ? getDefaultSignatureDataUrl()
+    : getDefaultOrSavedSignature();
+
+  if (shouldRefreshFactorySignature) {
+    localStorage.setItem(STORAGE_KEYS.DEFAULT_SIGNATURE_VERSION, DEFAULT_SIGNATURE_VERSION);
+    clearSavedSignature();
+  }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.INVOICE_DATA);
@@ -118,7 +130,10 @@ export function loadSavedInvoiceData(): InvoiceData {
     const mergedSeller = {
       ...defaultSeller,
       ...(parsed.seller || {}),
-      signatureUrl: parsed.seller?.signatureUrl || defaultSig,
+      cityStateZip: parsed.seller?.cityStateZip === 'Hyderabad-500045.'
+        ? defaultSeller.cityStateZip
+        : (parsed.seller?.cityStateZip || defaultSeller.cityStateZip),
+      signatureUrl: shouldRefreshFactorySignature ? defaultSig : (parsed.seller?.signatureUrl || defaultSig),
     };
 
     // If a signature is present in the loaded invoice, remember it as the default signature
@@ -129,6 +144,9 @@ export function loadSavedInvoiceData(): InvoiceData {
     const normalizedBuyer = {
       ...initialInvoiceData.buyer,
       ...(parsed.buyer || {}),
+      placeOfSupply: parsed.buyer?.placeOfSupply === "PE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune - 412108."
+        ? initialInvoiceData.buyer.placeOfSupply
+        : (parsed.buyer?.placeOfSupply || initialInvoiceData.buyer.placeOfSupply),
       name: typeof parsed.buyer?.name === 'string' && parsed.buyer.name.trim()
         ? parsed.buyer.name
         : initialInvoiceData.buyer.name,

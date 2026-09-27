@@ -3,7 +3,7 @@ import { BusinessProfile, ClientProfile, InvoiceData, InvoiceItem } from '../typ
 export const defaultSeller: BusinessProfile = {
   name: 'MURTHY CHEMICAL AGENCIES',
   address: 'Flat No. 104, Rukmini Apartment, Yousufguda Check Post',
-  cityStateZip: 'Hyderabad-500045.',
+  cityStateZip: 'Hyderabad, Telangana - 500045.',
   partnerName: 'R.S.N.MURTHY',
   phone: '9849187125',
   email: '',
@@ -22,7 +22,7 @@ export const defaultBuyer: ClientProfile = {
   cityStateZip: 'Pune-411057, Maharashtra.',
   gstin: '27AAACP6090Q1ZS',
   pan: 'AAACP6090Q',
-  placeOfSupply: "PE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune - 412108.",
+  placeOfSupply: "PE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune, Maharashtra - 412108.",
 };
 
 export const sampleInvoiceItems: InvoiceItem[] = [
