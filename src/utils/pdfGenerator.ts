@@ -173,8 +173,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(10.5);
   const invoiceDateLines = doc.splitTextToSize(formatInvoiceDate(invoiceData.invoiceDate), col3Width - 12);
   const partiesBlockHeight = Math.max(
-    64,
-    34 + Math.max(splitBuyerAddr.length * 8, splitPos.length * 8, invoiceNumberLines.length * 11, invoiceDateLines.length * 11) + 10,
+    58,
+    30 + Math.max(splitBuyerAddr.length * 8, splitPos.length * 8, invoiceNumberLines.length * 11, invoiceDateLines.length * 11) + 6,
   );
 
   const col1X = marginX;
@@ -265,7 +265,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
         {
           content: `CUSTOMER: ${custName}`,
           colSpan: 4,
-          styles: { fontStyle: 'bold', fontSize: 6.8, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 5 } },
+          styles: { fontStyle: 'bold', fontSize: 6.2, fillColor: [241, 245, 249], textColor: [30, 41, 59], lineColor: [100, 116, 139], lineWidth: 0.5, cellPadding: { top: 0.5, right: 2, bottom: 0.5, left: 5 } },
         },
       ]);
     }
@@ -275,7 +275,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
       tableBody.push([
         {
           content: [getInvoiceProductName(item), itemMeta].filter(Boolean).join('\n'),
-            styles: { cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 6 }, fontSize: 6.5, lineColor: [203, 203, 203] },
+            styles: { cellPadding: { top: 0, right: 2, bottom: 0, left: 6 }, fontSize: 5.9, lineColor: [203, 203, 203] },
         },
         formatInvoiceCommission(item).replace(/₹/g, 'INR '),
         formatInvoiceQuantity(item),
@@ -348,16 +348,16 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     headStyles: {
       fillColor: [15, 23, 42],
       textColor: [255, 255, 255],
-      fontSize: 7.2,
+      fontSize: 6.8,
       fontStyle: 'bold',
       halign: 'center',
       lineColor: [15, 23, 42],
       lineWidth: 0.5,
     },
     styles: {
-      fontSize: 6.9,
+      fontSize: 6.4,
       textColor: [15, 23, 42],
-      cellPadding: 1.5,
+      cellPadding: 1,
       lineColor: [148, 163, 184],
       lineWidth: 0.35,
       valign: 'middle',
@@ -384,10 +384,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.8);
   const amountWordLines = doc.splitTextToSize(amountWords, contentWidth - 14);
-  const wordsBoxHeight = Math.max(28, 16 + amountWordLines.length * 8);
+  const wordsBoxHeight = Math.max(20, 12 + amountWordLines.length * 8);
 
   const pageHeight = doc.internal.pageSize.getHeight();
-  const bottomBoxHeight = 64;
+  const bottomBoxHeight = 50;
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
   currentY = itemTableY;
@@ -404,11 +404,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text('AMOUNT CHARGEABLE (IN WORDS)', marginX + 7, currentY + 10);
+  doc.text('AMOUNT CHARGEABLE (IN WORDS)', marginX + 7, currentY + 9);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.8);
-  doc.text(amountWordLines, marginX + 7, currentY + 21);
+  doc.text(amountWordLines, marginX + 7, currentY + 16);
 
   currentY += wordsBoxHeight;
 
@@ -430,7 +430,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(7.2);
   doc.setTextColor(30, 41, 59);
   doc.text('BANK DETAILS', marginX + 7, bY);
-  bY += 5;
+  bY += 9;
 
   doc.setTextColor(30, 41, 59);
   doc.setFont('helvetica', 'normal');
@@ -514,7 +514,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     try {
       const imageProperties = doc.getImageProperties(invoiceData.seller.signatureUrl);
       const maxSignatureWidth = Math.min(104, rightBottomWidth - 16);
-      const maxSignatureHeight = 34;
+      const maxSignatureHeight = 22;
       const signatureScale = Math.min(
         maxSignatureWidth / imageProperties.width,
         maxSignatureHeight / imageProperties.height,
@@ -525,7 +525,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
         invoiceData.seller.signatureUrl,
         imageProperties.fileType,
         rightBottomX + (rightBottomWidth - signatureWidth) / 2,
-        currentY + 19 + (maxSignatureHeight - signatureHeight) / 2,
+        currentY + 14 + (maxSignatureHeight - signatureHeight) / 2,
         signatureWidth,
         signatureHeight,
       );
@@ -537,7 +537,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
   doc.setFont('helvetica', 'normal');
-  doc.text('RSN Murthy', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 8, { align: 'center' });
+  doc.text('RSN Murthy', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 6, { align: 'center' });
 
   const pageCount = doc.getNumberOfPages();
   if (pageCount > 1) {
