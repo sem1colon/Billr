@@ -19,6 +19,7 @@ describe('invoice date values', () => {
       description: 'Resin',
       hsnSacCode: '998311',
       qty: 2,
+      unit: 'kg',
       commissionRate: 0,
       commissionAmount: 0,
       invNo: 'INV-001',

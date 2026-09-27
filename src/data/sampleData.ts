@@ -19,7 +19,7 @@ export const defaultSeller: BusinessProfile = {
 export const defaultBuyer: ClientProfile = {
   name: 'PRAJ INDUSTRIES LIMITED',
   address: 'Praj Towers, S.No. 274 & 275/2, Bhumkar Chowk-Hinjewadi Road, Hinjewadi',
-  cityStateZip: 'Pune-411057, Maharashtra.',
+  cityStateZip: 'Pune, Maharashtra - 411057.',
   gstin: '27AAACP6090Q1ZS',
   pan: 'AAACP6090Q',
   placeOfSupply: "PE's Manufacturing,\n402/403/1098\nAt Pirangut, Urawade,\nTal: Mulshi, Dist: Pune, Maharashtra - 412108.",

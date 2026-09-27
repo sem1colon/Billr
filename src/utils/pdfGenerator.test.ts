@@ -31,16 +31,16 @@ describe('PDF generation', () => {
     expect(doc.getNumberOfPages()).toBe(1);
   });
 
-  it('keeps the item table, totals, and signature together on one page when they fit', () => {
+  it('keeps a long item table, totals, and signature together when they fit', () => {
     const invoice = {
       ...initialInvoiceData,
-      items: Array.from({ length: 36 }, (_, index) => createTestItem(index + 1)),
+      items: Array.from({ length: 30 }, (_, index) => createTestItem(index + 1)),
     };
 
     const doc = createInvoicePdfDoc(invoice);
     const pages = (doc as any).internal.pages as string[][];
     const pageText = pages.slice(1).map(page => page.join(' '));
-    const lastItemPage = pageText.findIndex(text => text.includes('Long service description 36'));
+    const lastItemPage = pageText.findIndex(text => text.includes('Long service description 30'));
 
     expect(doc.getNumberOfPages()).toBe(1);
     expect(lastItemPage).toBeGreaterThanOrEqual(0);
@@ -111,6 +111,8 @@ describe('PDF generation', () => {
     }).output();
 
     expect(pdf).toContain('Commission');
+    expect(pdf).toContain('Customer Group 1');
+    expect(pdf).not.toContain('CUSTOMER:');
     expect(pdf).not.toContain('Unit Price');
     expect(pdf).not.toContain('INR 550.00 / kg');
     expect(pdf).not.toContain('Commission rate:');

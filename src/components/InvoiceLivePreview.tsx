@@ -490,9 +490,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                           {group.customer && group.customer !== 'General Items' && (
                             <tr className="bg-slate-100 border-t border-b border-slate-400 font-bold">
                               <td colSpan={4} className="py-1.5 px-2.5 text-[10px] font-black uppercase tracking-[0.08em] text-slate-800">
-                                <span className="mr-2 text-slate-500">CUSTOMER</span>
-                                <span className="text-slate-400">|</span>
-                                <span className="ml-2">{group.customer}</span>
+                                {group.customer}
                               </td>
                             </tr>
                           )}
@@ -525,7 +523,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
                     {/* Summary Calculation Rows inside Table */}
                     <tr className="border-t-2 border-slate-900 font-bold bg-slate-100">
-                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
+                      <td className="border-r border-slate-900" />
+                      <td colSpan={2} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
                         Taxable Value
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
@@ -534,7 +533,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     </tr>
 
                     <tr className="border-t border-slate-900 font-bold bg-slate-50">
-                      <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
+                      <td className="border-r border-slate-900" />
+                      <td colSpan={2} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">
                         ADD: {gstLabel(invoiceData.gstType, gstRate)}
                       </td>
                       <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">
@@ -544,13 +544,15 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
 
                     {roundOff !== 0 && (
                       <tr className="border-t border-slate-900 font-bold bg-white">
-                        <td colSpan={3} className="py-1.5 px-2.5 border-r border-slate-900 text-right font-bold text-slate-900 text-xs">Round Off</td>
+                        <td className="border-r border-slate-900" />
+                        <td colSpan={2} className="py-1.5 px-2.5 border-r border-slate-900 text-left font-bold text-slate-900 text-xs">Round Off</td>
                         <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 text-xs">{formatInvoiceAmount(roundOff)}</td>
                       </tr>
                     )}
 
                     <tr className="border-t-2 border-slate-900 font-bold bg-slate-900">
-                      <td colSpan={3} className="py-2 px-2.5 border-r border-slate-700 text-left font-black text-white text-xs">
+                      <td className="border-r border-slate-700" />
+                      <td colSpan={2} className="py-2 px-2.5 border-r border-slate-700 text-left font-black text-white text-xs">
                         Total
                       </td>
                       <td className="py-2 px-2.5 text-right font-black text-white text-xs">
@@ -583,11 +585,11 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                   </p>
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px]">
                     <span className="whitespace-nowrap">
-                      <span className="font-black uppercase tracking-wide text-slate-600">A/C No.</span>{' '}
+                      <span className="font-black uppercase tracking-wide text-slate-600">A/C No.:</span>{' '}
                       <span className="font-black text-slate-950">{invoiceData.seller.accountNo || '50200084425696'}</span>
                     </span>
                     <span className="whitespace-nowrap">
-                      <span className="font-black uppercase tracking-wide text-slate-600">IFSC</span>{' '}
+                      <span className="font-black uppercase tracking-wide text-slate-600">IFSC:</span>{' '}
                       <span className="font-black text-slate-950">{invoiceData.seller.ifscCode || 'HDFC0000642'}</span>
                     </span>
                   </div>
