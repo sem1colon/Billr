@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatInvoiceAmount, formatInvoiceDate, formatInvoiceQuantity, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
+import { formatInvoiceAmount, formatInvoiceCommission, formatInvoiceDate, formatInvoiceQuantity, getInvoicePricingMeta, toIsoDateValue } from './invoiceFormatting';
 
 describe('invoice date values', () => {
   it('normalizes legacy dates for native date controls', () => {
@@ -27,5 +27,10 @@ describe('invoice date values', () => {
     })).toBe('Unit price: ₹550.00 / kg | Commission rate: ₹16.50 / kg');
     expect(formatInvoiceAmount(Number.NaN)).toBe('₹0.00');
     expect(formatInvoiceQuantity({ id: 'item-2', description: '', hsnSacCode: '', qty: Number.NaN, unit: 'kg', commissionRate: 0, commissionAmount: Number.NaN })).toBe('-');
+  });
+
+  it('formats commission values for the invoice table', () => {
+    expect(formatInvoiceCommission({ id: 'item-1', description: '', hsnSacCode: '', qty: 1, unit: 'kg', commissionRate: 16.5, commissionAmount: 16.5 })).toBe('₹16.50/kg');
+    expect(formatInvoiceCommission({ id: 'item-2', description: '', hsnSacCode: '', qty: 1, unit: 'kg', commissionType: 'PERCENTAGE', commissionRate: 3, commissionAmount: 16.5 })).toBe('3.00%');
   });
 });

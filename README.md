@@ -171,7 +171,11 @@ Billr/
 ├── public/
 │   ├── manifest.json
 │   ├── sw.js
-│   └── icons/assets
+│   ├── icon.svg
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── favicon-32x32.png
+│   └── apple-touch-icon.png
 ├── src/
 │   ├── components/
 │   ├── data/

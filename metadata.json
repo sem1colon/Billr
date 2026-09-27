@@ -1,7 +1,13 @@
 {
   "name": "Billr",
-  "description": "Import Excel, CSV, TSV, or text commission data, edit GST-ready invoices, save drafts locally, and export PDFs.",
+  "description": "A local-first invoice workspace for importing commission data, editing GST-ready invoices, saving drafts, and exporting PDFs.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "Import Excel, CSV, TSV, and text data",
+    "Create and edit GST-ready invoices",
+    "Save drafts and invoice history locally",
+    "Preview, validate, and export invoices as PDFs",
+    "Install as a responsive offline-capable PWA"
+  ]
 }
 

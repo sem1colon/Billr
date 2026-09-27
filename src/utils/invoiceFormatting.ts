@@ -80,6 +80,13 @@ export function formatInvoiceRate(item: InvoiceItem): string {
   return item.commissionType === 'PERCENTAGE' ? `${rate}%` : `₹${rate}`;
 }
 
+export function formatInvoiceCommission(item: InvoiceItem): string {
+  const rate = formatInvoiceRate(item);
+  return item.commissionType === 'PERCENTAGE' || rate === '-'
+    ? rate
+    : `${rate}/${item.unit || 'unit'}`;
+}
+
 export function formatInvoiceAmount(amount: number): string {
   const safeAmount = Number.isFinite(amount) ? amount : 0;
   return `₹${safeAmount.toLocaleString('en-IN', {

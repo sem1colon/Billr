@@ -348,8 +348,6 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
                           <span>&bull;</span>
                         </>
                       )}
-                      <span>HSN/SAC: <strong>{item.hsnSacCode || '998311'}</strong></span>
-                      <span>&bull;</span>
                       <span>Qty: <strong>{item.qty.toLocaleString()} {item.unit || 'kg'}</strong></span>
                       {item.unitPrice && (
                         <>

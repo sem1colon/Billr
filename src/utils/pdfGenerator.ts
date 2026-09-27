@@ -5,6 +5,7 @@ import { numberToIndianRupees } from './numberToWords';
 import { calculateInvoiceTotals } from './invoiceCalculations';
 import {
   formatInvoiceAmount,
+  formatInvoiceCommission,
   formatInvoiceDate,
   formatInvoiceQuantity,
   getInvoicePricingMeta,
@@ -284,7 +285,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
           ].filter(Boolean).join('\n'),
             styles: { cellPadding: { top: 1.5, right: 2, bottom: 1.5, left: 6 }, fontSize: 6.5, lineColor: [203, 203, 203] },
         },
-        item.hsnSacCode || '',
+        formatInvoiceCommission(item).replace(/₹/g, 'INR '),
         formatInvoiceQuantity(item),
         formatPdfAmount(item.commissionAmount),
       ]);
@@ -344,7 +345,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     startY: currentY,
     head: [[
       { content: 'Description of Services', styles: { halign: 'left' } },
-      { content: 'HSN/SAC CODE', styles: { halign: 'center' } },
+      { content: 'Commission', styles: { halign: 'center' } },
       { content: 'Qty', styles: { halign: 'center' } },
       { content: 'Amount', styles: { halign: 'right' } },
     ]],

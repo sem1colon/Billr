@@ -84,4 +84,14 @@ describe('PDF generation', () => {
 
     expect(pdf).not.toContain('MURTHY CHEMICAL AGENCIES');
   });
+
+  it('prints the commission column instead of HSN/SAC', () => {
+    const pdf = createInvoicePdfDoc({
+      ...initialInvoiceData,
+      items: [createTestItem(1)],
+    }).output();
+
+    expect(pdf).toContain('Commission');
+    expect(pdf).not.toContain('HSN/SAC CODE');
+  });
 });

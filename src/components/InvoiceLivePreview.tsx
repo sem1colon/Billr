@@ -24,6 +24,7 @@ import { formatIndianCurrency, numberToIndianRupees } from '../utils/numberToWor
 import { validateInvoiceForExport } from '../utils/invoiceValidation';
 import {
   formatInvoiceAmount,
+  formatInvoiceCommission,
   formatInvoiceDate,
   formatInvoiceQuantity,
   getInvoicePricingMeta,
@@ -455,7 +456,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                   <thead>
                     <tr className="bg-[#0f172a] text-white font-bold border-b border-slate-900 text-[11px] align-middle">
                       <th className="py-2 px-2.5 border-r border-slate-900 w-[48%] text-left align-middle">Description of Services</th>
-                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">HSN/SAC</th>
+                      <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">Commission</th>
                       <th className="py-2 px-2 text-center border-r border-slate-900 w-[14%] align-middle">Qty</th>
                       <th className="py-2 px-2.5 text-right w-[24%] align-middle">Amount</th>
                     </tr>
@@ -510,8 +511,8 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                                     {getInvoicePricingMeta(item)}
                                   </span>
                                 </td>
-                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 font-mono text-[11px] align-middle">
-                                  {item.hsnSacCode || '998311'}
+                                <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 text-[11px] align-middle">
+                                  {formatInvoiceCommission(item)}
                                 </td>
                                 <td className="py-1.5 px-2 text-center border-r border-slate-900 text-slate-900 text-[11px] align-middle">
                                   {formatInvoiceQuantity(item)}
@@ -587,7 +588,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     Cheques payable to "{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}"
                   </p>
                   <p className="text-slate-900 text-[11px] pt-0.5 leading-relaxed">
-                    {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SANJEVAREDDYNAGAR, HYDERABAD-500038.'}
+                    {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SR NAGAR, HYDERABAD-500038.'}
                   </p>
                   <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
                     A/C NO. {invoiceData.seller.accountNo || '50200084425696'}

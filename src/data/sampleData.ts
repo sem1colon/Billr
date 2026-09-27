@@ -10,7 +10,7 @@ export const defaultSeller: BusinessProfile = {
   gstin: '36ABXFM3174B1Z1',
   pan: 'ABXFM3174B',
   bankName: 'HDFC BANK',
-  bankBranch: 'SANJEVAREDDYNAGAR, HYDERABAD-500038.',
+  bankBranch: 'SR NAGAR, HYDERABAD-500038.',
   accountNo: '50200084425696',
   ifscCode: 'HDFC0000642',
   notes: 'Note:- Please make cheques in favor of "MURTHY CHEMICAL AGENCIES"',
