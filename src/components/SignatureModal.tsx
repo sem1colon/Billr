@@ -268,7 +268,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 {previewUrl ? (
                   <img 
                     src={previewUrl} 
-                    alt="Default Partner Signature" 
+                    alt="Default Signature"
                     className="max-h-24 max-w-full object-contain"
                   />
                 ) : (
@@ -385,7 +385,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               {visible ? <Eye className="w-5 h-5 text-emerald-600" /> : <EyeOff className="w-5 h-5 text-slate-400" />}
               <div>
                 <p className="text-sm font-bold text-slate-800">Include Signature on Invoice</p>
-                <p className="text-xs text-slate-500">Stamps partner signature on PDF copy</p>
+                <p className="text-xs text-slate-500">Stamps signature on PDF copy</p>
               </div>
             </div>
             <button

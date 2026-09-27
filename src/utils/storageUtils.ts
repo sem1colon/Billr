@@ -130,6 +130,10 @@ export function loadSavedInvoiceData(): InvoiceData {
     const mergedSeller = {
       ...defaultSeller,
       ...(parsed.seller || {}),
+      bankBranch: parsed.seller?.bankBranch === 'SR NAGAR, HYDERABAD-500038.'
+        || parsed.seller?.bankBranch === 'SR NAGAR, HYDERABAD, Telangana - 500038.'
+        ? defaultSeller.bankBranch
+        : (parsed.seller?.bankBranch || defaultSeller.bankBranch),
       cityStateZip: parsed.seller?.cityStateZip === 'Hyderabad-500045.'
         ? defaultSeller.cityStateZip
         : (parsed.seller?.cityStateZip || defaultSeller.cityStateZip),

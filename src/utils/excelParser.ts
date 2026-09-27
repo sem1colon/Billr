@@ -330,7 +330,7 @@ export function parseExcelFile(
     let commAmt = colIndices.commAmt !== -1 ? cleanNumber(row[colIndices.commAmt]) : 0;
 
     if (isSummaryRow) {
-      const resolvedProduct = `MCA Commission (${customer || lastCustomer || 'Customer'})`;
+      const resolvedProduct = 'MCA Commission';
       const resolvedQty = qty > 0 ? qty : 1;
       const resolvedCommAmt = commAmt || 0;
 
@@ -416,19 +416,13 @@ export function convertParsedRecordsToInvoiceItems(
     .filter(r => !selectedCustomer || selectedCustomer === 'ALL' || r.customer === selectedCustomer);
 
   return filtered.map((r) => {
-    // Include customer name in description if not already present
-    const hasCustomerInProduct = r.customer && r.product.toLowerCase().includes(r.customer.toLowerCase());
-    const desc = r.customer && !hasCustomerInProduct
-      ? `${r.product} (${r.customer})`
-      : r.product;
-
     const unitPriceVal = r.unitPrice || 0;
     const qtyVal = r.qty || 1;
     const productAmountVal = unitPriceVal > 0 ? Number((qtyVal * unitPriceVal).toFixed(2)) : undefined;
 
     return {
       id: `imported-${r.id}`,
-      description: desc || 'Commission Item',
+      description: r.product || 'Commission Item',
       hsnSacCode: '998311', // SAC code for Business Auxiliary / Commercial Agency services
       qty: qtyVal,
       unit: qtyVal > 1 ? 'kg' : 'Lot',

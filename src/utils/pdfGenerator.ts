@@ -325,11 +325,11 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     {
       content: 'Total',
       colSpan: 3,
-      styles: { fontStyle: 'bold', halign: 'right', fillColor: [240, 240, 240] },
+      styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] },
     },
     {
       content: formatPdfAmount(grandTotal),
-      styles: { fontStyle: 'bold', halign: 'right', fillColor: [240, 240, 240] },
+      styles: { fontStyle: 'bold', halign: 'right', fillColor: [255, 255, 255] },
     },
   ]);
 
@@ -425,7 +425,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     currentY = marginX;
   }
 
-  doc.setFillColor(239, 246, 255);
+  doc.setFillColor(255, 255, 255);
   doc.rect(marginX, currentY, contentWidth, wordsBoxHeight, 'FD');
   doc.setDrawColor(...slate);
   doc.setLineWidth(0.5);
@@ -446,7 +446,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const rightBottomWidth = contentWidth - leftBottomWidth;
   const rightBottomX = marginX + leftBottomWidth;
 
-  doc.setFillColor(249, 250, 251);
+  doc.setFillColor(255, 255, 255);
   doc.rect(marginX, currentY, contentWidth, bottomBoxHeight, 'F');
   doc.setDrawColor(...slate);
   doc.setLineWidth(0.5);
@@ -454,14 +454,14 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.line(rightBottomX, currentY, rightBottomX, currentY + bottomBoxHeight);
 
   // Left Side Content: Bank Details, payment identifiers, payee, and PAN
-  let bY = currentY + 9;
+  let bY = currentY + 10;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.2);
-  doc.setTextColor(30, 64, 175);
+  doc.setTextColor(30, 41, 59);
   doc.text('BANK DETAILS', marginX + 7, bY);
-  bY += 8;
+  bY += 5;
 
-  doc.setTextColor(...slate);
+  doc.setTextColor(30, 41, 59);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   const bankLocation = [invoiceData.seller.bankName, invoiceData.seller.bankBranch].filter(value => value?.trim()).join(', ');
@@ -474,27 +474,27 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   let identifierX = marginX + 7;
   if (invoiceData.seller.accountNo || invoiceData.seller.ifscCode) {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
+    doc.setFontSize(6.2);
     doc.setTextColor(...slate);
     if (invoiceData.seller.accountNo) {
       const accountLabel = 'A/C No.';
       doc.text(accountLabel, identifierX, bY);
       identifierX += doc.getTextWidth(accountLabel) + 3;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.4);
+      doc.setFontSize(8.2);
       doc.setTextColor(15, 23, 42);
       doc.text(invoiceData.seller.accountNo, identifierX, bY);
       identifierX += doc.getTextWidth(invoiceData.seller.accountNo) + 12;
     }
     if (invoiceData.seller.ifscCode) {
-      const ifscLabel = 'IFSC Code';
+      const ifscLabel = 'IFSC';
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
+      doc.setFontSize(6.2);
       doc.setTextColor(...slate);
       doc.text(ifscLabel, identifierX, bY);
       identifierX += doc.getTextWidth(ifscLabel) + 3;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.4);
+      doc.setFontSize(8.2);
       doc.setTextColor(15, 23, 42);
       doc.text(invoiceData.seller.ifscCode, identifierX, bY);
     }
@@ -506,10 +506,10 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   doc.setFontSize(6.5);
   if (sellerName) {
     const payeeX = marginX + 7;
-    const payeePrefix = 'Cheques payable to "';
+    const payeePrefix = 'Cheques payable to ';
     const payeeWidth = leftBottomWidth - 14;
     const payeePrefixWidth = doc.getTextWidth(payeePrefix);
-    const payeeNameLines = doc.splitTextToSize(`${sellerName}"`, payeeWidth - payeePrefixWidth);
+    const payeeNameLines = doc.splitTextToSize(sellerName, payeeWidth - payeePrefixWidth);
     doc.text(payeePrefix, payeeX, bY);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
@@ -530,7 +530,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     doc.text(invoiceData.seller.pan, panX + doc.getTextWidth(panLabel), bY + 1);
   }
 
-  // Right Side Content: Seller name and signature
+  // Right Side Content: Seller name, signature, and signatory labels
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
   if (sellerName) {
@@ -538,7 +538,7 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     doc.text(signatoryLines, rightBottomX + rightBottomWidth / 2, currentY + 13, { align: 'center' });
   }
 
-  // Embedded Partner Signature
+  // Embedded signature
   if (invoiceData.showSignature !== false && invoiceData.seller.signatureUrl && invoiceData.seller.signatureUrl.startsWith('data:image')) {
     try {
       const imageProperties = doc.getImageProperties(invoiceData.seller.signatureUrl);
@@ -565,7 +565,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.8);
-  doc.text('PARTNER', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 9, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.text('RSN Murthy', rightBottomX + rightBottomWidth / 2, currentY + bottomBoxHeight - 8, { align: 'center' });
 
   const pageCount = doc.getNumberOfPages();
   if (pageCount > 1) {

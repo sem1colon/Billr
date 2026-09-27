@@ -22,8 +22,8 @@ describe('workbook parsing and invoice transfer', () => {
     expect(items).toHaveLength(3);
     expect(new Set(items.map(item => item.customer))).toEqual(new Set(['Alpha', 'Beta']));
     expect(items[0].id).not.toBe(items[1].id);
-    expect(items[0].description).toContain('Alpha');
-    expect(items[1].description).toContain('Beta');
+    expect(items[0].description).toBe('Same Product');
+    expect(items[1].description).toBe('Same Product');
   });
 
   it('prevents duplicate source rows when the same parsed records are transferred twice', () => {
@@ -42,7 +42,7 @@ describe('workbook parsing and invoice transfer', () => {
     const items = convertParsedRecordsToInvoiceItems(result.records, 'ALL');
     expect(items).toHaveLength(2);
     expect(items[0].commissionAmount).toBe(13500);
-    expect(items[0].description).toContain('MCA Commission');
+    expect(items[0].description).toBe('MCA Commission');
   });
 
   it('selects the populated column when a workbook repeats the Sales Price header', () => {

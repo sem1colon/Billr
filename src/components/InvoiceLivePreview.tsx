@@ -195,7 +195,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
                     : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
                 }`}
-                title={isSigned ? 'Partner Signature Active (Click to edit)' : 'No signature attached (Click to add)'}
+                title={isSigned ? 'Signature Active (Click to edit)' : 'No signature attached (Click to add)'}
               >
                 {isSigned ? (
                   <>
@@ -308,7 +308,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               type="button"
               onClick={() => setIsSignatureModalOpen(true)}
               className="flex items-center space-x-1.5 px-3.5 py-2.5 apple-glass-btn text-blue-700 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer"
-              title="Configure Partner Signature"
+              title="Configure Signature"
             >
               <PenTool className="w-4 h-4 text-blue-600" />
               <span className="hidden sm:inline">Signature</span>
@@ -549,11 +549,11 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                       </tr>
                     )}
 
-                    <tr className="border-t-2 border-slate-900 font-bold bg-blue-50">
+                    <tr className="border-t-2 border-slate-900 font-bold bg-white">
                       <td colSpan={3} className="py-2 px-2.5 border-r border-slate-900 text-right font-black text-slate-900 text-xs">
                         Total
                       </td>
-                      <td className="py-2 px-2.5 text-right font-black text-blue-950 text-xs">
+                      <td className="py-2 px-2.5 text-right font-black text-slate-950 text-xs">
                         {formatInvoiceAmount(grandTotal)}
                       </td>
                     </tr>
@@ -562,7 +562,7 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               </div>
 
               {/* 5. Amount in Words Box */}
-              <div className="border-x border-b border-slate-900 p-2.5 text-left bg-blue-50">
+              <div className="border-x border-b border-slate-900 p-2.5 text-left bg-white">
                 <span className="text-slate-700 text-[10px] font-black block tracking-[0.12em] uppercase">Amount Chargeable (in words)</span>
                 <span className="font-black text-slate-950 text-xs mt-1 block leading-relaxed">
                   {amountInWords}
@@ -573,42 +573,44 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
               <div className="grid border-x border-b border-slate-900 text-xs bg-white" style={{ gridTemplateColumns: '65% 35%' }}>
                 
                 {/* Left: Bank Details and PAN */}
-                <div className="p-3 border-r border-slate-900 space-y-1 text-left" style={{ gridColumn: '1' }}>
-                  <p className="font-bold text-slate-900 text-[10px] uppercase tracking-wide pb-0.5">
+                <div className="border-r border-slate-900 text-left bg-white" style={{ gridColumn: '1' }}>
+                  <p className="px-3 pt-2 pb-0 font-black text-slate-900 text-[10px] uppercase tracking-[0.12em]">
                     Bank Details
                   </p>
-                  <p className="font-bold text-slate-900 text-[11px] leading-relaxed">
-                    {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SR NAGAR, HYDERABAD-500038.'}
+                  <div className="px-3 pb-3 pt-0 space-y-1.5">
+                  <p className="font-bold text-slate-900 text-[10px] leading-relaxed">
+                    {invoiceData.seller.bankName || 'HDFC BANK'}, {invoiceData.seller.bankBranch || 'SR NAGAR, HYDERABAD, TELANGANA - 500038.'}
                   </p>
-                  <p className="flex flex-nowrap items-baseline gap-4 text-[11px] leading-relaxed">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px]">
                     <span className="whitespace-nowrap">
-                      <span className="font-semibold text-slate-600">A/C No.</span>{' '}
+                      <span className="font-black uppercase tracking-wide text-slate-600">A/C No.</span>{' '}
                       <span className="font-black text-slate-950">{invoiceData.seller.accountNo || '50200084425696'}</span>
                     </span>
                     <span className="whitespace-nowrap">
-                      <span className="font-semibold text-slate-600">IFSC Code</span>{' '}
+                      <span className="font-black uppercase tracking-wide text-slate-600">IFSC</span>{' '}
                       <span className="font-black text-slate-950">{invoiceData.seller.ifscCode || 'HDFC0000642'}</span>
                     </span>
+                  </div>
+                  <p className="text-slate-700 text-[9px] leading-relaxed">
+                    Cheques payable to <strong className="font-black text-slate-950">{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}</strong>
                   </p>
-                  <p className="text-slate-700 text-[10px] leading-relaxed">
-                    Cheques payable to "<strong className="font-black text-slate-950">{invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}</strong>"
-                  </p>
-                  <p className="text-slate-700 text-[10px] leading-relaxed">
+                  <p className="text-slate-700 text-[9px] leading-relaxed">
                     COMPANY PAN: <strong className="font-black text-slate-950">{invoiceData.seller.pan || 'ABXFM3174B'}</strong>
                   </p>
+                  </div>
                 </div>
 
                 {/* Right: Authorized Signatory */}
-                <div className="p-3 flex flex-col justify-between text-center items-center bg-slate-50" style={{ gridColumn: '2' }}>
-                  <span className="font-bold text-slate-900 text-[11px] block uppercase leading-relaxed text-right">
+                <div className="p-0 flex flex-col justify-between text-center items-center bg-white" style={{ gridColumn: '2' }}>
+                  <span className="w-full px-3 py-1.5 font-black text-slate-900 text-[10px] block uppercase leading-relaxed">
                     For {invoiceData.seller.name || 'MURTHY CHEMICAL AGENCIES'}
                   </span>
 
-                  <div className="h-14 flex items-center justify-end my-1">
+                  <div className="h-14 px-3 flex items-center justify-end my-1">
                     {invoiceData.showSignature !== false && invoiceData.seller.signatureUrl ? (
                       <img 
                         src={invoiceData.seller.signatureUrl} 
-                        alt="Authorized Partner Signature" 
+                        alt="Authorized Signature"
                         referrerPolicy="no-referrer"
                         className="h-12 max-w-[150px] object-contain"
                       />
@@ -619,9 +621,9 @@ export const InvoiceLivePreview: React.FC<InvoiceLivePreviewProps> = ({
                     )}
                   </div>
 
-                  <span className="font-black text-slate-900 text-[11px] block uppercase tracking-wide">
-                    Partner
-                  </span>
+                  <div className="px-3 pb-3 text-slate-900 text-[11px] block leading-relaxed">
+                    <span className="font-normal block">RSN Murthy</span>
+                  </div>
                 </div>
 
               </div>

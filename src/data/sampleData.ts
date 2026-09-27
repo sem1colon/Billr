@@ -10,10 +10,10 @@ export const defaultSeller: BusinessProfile = {
   gstin: '36ABXFM3174B1Z1',
   pan: 'ABXFM3174B',
   bankName: 'HDFC BANK',
-  bankBranch: 'SR NAGAR, HYDERABAD-500038.',
+  bankBranch: 'SR NAGAR, HYDERABAD, TELANGANA - 500038.',
   accountNo: '50200084425696',
   ifscCode: 'HDFC0000642',
-  notes: 'Note:- Please make cheques in favor of "MURTHY CHEMICAL AGENCIES"',
+  notes: 'Note:- Please make cheques in favor of MURTHY CHEMICAL AGENCIES',
 };
 
 export const defaultBuyer: ClientProfile = {
@@ -28,7 +28,7 @@ export const defaultBuyer: ClientProfile = {
 export const sampleInvoiceItems: InvoiceItem[] = [
   {
     id: 'item-1',
-    description: 'SPIRIZYME ADV ULTI (Bio Agro Energy Pvt Ltd)',
+    description: 'SPIRIZYME ADV ULTI',
     hsnSacCode: '998311',
     qty: 360,
     unit: 'kg',
@@ -43,7 +43,7 @@ export const sampleInvoiceItems: InvoiceItem[] = [
   },
   {
     id: 'item-2',
-    description: 'FORTIVA REVO X (Bio Agro Energy Pvt Ltd)',
+    description: 'FORTIVA REVO X',
     hsnSacCode: '998311',
     qty: 375,
     unit: 'kg',
@@ -58,7 +58,7 @@ export const sampleInvoiceItems: InvoiceItem[] = [
   },
   {
     id: 'item-3',
-    description: 'EFFYGREN (Bio Agro Energy Pvt Ltd)',
+    description: 'EFFYGREN',
     hsnSacCode: '998311',
     qty: 30,
     unit: 'kg',
@@ -73,7 +73,7 @@ export const sampleInvoiceItems: InvoiceItem[] = [
   },
   {
     id: 'item-4',
-    description: 'EFFYMOLL+ (Ravindra and Company Ltd)',
+    description: 'EFFYMOLL+',
     hsnSacCode: '998311',
     qty: 75,
     unit: 'kg',
@@ -91,7 +91,7 @@ export const sampleInvoiceItems: InvoiceItem[] = [
 export const sampleStatementItems: InvoiceItem[] = [
   {
     id: 'stat-1',
-    description: 'SPIRIZYME ADV ULTI (Bio Agro Energy Pvt Ltd)',
+    description: 'SPIRIZYME ADV ULTI',
     hsnSacCode: '998311',
     qty: 360,
     unit: 'kg',
@@ -106,7 +106,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-2',
-    description: 'SPIRIZYME ADV ULTI (Bio Agro Energy Pvt Ltd)',
+    description: 'SPIRIZYME ADV ULTI',
     hsnSacCode: '998311',
     qty: 3480,
     unit: 'kg',
@@ -121,7 +121,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-3',
-    description: 'EFFYGREN (Bio Agro Energy Pvt Ltd)',
+    description: 'EFFYGREN',
     hsnSacCode: '998311',
     qty: 30,
     unit: 'kg',
@@ -136,7 +136,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-4',
-    description: 'RM-20 (Bio Agro Energy Pvt Ltd)',
+    description: 'RM-20',
     hsnSacCode: '998311',
     qty: 10,
     unit: 'kg',
@@ -151,7 +151,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-5',
-    description: 'SPIRIZYME ADV ULTI (Bio Agro Energy Pvt Ltd)',
+    description: 'SPIRIZYME ADV ULTI',
     hsnSacCode: '998311',
     qty: 1590,
     unit: 'kg',
@@ -166,7 +166,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-6',
-    description: 'FORTIVA REVO X (Bio Agro Energy Pvt Ltd)',
+    description: 'FORTIVA REVO X',
     hsnSacCode: '998311',
     qty: 375,
     unit: 'kg',
@@ -181,7 +181,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-7',
-    description: 'ALCOHOL ACTIVE DR (Bio Agro Energy Pvt Ltd)',
+    description: 'ALCOHOL ACTIVE DR',
     hsnSacCode: '998311',
     qty: 320,
     unit: 'kg',
@@ -196,7 +196,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-8',
-    description: 'EFFYMOLL+ (Ravindra and Company Ltd)',
+    description: 'EFFYMOLL+',
     hsnSacCode: '998311',
     qty: 75,
     unit: 'kg',
@@ -211,7 +211,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-9',
-    description: 'EFFYGREN (SNJ Sugars and Products Ltd)',
+    description: 'EFFYGREN',
     hsnSacCode: '998311',
     qty: 350,
     unit: 'kg',
@@ -226,7 +226,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-10',
-    description: 'EFFYMOLL+ (The Andhra Sugars Ltd)',
+    description: 'EFFYMOLL+',
     hsnSacCode: '998311',
     qty: 50,
     unit: 'kg',
@@ -241,7 +241,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-11',
-    description: 'FORTIVA REVO X (Vishwa Samudra Bio Energy Pvt Ltd)',
+    description: 'FORTIVA REVO X',
     hsnSacCode: '998311',
     qty: 1002,
     unit: 'kg',
@@ -256,7 +256,7 @@ export const sampleStatementItems: InvoiceItem[] = [
   },
   {
     id: 'stat-12',
-    description: 'SPIRIZYME ADV ULTI (Vishwa Samudra Bio Energy Pvt Ltd)',
+    description: 'SPIRIZYME ADV ULTI',
     hsnSacCode: '998311',
     qty: 8249,
     unit: 'kg',
@@ -281,7 +281,7 @@ export function getTodayDateIso(): string {
 
 export const initialInvoiceData: InvoiceData = {
   id: 'inv-initial-01',
-  invoiceNumber: 'MCA/2026-27/001',
+  invoiceNumber: 'MCA-2026-27-001',
   invoiceDate: '2026-08-10',
   seller: defaultSeller,
   buyer: defaultBuyer,

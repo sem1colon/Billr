@@ -110,7 +110,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              <strong>Seller:</strong> Murthy Chemical Agencies &bull; <strong>Partner:</strong> R.S.N. Murthy
+              <strong>Seller:</strong> Murthy Chemical Agencies &bull; <strong>Sign:</strong> R.S.N. Murthy
             </p>
           </div>
         </div>
@@ -173,7 +173,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Managing Partner Name
+              Signatory Name
             </label>
             <input
               type="text"
@@ -302,14 +302,14 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
             </div>
           </div>
 
-          {/* Partner Signature Configuration */}
+          {/* Signature Configuration */}
           <div className="p-4 apple-glass-subtle rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3">
               <div className="h-12 w-28 bg-white/90 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden p-1 shadow-2xs">
                 {invoiceData.seller.signatureUrl ? (
                   <img 
                     src={invoiceData.seller.signatureUrl} 
-                    alt="Partner Signature" 
+                    alt="Signature"
                     className="max-h-full max-w-full object-contain"
                   />
                 ) : (
@@ -317,7 +317,7 @@ export const BusinessSettingsView: React.FC<BusinessSettingsViewProps> = ({
                 )}
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block">Authorized Partner Signature</span>
+                <span className="text-xs font-bold text-slate-900 block">Authorized Signature</span>
                 <span className="text-[11px] text-slate-500">Auto-embedded on all official tax invoices.</span>
               </div>
             </div>

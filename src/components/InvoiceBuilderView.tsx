@@ -150,7 +150,7 @@ export const InvoiceBuilderView: React.FC<InvoiceBuilderViewProps> = ({
               aria-required="true"
               aria-invalid={!hasInvoiceNumber}
               aria-describedby={!hasInvoiceNumber ? 'invoice-number-error' : undefined}
-              placeholder="e.g. MCA/2026-27/001"
+              placeholder="e.g. MCA-2026-27-001"
               className="w-full px-3.5 py-2.5 apple-glass-input text-xs sm:text-sm font-bold text-slate-900 rounded-xl outline-none"
             />
             {!hasInvoiceNumber && <p id="invoice-number-error" className="mt-1 text-[11px] font-semibold text-rose-700">Add an invoice number before exporting.</p>}
