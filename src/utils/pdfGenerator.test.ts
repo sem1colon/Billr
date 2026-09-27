@@ -34,15 +34,18 @@ describe('PDF generation', () => {
   it('keeps totals beside the item table when the signature footer needs another page', () => {
     const invoice = {
       ...initialInvoiceData,
-      items: Array.from({ length: 26 }, (_, index) => createTestItem(index + 1)),
+      items: Array.from({ length: 36 }, (_, index) => createTestItem(index + 1)),
     };
 
     const doc = createInvoicePdfDoc(invoice);
     const pages = (doc as any).internal.pages as string[][];
+    const pageText = pages.slice(1).map(page => page.join(' '));
+    const lastItemPage = pageText.findIndex(text => text.includes('Long service description 36'));
 
     expect(doc.getNumberOfPages()).toBeGreaterThan(1);
-    expect(pages[1].join(' ')).toContain('(Taxable Value)');
-    expect(pages[2].join(' ')).toContain('(RSN Murthy)');
+    expect(lastItemPage).toBeGreaterThanOrEqual(0);
+    expect(pageText[lastItemPage]).toContain('(Taxable Value)');
+    expect(pageText[pageText.length - 1]).toContain('(RSN Murthy)');
   });
 
   it('wraps long content and paginates large item tables', () => {

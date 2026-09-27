@@ -333,6 +333,8 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
     },
   ]);
 
+  tableBody.push(...summaryRows);
+
   autoTable(doc, {
     startY: currentY,
     head: [[
@@ -389,31 +391,6 @@ export function createInvoicePdfDoc(invoiceData: InvoiceData): jsPDF {
   const footerHeight = wordsBoxHeight + bottomBoxHeight;
   const itemTableY = (doc as any).lastAutoTable.finalY || currentY + 180;
   currentY = itemTableY;
-
-  autoTable(doc, {
-    startY: currentY,
-    body: summaryRows,
-    theme: 'grid',
-    styles: {
-      fontSize: 6.9,
-      textColor: [15, 23, 42],
-      cellPadding: 1.5,
-      lineColor: [148, 163, 184],
-      lineWidth: 0.35,
-      valign: 'middle',
-    },
-    columnStyles: {
-      0: { halign: 'left', cellWidth: contentWidth * 0.58 },
-      1: { halign: 'center', cellWidth: contentWidth * 0.15 },
-      2: { halign: 'center', cellWidth: contentWidth * 0.10 },
-      3: { halign: 'right', cellWidth: contentWidth * 0.17 },
-    },
-    margin: { left: marginX, right: marginX, bottom: marginX },
-    pageBreak: 'avoid',
-    rowPageBreak: 'avoid',
-  });
-
-  currentY = (doc as any).lastAutoTable.finalY || currentY + summaryHeightEstimate;
   if (currentY + footerHeight > pageHeight - marginX) {
     doc.addPage();
     currentY = marginX;
