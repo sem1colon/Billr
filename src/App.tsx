@@ -33,6 +33,10 @@ import {
   hasSavedInvoiceData,
 } from './utils/storageUtils';
 
+const SWIPE_NAVIGATION_ORDER: ActiveTab[] = ['home', 'sheet', 'builder', 'preview', 'settings'];
+const SWIPE_COMMIT_DISTANCE = 72;
+const SWIPE_COMMIT_RATIO = 0.22;
+
 export default function App() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(() => loadSavedInvoiceData());
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => loadSavedActiveTab());
@@ -46,7 +50,105 @@ export default function App() {
   const [hasSavedDraft, setHasSavedDraft] = useState(() => hasSavedInvoiceData());
   const [saveStatus, setSaveStatus] = useState<'ready' | 'saving' | 'saved'>('ready');
   const [hasShownRestoreNotice, setHasShownRestoreNotice] = useState(false);
+  const [navigationDirection, setNavigationDirection] = useState<1 | -1>(1);
+  const [swipeOffset, setSwipeOffset] = useState(0);
   const isInitialMount = useRef(true);
+  const swipeRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    lastX: 0,
+    lastTime: 0,
+    velocityX: 0,
+    active: false,
+  });
+
+  const navigateTo = (nextTab: ActiveTab) => {
+    if (nextTab === activeTab) return;
+    const currentIndex = SWIPE_NAVIGATION_ORDER.indexOf(activeTab);
+    const nextIndex = SWIPE_NAVIGATION_ORDER.indexOf(nextTab);
+    if (currentIndex !== -1 && nextIndex !== -1) {
+      setNavigationDirection(nextIndex > currentIndex ? 1 : -1);
+    }
+    setActiveTab(nextTab);
+  };
+
+  const getSwipeTarget = (deltaX: number) => {
+    const currentIndex = SWIPE_NAVIGATION_ORDER.indexOf(activeTab);
+    if (currentIndex === -1) return null;
+    if (deltaX < 0 && currentIndex < SWIPE_NAVIGATION_ORDER.length - 1) {
+      return SWIPE_NAVIGATION_ORDER[currentIndex + 1];
+    }
+    if (deltaX > 0 && currentIndex > 0) {
+      return SWIPE_NAVIGATION_ORDER[currentIndex - 1];
+    }
+    return null;
+  };
+
+  const handleSwipePointerDown = (event: React.PointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse' || event.isPrimary === false) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, select, textarea, [contenteditable="true"], [data-no-swipe]')) return;
+
+    swipeRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastTime: event.timeStamp,
+      velocityX: 0,
+      active: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleSwipePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+    const swipe = swipeRef.current;
+    if (swipe.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - swipe.startX;
+    const deltaY = event.clientY - swipe.startY;
+    const elapsed = Math.max(event.timeStamp - swipe.lastTime, 1);
+
+    if (!swipe.active && Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      swipe.pointerId = -1;
+      return;
+    }
+    if (Math.abs(deltaX) < 8 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+
+    swipe.active = true;
+    swipe.velocityX = (event.clientX - swipe.lastX) / elapsed;
+    swipe.lastX = event.clientX;
+    swipe.lastTime = event.timeStamp;
+    const resistance = getSwipeTarget(deltaX) ? 1 : 0.22;
+    setSwipeOffset(deltaX * resistance);
+    event.preventDefault();
+  };
+
+  const handleSwipePointerEnd = (event: React.PointerEvent<HTMLElement>) => {
+    const swipe = swipeRef.current;
+    if (swipe.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - swipe.startX;
+    const shouldCommit = swipe.active && (
+      Math.abs(deltaX) > Math.max(SWIPE_COMMIT_DISTANCE, window.innerWidth * SWIPE_COMMIT_RATIO) ||
+      Math.abs(swipe.velocityX) > 0.7
+    );
+    const target = shouldCommit ? getSwipeTarget(deltaX) : null;
+
+    swipeRef.current.pointerId = -1;
+    setSwipeOffset(0);
+    if (target) navigateTo(target);
+  };
+
+  const handleSwipePointerCancel = () => {
+    swipeRef.current.pointerId = -1;
+    setSwipeOffset(0);
+  };
+
+  const pageVariants = {
+    enter: { opacity: 0, x: navigationDirection > 0 ? 34 : -34 },
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: navigationDirection > 0 ? -34 : 34 },
+  };
 
   // Auto-persist invoiceData to localStorage
   useEffect(() => {
@@ -131,7 +233,7 @@ export default function App() {
     clearSavedInvoiceData();
     clearSavedWorkbookState();
     setInvoiceData(freshInvoice);
-    setActiveTab('builder');
+    navigateTo('builder');
     setIsNewInvoiceDialogOpen(false);
     showToast('Started a new invoice');
   };
@@ -140,7 +242,7 @@ export default function App() {
     const validation = validateInvoiceForExport(invoiceData);
     if (!validation.isValid) {
       showToast(validation.errors[0]);
-      setActiveTab('builder');
+      navigateTo('builder');
       return;
     }
     try {
@@ -178,7 +280,7 @@ export default function App() {
     setInvoiceData(freshSample);
     saveInvoiceData(freshSample);
     setHasSavedDraft(true);
-    setActiveTab('builder');
+    navigateTo('builder');
     showToast('Loaded reference sample invoice');
   };
 
@@ -204,7 +306,7 @@ export default function App() {
     setInvoiceHistory([]);
     setHasSavedDraft(false);
     setIsClearDataDialogOpen(false);
-    setActiveTab('home');
+    navigateTo('home');
     showToast('Local Billr data cleared');
   };
 
@@ -215,7 +317,7 @@ export default function App() {
       const items = convertParsedRecordsToInvoiceItems(cached.records, cached.customer);
       handleApplyItemsFromSheet(items);
     }
-    setActiveTab('preview');
+    navigateTo('preview');
   };
 
   const { grandTotal } = calculateInvoiceTotals(invoiceData);
@@ -226,7 +328,7 @@ export default function App() {
       {/* Top Header Navigation */}
       <HeaderNav
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={navigateTo}
         onDownloadPdf={handleDownloadPdf}
         onStartNewInvoice={() => setIsNewInvoiceDialogOpen(true)}
         saveStatus={saveStatus}
@@ -268,24 +370,36 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12 mobile-content-safe">
-        <AnimatePresence mode="wait">
+      <main
+        className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 pb-32 md:pb-12 mobile-content-safe swipe-surface"
+        onPointerDown={handleSwipePointerDown}
+        onPointerMove={handleSwipePointerMove}
+        onPointerUp={handleSwipePointerEnd}
+        onPointerCancel={handleSwipePointerCancel}
+      >
+        <motion.div
+          className="swipe-stage"
+          animate={{ x: swipeOffset }}
+          transition={{ type: 'spring', stiffness: 520, damping: 42, mass: 0.72 }}
+        >
+        <AnimatePresence mode="wait" initial={false}>
           {activeTab === 'home' && (
             <motion.div
               key="home"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
             >
               <HomeDashboardView
                 invoiceData={invoiceData}
                 hasSavedDraft={hasSavedDraft}
                 history={invoiceHistory}
                 lastSavedTimestamp={getLastSavedTimestamp()}
-                onResumeDraft={() => setActiveTab(invoiceData.items.length > 0 ? 'builder' : 'sheet')}
+                onResumeDraft={() => navigateTo(invoiceData.items.length > 0 ? 'builder' : 'sheet')}
                 onStartNewInvoice={() => setIsNewInvoiceDialogOpen(true)}
-                onImport={() => setActiveTab('sheet')}
+                onImport={() => navigateTo('sheet')}
                 onLoadSample={handleLoadSample}
                 onExportBackup={handleExportBackup}
                 onClearData={() => setIsClearDataDialogOpen(true)}
@@ -297,15 +411,16 @@ export default function App() {
           {activeTab === 'sheet' && (
             <motion.div
               key="sheet"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
             >
               <ExcelImportView
                 onApplyItemsToInvoice={handleApplyItemsFromSheet}
-                onNavigateToPreview={() => setActiveTab('preview')}
-                onNavigateToBuilder={() => setActiveTab('builder')}
+                onNavigateToPreview={() => navigateTo('preview')}
+                onNavigateToBuilder={() => navigateTo('builder')}
               />
             </motion.div>
           )}
@@ -314,18 +429,19 @@ export default function App() {
           {activeTab === 'builder' && (
             <motion.div
               key="builder"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
             >
               <InvoiceBuilderView
                 invoiceData={invoiceData}
                 setInvoiceData={setInvoiceData}
                 onOpenAddItemModal={handleOpenAddItemModal}
-                onNavigateToPreview={() => setActiveTab('preview')}
-                onNavigateToSettings={() => setActiveTab('settings')}
-                onNavigateToSheet={() => setActiveTab('sheet')}
+                onNavigateToPreview={() => navigateTo('preview')}
+                onNavigateToSettings={() => navigateTo('settings')}
+                onNavigateToSheet={() => navigateTo('sheet')}
               />
             </motion.div>
           )}
@@ -334,16 +450,17 @@ export default function App() {
           {activeTab === 'preview' && (
             <motion.div
               key="preview"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
             >
               <InvoiceLivePreview
                 invoiceData={invoiceData}
                 setInvoiceData={setInvoiceData}
                 onDownloadPdf={handleDownloadPdf}
-                onEditBuilder={() => setActiveTab('builder')}
+                onEditBuilder={() => navigateTo('builder')}
               />
             </motion.div>
           )}
@@ -352,30 +469,32 @@ export default function App() {
           {activeTab === 'settings' && (
             <motion.div
               key="settings"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
             >
               <BusinessSettingsView
                 invoiceData={invoiceData}
                 setInvoiceData={setInvoiceData}
                 onSaveProfile={() => {
                   showToast('Agency profile saved');
-                  setActiveTab('builder');
+                  navigateTo('builder');
                 }}
-                onNavigateToBuilder={() => setActiveTab('builder')}
+                onNavigateToBuilder={() => navigateTo('builder')}
               />
             </motion.div>
           )}
         </AnimatePresence>
+        </motion.div>
 
       </main>
 
       {/* Floating Bottom Step Bar (Mobile-first for iPhone 17e) */}
       <BottomDockNav
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={navigateTo}
         onOpenAddItemModal={() => handleOpenAddItemModal()}
         onDownloadPdf={handleDownloadPdf}
         onGenerateFromSheet={handleGenerateFromSheet}

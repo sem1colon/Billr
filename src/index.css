@@ -83,6 +83,19 @@
     #f8fafc;
 }
 
+/* Horizontal navigation may claim a gesture only after vertical intent is ruled out. */
+.swipe-surface {
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
+}
+
+.swipe-stage {
+  min-height: 100%;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 .home-start {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(239, 246, 255, 0.76));
 }
